@@ -20,6 +20,7 @@
 
 import sys
 import os
+import posixpath
 
 import rclexecm
 from archivextract import ArchiveExtractor
@@ -113,6 +114,8 @@ class RarExtractor(ArchiveExtractor):
         iseof = rclexecm.RclExecM.noteof
         if self.currentindex >= len(self.rar.namelist()) - 1:
             iseof = rclexecm.RclExecM.eofnext
+        filename = posixpath.basename(ipath)
+        self.em.setfield("filename", filename)
         return (ok, docdata, rclexecm.makebytes(ipath), iseof)
 
     def closefile(self):

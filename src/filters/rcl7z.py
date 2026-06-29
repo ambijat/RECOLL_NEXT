@@ -12,6 +12,7 @@
 
 import sys
 import os
+import posixpath
 
 import rclexecm
 from archivextract import ArchiveExtractor
@@ -52,6 +53,8 @@ class SevenZipExtractor(ArchiveExtractor):
         iseof = rclexecm.RclExecM.noteof
         if self.currentindex >= self.namelistlen - 1:
             iseof = rclexecm.RclExecM.eofnext
+        filename = posixpath.basename(ipath)
+        self.em.setfield("filename", filename)
         return (ok, docdata, rclexecm.makebytes(ipath), iseof)
 
     def closefile(self):
