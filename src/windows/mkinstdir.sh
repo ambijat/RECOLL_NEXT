@@ -66,6 +66,8 @@ PYTHONMINOR=12
 PYTHON=${RCLDEPS}python-3.12.4-embed-amd64
 UNRTF=${RCLDEPS}unrtf
 ANTIWORD=${RCLDEPS}antiword
+ICONVDLL=/c/msys64/usr/bin/msys-iconv-2.dll
+MSYSDLL=/c/msys64/usr/bin/msys-2.0.dll
 EPUB=${RCLDEPS}epub-0.5.2
 FUTURE=${RCLDEPS}python2-future
 POPPLER=${RCLDEPS}poppler-22.04.0/
@@ -180,6 +182,7 @@ copyantiword()
     bindir=$ANTIWORD/
     test -d $Filters/Resources || mkdir -p $FILTERS/Resources || exit 1
     chkcp  $bindir/antiword.exe            $FILTERS
+    chkcp ${MSYSDLL} $FILTERS
     rsync -av  $ANTIWORD/Resources/*       $FILTERS/Resources || exit 1
 }
 
@@ -192,7 +195,8 @@ copyunrtf()
     chkcp  $UNRTF/outputs/*.conf           $FILTERS/Share
     chkcp  $UNRTF/outputs/SYMBOL.charmap   $FILTERS/Share
     # libiconv-2 originally comes from mingw
-    chkcp $MISC/libiconv-2.dll $FILTERS
+    chkcp ${ICONVDLL} $FILTERS
+    chkcp ${MSYSDLL} $FILTERS
 }
 
 
