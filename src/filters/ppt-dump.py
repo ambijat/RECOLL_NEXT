@@ -72,8 +72,8 @@ class PPTDumper(object):
                 if not self.__readSubStream(dirstrm):
                     result = False
             elif sdirname == b"\x05DocumentSummaryInformation":
-                strm = olestream.PropertySetStream(dirstrm.bytes)
-                strm.read()
+                prop_strm = olestream.PropertySetStream(dirstrm.bytes)
+                prop_strm.read()
             else:
                 globals.dumpBytes(dirstrm.bytes, 512)
         return result
