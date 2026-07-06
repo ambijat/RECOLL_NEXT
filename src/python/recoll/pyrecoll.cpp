@@ -93,7 +93,7 @@ SearchData_init(recoll_SearchDataObject *self, PyObject *args, PyObject *kwargs)
         return -1;
     Rcl::SClType tp = Rcl::SCLT_AND;
 
-    if (stp && strcasecmp(stp, "or")) {
+    if (stp && !strcasecmp(stp, "or")) {
         tp = Rcl::SCLT_OR;
     }
     std::string stemlang;
