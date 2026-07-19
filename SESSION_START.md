@@ -28,6 +28,9 @@ must not be contacted.
 - `rclsem_recoll.py` exposes Recoll's `rcludi` inventory lazily, and
   `rclsem_retrieve.py` performs deterministic exact cosine retrieval with source
   metadata and offsets. `recoll_ai.py` exposes both as `sync` and `search`.
+- On Windows, a Python-ABI mismatch falls back automatically to
+  `rclsem_recoll_bridge.py` running under the Python runtime bundled with the local
+  Recoll installation. Document transfer remains local over a private pipe.
 - Inherited manuals, generated documentation, citation metadata, and legacy
   distribution packaging were removed to leave a rebuild skeleton.
 - Existing local edits in `src/filters/cmdtalk.py` and
@@ -75,9 +78,9 @@ only when it describes the rebuilt product or records legally required provenanc
 - The inherited `rclsem_embed.py`/Chroma path is superseded but not yet retired;
   callers must move to `recoll_ai.py sync` and `recoll_ai.py search`.
 - Environment setup and worker launch assume Unix `bin/python3` paths.
-- The Recoll Python extension is not installed in the repository `.venv`; live
-  inventory synchronization must run under an interpreter that provides
-  `recoll.recoll` until Windows packaging supplies it.
+- The repository `.venv` uses Python 3.14 while Recoll 1.43.5 ships bindings through
+  Python 3.13. The automatic bundled-Python bridge is validated on this workstation;
+  packaging still needs a general Windows installation-discovery contract.
 - Exact cosine retrieval scans every stored segment. This is the reference-correct
   implementation, not the eventual large-corpus acceleration strategy.
 

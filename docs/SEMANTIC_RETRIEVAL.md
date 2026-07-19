@@ -10,7 +10,13 @@ not replace Recoll lexical search.
 ## Source contract
 
 `rclsem_recoll.py` imports `recoll.recoll` only when inventory enumeration begins.
-It runs `mime:*` with `fetchtext=True` by default and maps each result as follows:
+If the current interpreter has no compatible binding, it discovers the Python
+runtime bundled by the Windows Recoll installer and starts
+`rclsem_recoll_bridge.py`. The bridge streams private JSON lines over a local child
+process pipe; it creates no intermediate document files and contacts no network.
+
+The adapter runs `mime:*` with `fetchtext=True` by default and maps each result as
+follows:
 
 | Recoll field | Semantic field | Rule |
 | --- | --- | --- |
@@ -20,8 +26,8 @@ It runs `mime:*` with `fetchtext=True` by default and maps each result as follow
 | `url`, then `filename` | `path` | Source locator fallback |
 
 The adapter deliberately has no import-time Recoll dependency. Unit tests can use a
-fake connector, while a live synchronization must use a Python interpreter that can
-import `recoll.recoll`.
+fake connector. `--recoll-python` or the `RECOLL_PYTHON` environment variable can
+override runtime discovery when Recoll is installed in a nonstandard location.
 
 ## Retrieval contract
 
@@ -40,7 +46,7 @@ but regression tests must compare it against this reference path.
 
 ## Commands
 
-From the repository root, using an interpreter with the Recoll binding:
+From the repository root:
 
 ```powershell
 python src\semantic\recoll_ai.py sync --store .local\semantic.sqlite3
@@ -64,10 +70,13 @@ payloads.
 
 ## Current validation
 
-The semantic suite has 40 passing tests, including inventory mapping, source evidence,
+The semantic suite has 42 passing tests, including inventory mapping, bridge protocol
+validation, source evidence,
 deterministic tie handling, dimension mismatch rejection, and privacy-safe query
-events. A live synthetic search through `embeddinggemma` returned 768-dimensional
-vectors and ranked the governance document first for `integrity of cited evidence`.
+events. A live bridge check from the Python 3.14 virtual environment read a real
+Recoll document through Recoll's bundled Python 3.12 binding. A live synthetic search
+through `embeddinggemma` returned 768-dimensional vectors and ranked the governance
+document first for `integrity of cited evidence`.
 
 ## Next boundary
 

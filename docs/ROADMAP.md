@@ -14,7 +14,8 @@ and verify events while detecting mutation.
 Implemented foundation: the local-only Ollama adapter, deterministic versioned
 segmenter, model-versioned SQLite store, incremental synchronization, stale deletion,
 dimension validation, privacy-safe synchronization events, lazy Recoll inventory
-adapter, and deterministic exact cosine retrieval.
+adapter, Windows bundled-Python compatibility bridge, and deterministic exact cosine
+retrieval.
 
 - Separate configuration, Ollama client, segmentation, vector-store, and Recoll
   adapters. (Implemented for the command-line vertical slice.)

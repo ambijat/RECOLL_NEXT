@@ -39,6 +39,10 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_semantic_options(sync)
     sync.add_argument("--confdir", default="", help="Recoll configuration directory")
     sync.add_argument("--query", default="mime:*", help="Recoll inventory query")
+    sync.add_argument(
+        "--recoll-python",
+        help="Python runtime containing recoll.recoll (auto-detected on Windows)",
+    )
     sync.add_argument("--batch-size", default=32, type=int)
     sync.add_argument("--target-chars", default=900, type=int)
     sync.add_argument("--overlap-chars", default=150, type=int)
@@ -181,7 +185,11 @@ def _run_sync(args: argparse.Namespace) -> Dict[str, Any]:
         batch_size=args.batch_size,
         event_sink=_event_sink(args.store, args.ledger, args.session_id),
     )
-    inventory = RecollInventory(confdir=args.confdir, query_text=args.query)
+    inventory = RecollInventory(
+        confdir=args.confdir,
+        query_text=args.query,
+        bridge_python=args.recoll_python,
+    )
     report = asdict(
         synchronizer.sync(
             inventory.documents(), delete_missing=not args.keep_missing

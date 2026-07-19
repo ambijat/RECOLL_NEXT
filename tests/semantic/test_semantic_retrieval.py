@@ -8,7 +8,11 @@ import unittest
 SEMANTIC_SOURCE = Path(__file__).resolve().parents[2] / "src" / "semantic"
 sys.path.insert(0, str(SEMANTIC_SOURCE))
 
-from rclsem_recoll import RecollInventory, RecollInventoryError  # noqa: E402
+from rclsem_recoll import (  # noqa: E402
+    RecollInventory,
+    RecollInventoryError,
+    _decode_bridge_document,
+)
 from rclsem_retrieve import SemanticRetrievalError, SemanticSearcher  # noqa: E402
 from rclsem_segments import DeterministicSegmenter, SourceDocument  # noqa: E402
 from rclsem_store import SemanticStore, StoreCompatibilityError  # noqa: E402
@@ -76,6 +80,23 @@ class RecollInventoryTest(unittest.TestCase):
         inventory = RecollInventory(connector=lambda _: FakeDatabase(query))
         with self.assertRaisesRegex(RecollInventoryError, "rcludi"):
             list(inventory.documents())
+
+    def test_bridge_json_maps_to_the_same_source_contract(self):
+        document = _decode_bridge_document(
+            '{"document_id":"udi","text":"body","title":"T","path":"p"}\n',
+            1,
+        )
+        self.assertEqual(SourceDocument("udi", "body", title="T", path="p"), document)
+
+    def test_bridge_rejects_malformed_or_extra_fields(self):
+        with self.assertRaisesRegex(RecollInventoryError, "invalid JSON"):
+            _decode_bridge_document("not-json\n", 2)
+        with self.assertRaisesRegex(RecollInventoryError, "invalid fields"):
+            _decode_bridge_document(
+                '{"document_id":"udi","text":"body","title":"T",'
+                '"path":"p","secret":"x"}\n',
+                3,
+            )
 
 
 class FakeEventSink:
