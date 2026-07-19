@@ -51,6 +51,8 @@ corpus and remains usable without Ollama.
 - Require citations in a machine-readable response contract. (Implemented.)
 - Validate cited identifiers against supplied context. (Implemented.)
 - Display answer, uncertainty, and navigable Recoll sources in Qt.
+- Provide a runnable desktop companion while the native Qt build toolchain is being
+  established. (Implemented.)
 - Emit privacy-minimized `model.generation.*` and `answer.*` events.
 
 Exit: answers cite real indexed segments, gracefully decline unsupported questions,

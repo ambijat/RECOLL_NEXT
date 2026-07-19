@@ -15,6 +15,7 @@ QT += xml widgets printsupport network
 CONFIG  += qt c++17 warn_on thread release lrelease
 
 HEADERS += \
+        aiperspective_w.h \
         actsearch_w.h \
         advsearch_w.h \
         advshist.h \
@@ -50,6 +51,7 @@ HEADERS += \
         widgets/qxtconfirmationmessage.h
 
 SOURCES += \
+        aiperspective_w.cpp \
         actsearch_w.cpp \
         advsearch_w.cpp \
         advshist.cpp \

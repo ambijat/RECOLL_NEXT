@@ -13,6 +13,7 @@ later appends do not modify earlier entries.
 | 2026-07-19 | 12 | `e0478a4bf966ac6bf83f848da580e090ad8bf59cc90a3406caeef3a37e3183a4` | Windows bridge milestone `53d68526`; event 12 corrects the full commit reference recorded by event 11. |
 | 2026-07-19 | 13 | `dd2c62431ef8c9188a5ab82ca2d0c4f4cf7725bdabffbc1f043fc6a981b277f8` | Validated local cited answers recorded as the customer-output evidence boundary. |
 | 2026-07-19 | 14 | `5af399968a7bfb4ba19b09a502b53e36547315082cd76986f27717616237ce75` | Local cited-answer deliverable committed as `ca566f79` after 48 tests and live Ollama validation. |
+| 2026-07-19 | 15 | `5b4aaa3f52c6a81ecfa85327775eafa3b1c4a84e740331488d71f37fd3ecc4d3` | Asynchronous AI Perspective UI recorded as the customer presentation boundary. |
 
 Verify the current head before adding another row:
 

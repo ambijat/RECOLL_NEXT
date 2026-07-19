@@ -34,6 +34,10 @@ must not be contacted.
 - `rclsem_answer.py` implements bounded local synthesis with `gemma3:4b`. The `ask`
   command validates every generated citation against retrieved segment IDs and
   supports answer, summary, timeline, contradiction, decision, and action views.
+- `aiperspective_w.{h,cpp}` wires a native AI Perspective dock into `RclMain`, while
+  `recoll_ai_gui.py` provides an immediately runnable dependency-free desktop
+  companion. Both consume the same asynchronous `search --json` and `ask --json`
+  contracts and expose evidence, cancellation, and source opening.
 - Inherited manuals, generated documentation, citation metadata, and legacy
   distribution packaging were removed to leave a rebuild skeleton.
 - Existing local edits in `src/filters/cmdtalk.py` and
@@ -47,7 +51,8 @@ Foundation and hardening:
 2. Introduce the event ledger at subsystem boundaries.
 3. Synchronize embeddings correctly for additions, updates, and deletions.
 4. Add hybrid lexical/semantic retrieval; semantic-only retrieval is complete.
-5. Expose the implemented cited-answer pipeline through the Recoll Qt interface.
+5. Compile and package the implemented Recoll Qt AI Perspective dock; the runnable
+   desktop companion is available for immediate validation.
 
 ## Required reading
 
@@ -58,6 +63,7 @@ Foundation and hardening:
 - [Semantic index foundation](docs/SEMANTIC_INDEX.md)
 - [Semantic retrieval](docs/SEMANTIC_RETRIEVAL.md)
 - [Local cited answers](docs/CITED_ANSWERS.md)
+- [AI Perspective workspace](docs/AI_WORKSPACE.md)
 - [Event ledger specification](docs/EVENT_LEDGER.md)
 - [Project governance ledger](governance/README.md)
 - [Implementation roadmap](docs/ROADMAP.md)
@@ -89,8 +95,9 @@ only when it describes the rebuilt product or records legally required provenanc
   implementation, not the eventual large-corpus acceleration strategy.
 - The first `gemma3:4b` cited answer took approximately 107 seconds on this machine;
   the GUI must expose progress and cancellation and must never block lexical search.
-- The customer-facing Qt AI Workspace is not yet implemented. `doctor`, `sync`,
-  `search`, and `ask` are currently command-line product contracts.
+- The native Qt AI Perspective dock is implemented in source but cannot be compiled
+  on this workstation until a matching Qt/C++ development SDK is installed. The
+  Tk 8.6 desktop companion exercises the same customer workflow immediately.
 
 ## Definition of the next stable checkpoint
 

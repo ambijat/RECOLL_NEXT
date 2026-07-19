@@ -24,6 +24,7 @@ Start every work session with [SESSION_START.md](SESSION_START.md).
 - [Semantic index foundation](docs/SEMANTIC_INDEX.md)
 - [Semantic retrieval](docs/SEMANTIC_RETRIEVAL.md)
 - [Local cited answers](docs/CITED_ANSWERS.md)
+- [AI Perspective workspace](docs/AI_WORKSPACE.md)
 - [Event ledger](docs/EVENT_LEDGER.md)
 - [Project governance ledger](governance/README.md)
 - [Roadmap](docs/ROADMAP.md)

@@ -55,6 +55,7 @@ class IdxTreeModel;
 class UIPrefsDialog;
 class ConfigSwitchW;
 class PTransEdit;
+class AIPerspectiveDock;
 
 #include "ui_rclmain.h"
 
@@ -281,6 +282,7 @@ private:
     // We sometimes take the indexer lock (e.g.: when editing the webcache)
     Pidfile         *m_pidfile{0};
     IdxTreeModel    *m_idxtreemodel{nullptr};
+    AIPerspectiveDock *m_aiPerspective{nullptr};
     
     // Menu for the button version of the top menu.
     QMenu *buttonTopMenu;

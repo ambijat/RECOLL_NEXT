@@ -26,6 +26,8 @@ set(qtgui_ui_SOURCES
     )
 
 set(qtgui_SOURCES
+    aiperspective_w.cpp
+    aiperspective_w.h
     actsearch_w.cpp
     actsearch_w.h
     advsearch_w.cpp

@@ -79,6 +79,7 @@
 #include "idxmodel.h"
 #include "cstr.h"
 #include "preview_w.h"
+#include "aiperspective_w.h"
 
 using std::string;
 using std::vector;
@@ -179,6 +180,18 @@ void RclMain::init()
     resultsHLayout->insertWidget(1, restable);
     actionShowResultsAsTable->setChecked(prefs.showResultsAsTable);
     showResultsAsTable(prefs.showResultsAsTable);
+
+    m_aiPerspective = new AIPerspectiveDock(this);
+    addDockWidget(Qt::RightDockWidgetArea, m_aiPerspective);
+    viewMenu->addAction(m_aiPerspective->toggleViewAction());
+    connect(this, &RclMain::resultsReady, this, [this]() {
+        m_aiPerspective->setQuery(sSearch->currentText());
+    });
+    connect(m_aiPerspective, &AIPerspectiveDock::openSourceRequested,
+            this, [this](const QString& url) {
+        setUrlToView(url);
+        viewUrl();
+    });
 
     onNewShortcuts();
     Preview::listShortcuts();
