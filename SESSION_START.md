@@ -25,6 +25,9 @@ must not be contacted.
   synchronization live in `rclsem_segments.py`, `rclsem_store.py`, and
   `rclsem_sync.py`; the live `embeddinggemma` path has been validated at 768
   dimensions.
+- `rclsem_recoll.py` exposes Recoll's `rcludi` inventory lazily, and
+  `rclsem_retrieve.py` performs deterministic exact cosine retrieval with source
+  metadata and offsets. `recoll_ai.py` exposes both as `sync` and `search`.
 - Inherited manuals, generated documentation, citation metadata, and legacy
   distribution packaging were removed to leave a rebuild skeleton.
 - Existing local edits in `src/filters/cmdtalk.py` and
@@ -37,7 +40,7 @@ Foundation and hardening:
 1. Make the semantic subsystem deterministic, testable, and cross-platform.
 2. Introduce the event ledger at subsystem boundaries.
 3. Synchronize embeddings correctly for additions, updates, and deletions.
-4. Add hybrid lexical/semantic retrieval.
+4. Add hybrid lexical/semantic retrieval; semantic-only retrieval is complete.
 5. Add Ollama-generated answers whose claims link back to Recoll documents.
 
 ## Required reading
@@ -47,6 +50,7 @@ Foundation and hardening:
 - [Goal Fidelity Covenant](docs/GOAL_FIDELITY.md)
 - [Local AI runtime](docs/LOCAL_AI_RUNTIME.md)
 - [Semantic index foundation](docs/SEMANTIC_INDEX.md)
+- [Semantic retrieval](docs/SEMANTIC_RETRIEVAL.md)
 - [Event ledger specification](docs/EVENT_LEDGER.md)
 - [Project governance ledger](governance/README.md)
 - [Implementation roadmap](docs/ROADMAP.md)
@@ -68,13 +72,14 @@ only when it describes the rebuilt product or records legally required provenanc
 
 ## Known immediate defects
 
-- The inherited `rclsem_embed.py`/Chroma path still contains dropped-segment, stale
-  deletion, and model-compatibility defects. It must be retired after the Recoll
-  adapter and semantic query path move to the new SQLite foundation.
+- The inherited `rclsem_embed.py`/Chroma path is superseded but not yet retired;
+  callers must move to `recoll_ai.py sync` and `recoll_ai.py search`.
 - Environment setup and worker launch assume Unix `bin/python3` paths.
-- Semantic query failures are mostly surfaced only through logs.
-- The new semantic store does not yet expose similarity retrieval or connect to the
-  installed Recoll document inventory.
+- The Recoll Python extension is not installed in the repository `.venv`; live
+  inventory synchronization must run under an interpreter that provides
+  `recoll.recoll` until Windows packaging supplies it.
+- Exact cosine retrieval scans every stored segment. This is the reference-correct
+  implementation, not the eventual large-corpus acceleration strategy.
 
 ## Definition of the next stable checkpoint
 

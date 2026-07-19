@@ -13,16 +13,18 @@ and verify events while detecting mutation.
 
 Implemented foundation: the local-only Ollama adapter, deterministic versioned
 segmenter, model-versioned SQLite store, incremental synchronization, stale deletion,
-dimension validation, and privacy-safe synchronization events.
+dimension validation, privacy-safe synchronization events, lazy Recoll inventory
+adapter, and deterministic exact cosine retrieval.
 
 - Separate configuration, Ollama client, segmentation, vector-store, and Recoll
-  adapters.
+  adapters. (Implemented for the command-line vertical slice.)
 - Support Windows and Unix virtual environments and worker launch paths.
 - Fix dropped segments and add deterministic segmentation tests.
 - Store source revision, model, dimensions, and segmentation version as metadata.
 - Synchronize additions, updates, and deletions idempotently.
 - Add health checks and actionable GUI errors.
-- Emit `index.semantic.*`, `model.embedding.*`, and `search.semantic.*` events.
+- Emit `index.semantic.*` and `search.semantic.*` events. (`model.embedding.*`
+  remains for worker-level instrumentation.)
 
 Exit: repeated synchronization produces the same semantic index, changed files update
 correctly, deleted files disappear, and failures are diagnosed.

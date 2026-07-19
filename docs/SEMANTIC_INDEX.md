@@ -7,8 +7,8 @@ document inventory. This foundation provides deterministic segmentation,
 model-versioned SQLite storage, incremental embedding synchronization, and
 privacy-safe lifecycle events.
 
-It does not yet connect to the live Recoll Python binding or perform similarity
-retrieval. Those are the next adapter and query milestones.
+The live inventory adapter and similarity query layer are specified separately in
+[Semantic Retrieval](SEMANTIC_RETRIEVAL.md).
 
 ## Components
 
@@ -99,6 +99,6 @@ batch limits, first synchronization, idempotent repetition, document replacement
 stale deletion, model isolation, dimension rejection, duplicate identifiers, Windows
 SQLite handle closure, and privacy-safe events.
 
-The complete semantic test suite currently has 29 passing tests. A live local check
+The complete semantic test suite currently has 40 passing tests. A live local check
 against `embeddinggemma` produced 768-dimensional vectors for two synthetic documents;
 the immediate second pass correctly produced zero new embeddings.

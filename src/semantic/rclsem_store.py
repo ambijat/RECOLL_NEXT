@@ -42,6 +42,16 @@ class StoredSegment:
     embedding: Tuple[float, ...]
 
 
+@dataclass(frozen=True)
+class StoredEvidence:
+    """A stored segment joined with its source-facing document metadata."""
+
+    segment: TextSegment
+    title: str
+    path: str
+    embedding: Tuple[float, ...]
+
+
 class SemanticStore:
     """Own a rebuildable semantic index without changing the Recoll index."""
 
@@ -237,6 +247,43 @@ class SemanticStore:
             )
             for row in rows
         ]
+
+    def iter_namespace_segments(self, namespace_id: str) -> Iterator[StoredEvidence]:
+        """Yield a stable snapshot of all evidence in one semantic namespace."""
+
+        namespace = self.get_namespace(namespace_id)
+        dimensions = namespace.dimensions or 0
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT s.segment_id, s.document_id, d.source_revision, s.ordinal,
+                       s.source_start, s.source_end, s.text, d.title, d.path,
+                       s.embedding
+                FROM semantic_segments AS s
+                JOIN semantic_documents AS d
+                  ON d.namespace_id = s.namespace_id
+                 AND d.document_id = s.document_id
+                WHERE s.namespace_id = ?
+                ORDER BY s.segment_id
+                """,
+                (namespace_id,),
+            ).fetchall()
+        for row in rows:
+            yield StoredEvidence(
+                segment=TextSegment(
+                    segment_id=row[0],
+                    document_id=row[1],
+                    source_revision=row[2],
+                    ordinal=row[3],
+                    source_start=row[4],
+                    source_end=row[5],
+                    text=row[6],
+                    segmenter_version=namespace.segmenter_version,
+                ),
+                title=row[7],
+                path=row[8],
+                embedding=_unpack_embedding(row[9], dimensions),
+            )
 
     def counts(self, namespace_id: str) -> Tuple[int, int]:
         with self._connect() as connection:

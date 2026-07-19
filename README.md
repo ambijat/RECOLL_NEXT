@@ -22,6 +22,7 @@ Start every work session with [SESSION_START.md](SESSION_START.md).
 - [Goal Fidelity Covenant](docs/GOAL_FIDELITY.md)
 - [Local AI runtime](docs/LOCAL_AI_RUNTIME.md)
 - [Semantic index foundation](docs/SEMANTIC_INDEX.md)
+- [Semantic retrieval](docs/SEMANTIC_RETRIEVAL.md)
 - [Event ledger](docs/EVENT_LEDGER.md)
 - [Project governance ledger](governance/README.md)
 - [Roadmap](docs/ROADMAP.md)

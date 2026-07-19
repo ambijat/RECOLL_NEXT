@@ -62,4 +62,5 @@ the latter. Logs and ledger events contain identifiers and measurements, not ful
 content.
 
 The implemented segmentation, namespace, and synchronization invariants are specified
-in the [Semantic Index Foundation](SEMANTIC_INDEX.md).
+in the [Semantic Index Foundation](SEMANTIC_INDEX.md). The inventory and evidence
+query contracts are specified in [Semantic Retrieval](SEMANTIC_RETRIEVAL.md).
