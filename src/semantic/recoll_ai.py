@@ -54,6 +54,27 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_semantic_options(search)
     search.add_argument("query", help="local semantic query")
     search.add_argument("--limit", "-n", default=10, type=int)
+
+    ask = subparsers.add_parser(
+        "ask", help="generate a local answer grounded in semantic evidence"
+    )
+    _add_semantic_options(ask)
+    ask.set_defaults(timeout=120.0)
+    ask.add_argument("query", help="local question")
+    ask.add_argument("--chat-model", default=DEFAULT_CHAT_MODEL)
+    ask.add_argument("--evidence-limit", default=6, type=int)
+    ask.add_argument(
+        "--view",
+        default="answer",
+        choices=(
+            "answer",
+            "summary",
+            "timeline",
+            "contradictions",
+            "decisions",
+            "actions",
+        ),
+    )
     return parser
 
 
@@ -212,6 +233,35 @@ def _run_search(args: argparse.Namespace) -> Dict[str, Any]:
     return {"status": "ready", "result_count": len(results), "results": results}
 
 
+def _run_ask(args: argparse.Namespace) -> Dict[str, Any]:
+    from rclsem_answer import CitedAnswerComposer
+    from rclsem_retrieve import SemanticSearcher
+    from rclsem_store import SemanticStore
+
+    client = OllamaClient(args.endpoint, timeout=args.timeout)
+    sink = _event_sink(args.store, args.ledger, args.session_id)
+    searcher = SemanticSearcher(
+        SemanticStore(args.store),
+        client,
+        embedding_model=args.embedding_model,
+        event_sink=sink,
+    )
+    composer = CitedAnswerComposer(
+        searcher,
+        client,
+        chat_model=args.chat_model,
+        event_sink=sink,
+    )
+    result = asdict(
+        composer.ask(
+            args.query,
+            evidence_limit=args.evidence_limit,
+            view=args.view,
+        )
+    )
+    return {"status": "answered", **result}
+
+
 def _print_operation(report: Dict[str, Any]) -> None:
     if report["status"] == "synchronized":
         print("Recoll semantic index: synchronized")
@@ -222,6 +272,23 @@ def _print_operation(report: Dict[str, Any]) -> None:
             f"unchanged={report['documents_unchanged']} deleted={report['documents_deleted']}"
         )
         print(f"Segments embedded: {report['segments_embedded']}")
+        return
+    if report["status"] == "answered":
+        print(f"Local AI {report['view']}:")
+        print(report["answer"])
+        if report["insufficient_evidence"]:
+            print("Evidence status: insufficient")
+        print("Evidence:")
+        if not report["citations"]:
+            print("  (none)")
+        for position, citation in enumerate(report["citations"], start=1):
+            label = citation["title"] or citation["path"] or citation["document_id"]
+            print(f"  [{position}] {label}")
+            print(
+                f"      segment={citation['segment_id']} "
+                f"source={citation['path']} "
+                f"offsets={citation['source_start']}:{citation['source_end']}"
+            )
         return
     print(f"Semantic results: {report['result_count']}")
     for position, result in enumerate(report["results"], start=1):
@@ -249,7 +316,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             _print_human(report)
         return code
     try:
-        report = _run_sync(args) if args.command == "sync" else _run_search(args)
+        if args.command == "sync":
+            report = _run_sync(args)
+        elif args.command == "search":
+            report = _run_search(args)
+        else:
+            report = _run_ask(args)
     except Exception as ex:
         # The command line is a trust boundary: report the typed failure, never a
         # traceback which might contain extracted document text.

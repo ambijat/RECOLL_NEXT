@@ -44,10 +44,12 @@ corpus and remains usable without Ollama.
 
 ## Phase 3 — local cited answers
 
-- Add a configurable Ollama generation adapter with timeouts and cancellation.
-- Construct bounded context from deduplicated evidence.
-- Require citations in a machine-readable response contract.
-- Validate cited identifiers against supplied context.
+- Add a configurable Ollama generation adapter with timeouts. (Implemented;
+  cancellation remains for the GUI worker.)
+- Construct bounded context from deduplicated evidence. (Implemented for semantic
+  evidence.)
+- Require citations in a machine-readable response contract. (Implemented.)
+- Validate cited identifiers against supplied context. (Implemented.)
 - Display answer, uncertainty, and navigable Recoll sources in Qt.
 - Emit privacy-minimized `model.generation.*` and `answer.*` events.
 

@@ -54,6 +54,7 @@ ollama pull nomic-embed-text
 cp rclsem_common.py  rclsem_embed.py  rclsem_query.py  rclsem_segment.py  rclsem_talk.py  \
    rclsem_events.py rclsem_ledger.py rclsem_ollama.py rclsem_segments.py rclsem_store.py \
    rclsem_sync.py rclsem_recoll.py rclsem_recoll_bridge.py rclsem_retrieve.py \
+   rclsem_answer.py \
    recoll_ai.py slicelist.py cmdtalkplugin.py "$venvdir"
 (cd "$venvdir";chmod a+x rclsem_embed.py rclsem_query.py rclsem_talk.py recoll_ai.py)
 

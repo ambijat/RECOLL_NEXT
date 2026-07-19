@@ -11,6 +11,7 @@ later appends do not modify earlier entries.
 | 2026-07-19 | 9 | `a946f13bf6069a07f45915029c8699715fc8a9644d17674e33c297db85dc4031` | Recoll inventory and semantic retrieval milestone committed locally as `74f34053`. |
 | 2026-07-19 | 10 | `a78d2720375337a8b287de2a1a2fcdc2ba931e74eb0e2b531edd64eaa9cb47b8` | Windows Recoll bundled-Python bridge recorded as the ABI compatibility boundary. |
 | 2026-07-19 | 12 | `e0478a4bf966ac6bf83f848da580e090ad8bf59cc90a3406caeef3a37e3183a4` | Windows bridge milestone `53d68526`; event 12 corrects the full commit reference recorded by event 11. |
+| 2026-07-19 | 13 | `dd2c62431ef8c9188a5ab82ca2d0c4f4cf7725bdabffbc1f043fc6a981b277f8` | Validated local cited answers recorded as the customer-output evidence boundary. |
 
 Verify the current head before adding another row:
 

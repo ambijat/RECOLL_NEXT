@@ -70,7 +70,7 @@ payloads.
 
 ## Current validation
 
-The semantic suite has 42 passing tests, including inventory mapping, bridge protocol
+The semantic suite has 48 passing tests, including inventory mapping, bridge protocol
 validation, source evidence,
 deterministic tie handling, dimension mismatch rejection, and privacy-safe query
 events. A live bridge check from the Python 3.14 virtual environment read a real
@@ -80,6 +80,6 @@ document first for `integrity of cited evidence`.
 
 ## Next boundary
 
-The next artifact combines authoritative Recoll lexical candidates with these semantic
-evidence results. Reciprocal-rank fusion is the initial policy, with lexical-only
-fallback whenever Ollama or the semantic sidecar is unavailable.
+The semantic evidence contract now feeds the [Local Cited Answers](CITED_ANSWERS.md)
+artifact. The next retrieval artifact combines authoritative Recoll lexical candidates
+with semantic results using reciprocal-rank fusion and lexical-only fallback.

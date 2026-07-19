@@ -24,7 +24,8 @@ The evidence, privacy, and user-control boundaries are defined normatively by th
    generation. No model name or endpoint is hard-coded at product boundaries.
 6. **Answer composer** — builds bounded context from retrieved segments and returns
    an answer plus document/segment citations. It must be able to decline when evidence
-   is insufficient.
+   is insufficient. The initial implementation rejects malformed output, invented
+   segment identifiers, and supported answers without citations.
 7. **Presentation and API** — Qt and future automation interfaces consume the same
    retrieval and answer contracts.
 8. **Event ledger** — cross-cutting, append-only evidence about operations and
@@ -64,3 +65,5 @@ content.
 The implemented segmentation, namespace, and synchronization invariants are specified
 in the [Semantic Index Foundation](SEMANTIC_INDEX.md). The inventory and evidence
 query contracts are specified in [Semantic Retrieval](SEMANTIC_RETRIEVAL.md).
+The generation and validation boundary is specified in
+[Local Cited Answers](CITED_ANSWERS.md).

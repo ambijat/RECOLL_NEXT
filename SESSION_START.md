@@ -31,6 +31,9 @@ must not be contacted.
 - On Windows, a Python-ABI mismatch falls back automatically to
   `rclsem_recoll_bridge.py` running under the Python runtime bundled with the local
   Recoll installation. Document transfer remains local over a private pipe.
+- `rclsem_answer.py` implements bounded local synthesis with `gemma3:4b`. The `ask`
+  command validates every generated citation against retrieved segment IDs and
+  supports answer, summary, timeline, contradiction, decision, and action views.
 - Inherited manuals, generated documentation, citation metadata, and legacy
   distribution packaging were removed to leave a rebuild skeleton.
 - Existing local edits in `src/filters/cmdtalk.py` and
@@ -44,7 +47,7 @@ Foundation and hardening:
 2. Introduce the event ledger at subsystem boundaries.
 3. Synchronize embeddings correctly for additions, updates, and deletions.
 4. Add hybrid lexical/semantic retrieval; semantic-only retrieval is complete.
-5. Add Ollama-generated answers whose claims link back to Recoll documents.
+5. Expose the implemented cited-answer pipeline through the Recoll Qt interface.
 
 ## Required reading
 
@@ -54,6 +57,7 @@ Foundation and hardening:
 - [Local AI runtime](docs/LOCAL_AI_RUNTIME.md)
 - [Semantic index foundation](docs/SEMANTIC_INDEX.md)
 - [Semantic retrieval](docs/SEMANTIC_RETRIEVAL.md)
+- [Local cited answers](docs/CITED_ANSWERS.md)
 - [Event ledger specification](docs/EVENT_LEDGER.md)
 - [Project governance ledger](governance/README.md)
 - [Implementation roadmap](docs/ROADMAP.md)
@@ -83,6 +87,10 @@ only when it describes the rebuilt product or records legally required provenanc
   packaging still needs a general Windows installation-discovery contract.
 - Exact cosine retrieval scans every stored segment. This is the reference-correct
   implementation, not the eventual large-corpus acceleration strategy.
+- The first `gemma3:4b` cited answer took approximately 107 seconds on this machine;
+  the GUI must expose progress and cancellation and must never block lexical search.
+- The customer-facing Qt AI Workspace is not yet implemented. `doctor`, `sync`,
+  `search`, and `ask` are currently command-line product contracts.
 
 ## Definition of the next stable checkpoint
 
