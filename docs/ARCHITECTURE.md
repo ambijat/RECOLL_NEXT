@@ -9,6 +9,8 @@ usable even when Ollama or the vector store is unavailable.
 
 The evidence, privacy, and user-control boundaries are defined normatively by the
 [Prismatic Search Charter](PRISMATIC_SEARCH.md).
+The retrieval ownership and hybrid-ranking boundary are defined normatively by the
+[Xapian-first Hybrid Search Protocol](XAPIAN_FIRST_PROTOCOL.md).
 
 ## Logical layers
 
@@ -36,6 +38,8 @@ The evidence, privacy, and user-control boundaries are defined normatively by th
 
 - Original files are the content source of truth.
 - Recoll is the document identity and searchable metadata source of truth.
+- The semantic sidecar stores only rebuildable vector coordinates and model metadata;
+  it is not a second document index.
 - Embeddings and generated answers are derived artifacts.
 - The event ledger is the audit source of truth for actions that occurred.
 

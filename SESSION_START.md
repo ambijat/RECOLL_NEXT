@@ -38,6 +38,10 @@ must not be contacted.
   `recoll_ai_gui.py` provides an immediately runnable dependency-free desktop
   companion. Both consume the same asynchronous `search --json` and `ask --json`
   contracts and expose evidence, cancellation, and source opening.
+- The Xapian-first protocol establishes the active Recoll database as the lexical and
+  document authority. The semantic database is a disposable vector sidecar and the
+  next retrieval artifact is bounded Xapian candidate generation plus Ollama
+  reranking.
 - Inherited manuals, generated documentation, citation metadata, and legacy
   distribution packaging were removed to leave a rebuild skeleton.
 - Existing local edits in `src/filters/cmdtalk.py` and
@@ -58,6 +62,7 @@ Foundation and hardening:
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Prismatic Search Charter](docs/PRISMATIC_SEARCH.md)
+- [Xapian-first hybrid search protocol](docs/XAPIAN_FIRST_PROTOCOL.md)
 - [Goal Fidelity Covenant](docs/GOAL_FIDELITY.md)
 - [Local AI runtime](docs/LOCAL_AI_RUNTIME.md)
 - [Semantic index foundation](docs/SEMANTIC_INDEX.md)
