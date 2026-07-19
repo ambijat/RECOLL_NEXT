@@ -69,7 +69,7 @@ RECOLL_AI_STORE
 
 ## Current validation
 
-The semantic and GUI-contract suite has 54 passing tests. Tests cover command
+The semantic and GUI-contract suite has 63 passing tests. Tests cover command
 construction, workstation limits, response-status validation, clickable file URLs,
 native build-file inclusion, main-window query handoff, asynchronous `QProcess` use,
 and the established retrieval, answer, privacy, and ledger invariants.
@@ -77,3 +77,8 @@ and the established retrieval, answer, privacy, and ledger invariants.
 The desktop companion was launched successfully on Tk 8.6 against the academic PDF
 semantic store. Native Qt source compilation remains pending because this workstation
 has the Recoll runtime libraries but no Qt/C++ development SDK or build executable.
+
+Successful cited Ask operations now also create provenance-gated Perspective Memory
+unless `--no-remember` is supplied. The present GUI does not yet expose a memory
+toggle or memory-search panel; packaging must make background retention visible and
+manageable before release.

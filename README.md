@@ -17,6 +17,19 @@ Start every work session with [SESSION_START.md](SESSION_START.md).
 
 ## New product documents
 
+- [Documentation map](docs/README.md)
+- [Portability contract](docs/PORTABILITY_CONTRACT.md)
+- [Mandatory agent handoff](docs/AGENT_HANDOFF.md)
+- [Verified workstation baseline](docs/WORKSTATION_BASELINE.md)
+- [Development and build](docs/DEVELOPMENT_AND_BUILD.md)
+- [Configuration reference](docs/CONFIGURATION_REFERENCE.md)
+- [Local CLI and JSON API](docs/API_CONTRACT.md)
+- [Data migration](docs/DATA_MIGRATION.md)
+- [Transfer manifest template](docs/TRANSFER_MANIFEST_TEMPLATE.md)
+- [Operations runbook](docs/OPERATIONS_RUNBOOK.md)
+- [Component catalog](docs/COMPONENT_CATALOG.md)
+- [Security and privacy](docs/SECURITY_AND_PRIVACY.md)
+- [Provenance and licensing](docs/PROVENANCE_AND_LICENSING.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Prismatic Search Charter](docs/PRISMATIC_SEARCH.md)
 - [Xapian-first hybrid search protocol](docs/XAPIAN_FIRST_PROTOCOL.md)

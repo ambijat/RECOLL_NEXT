@@ -18,6 +18,7 @@ later appends do not modify earlier entries.
 | 2026-07-19 | 17 | `d2cdc02f894b3b991bfb3d35e0c4f4a1bbd0ab1fc1265917c6a5278e93492d8e` | Xapian-first hybrid retrieval recorded: Recoll remains authoritative and the Ollama vector sidecar remains minimal and rebuildable. |
 | 2026-07-19 | 18 | `f420ebf62f447924fd593d1702500d977122dfedeff05d3d44de3a0b34a43c05` | Provenance-gated Perspective Memory recorded as secondary interpretation, never primary documentary evidence. |
 | 2026-07-19 | 19 | `2dad13dc244efdbd2daf62a28763a64327ad2d2a5555aec7df4c34eb4b11b4e8` | Perspective Memory milestone committed as `95c83da0` after 59 tests and a live local embedding smoke test. |
+| 2026-07-19 | 20 | `f813720751f9c0c8c964803d936b4d7ff41edef3989dedf03d60bf1b2f9c8597` | Portable source/data/model/build fidelity gates and mandatory tracked agent orientation recorded as the continuity contract. |
 
 Verify the current head before adding another row:
 

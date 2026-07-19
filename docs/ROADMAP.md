@@ -5,6 +5,7 @@
 - Maintain the session briefing and architectural decisions.
 - Add and test the local event-ledger primitive.
 - Preserve inherited changes and prohibit accidental remote operations.
+- Maintain the mandatory portability and agent-handoff documentation suite.
 
 Exit: a new session can orient itself from `SESSION_START.md`, and a ledger can append
 and verify events while detecting mutation.
@@ -60,6 +61,9 @@ and never require cloud services.
 
 ## Phase 4 — integrity and operations
 
+- Document source/data capsules, workstation reconstruction, configuration, build,
+  migration, security, routine operations, and agent handoff. (Implemented; live
+  second-machine validation remains.)
 - Add ledger head checkpoints and optional local asymmetric signatures.
 - Add retention, export, redaction-by-tombstone policy, and recovery tooling.
 - Add migration/versioning for semantic stores and ledger schemas.

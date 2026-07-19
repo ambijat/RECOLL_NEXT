@@ -38,6 +38,7 @@ were recorded. It does not override the governing documents.
 | Complete synchronization | Semantic state reflects additions, changes, and deletions from the authoritative inventory. | Incremental synchronizer and regression tests. | Repeated passes embed nothing unchanged; changed documents replace atomically; stale deletion runs only after complete enumeration. |
 | Tamper-evident history | Important decisions and product events form a verifiable local chain. | `governance/events.jsonl` and the event-ledger implementation. | Sequence, previous hash, event hash, and checkpoint head must verify before a milestone commit. |
 | Independent development | Historical upstream data is lineage, not operational authority. | Session contract and local commits. | No fetch, pull, push, PR, or remote API operation without a new explicit user instruction that changes repository policy. |
+| Portable continuity | A new desktop or AI agent can reconstruct declared behavior from tracked source, contracts, manifests, and verified local capsules rather than chat memory. | Portability contract, migration runbook, workstation baseline, and mandatory agent handoff. | Every transfer declares fidelity levels, verifies Git/ledger/model/index compatibility, recreates ABIs, and records deviations before acceptance. |
 
 ## Decision test
 
@@ -68,6 +69,9 @@ Stop and review the architecture when any of these appear:
 - an AI-generated interpretation cannot be dismissed or traced;
 - a major architectural change is committed without a decision event;
 - documentation describes aspirations that tests no longer enforce.
+- a new agent mutates the repository without completing mandatory orientation;
+- a copied virtual environment, index, model store, or binary is assumed compatible
+  without a destination acceptance check.
 
 ## Milestone fidelity review
 

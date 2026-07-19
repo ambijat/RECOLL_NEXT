@@ -46,6 +46,10 @@ must not be contacted.
   provenance-gated secondary memory. `ask` remembers by default with a
   `--no-remember` override, and `memory-search` retrieves current perspectives;
   memories are not yet fed recursively into new answer prompts.
+- The portability documentation suite defines source/data capsules, workstation
+  reconstruction, configuration, build/test requirements, migration, operations,
+  recovery, and mandatory cross-agent handoff. `AGENTS.md` requires every agent to
+  read the complete `Required reading` set before mutation.
 - Inherited manuals, generated documentation, citation metadata, and legacy
   distribution packaging were removed to leave a rebuild skeleton.
 - Existing local edits in `src/filters/cmdtalk.py` and
@@ -61,9 +65,24 @@ Foundation and hardening:
 4. Add hybrid lexical/semantic retrieval; semantic-only retrieval is complete.
 5. Compile and package the implemented Recoll Qt AI Perspective dock; the runnable
    desktop companion is available for immediate validation.
+6. Validate the documented clean-rebuild portability procedure on a second desktop
+   or isolated destination environment.
 
 ## Required reading
 
+- [Documentation map](docs/README.md)
+- [Portability contract](docs/PORTABILITY_CONTRACT.md)
+- [Mandatory agent handoff](docs/AGENT_HANDOFF.md)
+- [Verified workstation baseline](docs/WORKSTATION_BASELINE.md)
+- [Development, build, and test guide](docs/DEVELOPMENT_AND_BUILD.md)
+- [Configuration and storage reference](docs/CONFIGURATION_REFERENCE.md)
+- [Local CLI and JSON API contract](docs/API_CONTRACT.md)
+- [Desktop-to-desktop data migration](docs/DATA_MIGRATION.md)
+- [Transfer manifest template](docs/TRANSFER_MANIFEST_TEMPLATE.md)
+- [Local operations runbook](docs/OPERATIONS_RUNBOOK.md)
+- [Component and responsibility catalog](docs/COMPONENT_CATALOG.md)
+- [Security and privacy model](docs/SECURITY_AND_PRIVACY.md)
+- [Provenance and licensing preservation](docs/PROVENANCE_AND_LICENSING.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Prismatic Search Charter](docs/PRISMATIC_SEARCH.md)
 - [Xapian-first hybrid search protocol](docs/XAPIAN_FIRST_PROTOCOL.md)
@@ -99,10 +118,12 @@ only when it describes the rebuilt product or records legally required provenanc
   callers must move to `recoll_ai.py sync` and `recoll_ai.py search`.
 - Environment setup and worker launch assume Unix `bin/python3` paths.
 - The repository `.venv` uses Python 3.14 while Recoll 1.43.5 ships bindings through
-  Python 3.13. The automatic bundled-Python bridge is validated on this workstation;
+  Python 3.12.4. The automatic bundled-Python bridge is validated on this workstation;
   packaging still needs a general Windows installation-discovery contract.
 - Exact cosine retrieval scans every stored segment. This is the reference-correct
   implementation, not the eventual large-corpus acceleration strategy.
+- `memory-search` accepts shared ledger arguments but does not yet emit runtime search
+  events; secondary-memory read auditing remains incomplete.
 - The first `gemma3:4b` cited answer took approximately 107 seconds on this machine;
   the GUI must expose progress and cancellation and must never block lexical search.
 - The native Qt AI Perspective dock is implemented in source but cannot be compiled
@@ -114,4 +135,5 @@ only when it describes the rebuilt product or records legally required provenanc
 A Windows-capable developer setup can index a small corpus, synchronize embeddings,
 run lexical/semantic/hybrid searches, verify the event chain, and obtain an Ollama
 answer with citations—all without network access after models and dependencies are
-installed.
+installed. The documented source and clean-rebuild data capsules can then reproduce
+that checkpoint on a second desktop without relying on chat history or a Git remote.

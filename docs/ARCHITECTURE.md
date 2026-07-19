@@ -11,6 +11,8 @@ The evidence, privacy, and user-control boundaries are defined normatively by th
 [Prismatic Search Charter](PRISMATIC_SEARCH.md).
 The retrieval ownership and hybrid-ranking boundary are defined normatively by the
 [Xapian-first Hybrid Search Protocol](XAPIAN_FIRST_PROTOCOL.md).
+Cross-machine reconstruction and artifact ownership are governed by the
+[Portability Contract](PORTABILITY_CONTRACT.md).
 
 ## Logical layers
 
@@ -41,8 +43,9 @@ The retrieval ownership and hybrid-ranking boundary are defined normatively by t
 
 - Original files are the content source of truth.
 - Recoll is the document identity and searchable metadata source of truth.
-- The semantic sidecar stores only rebuildable vector coordinates and model metadata;
-  it is not a second document index.
+- The semantic sidecar is not a second document authority. Its current schema includes
+  transitional extracted-text/title/path caches plus rebuildable vector coordinates,
+  model metadata, and explicitly secondary Perspective Memory.
 - Embeddings and generated answers are derived artifacts.
 - The event ledger is the audit source of truth for actions that occurred.
 
@@ -77,3 +80,7 @@ The generation and validation boundary is specified in
 [Local Cited Answers](CITED_ANSWERS.md).
 The secondary interpretation boundary is specified in
 [Perspective Memory](PERSPECTIVE_MEMORY.md).
+The complete implementation ownership map is specified in the
+[Component Catalog](COMPONENT_CATALOG.md).
+The presentation child-process envelopes are specified in the
+[Local CLI and JSON API Contract](API_CONTRACT.md).
