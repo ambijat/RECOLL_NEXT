@@ -25,6 +25,7 @@ correctly, deleted files disappear, and failures are diagnosed.
 
 ## Phase 2 — hybrid retrieval
 
+- Implement the duties and acceptance criteria in the Prismatic Search Charter.
 - Define a shared evidence result contract.
 - Retrieve lexical and semantic candidates concurrently.
 - Normalize/rank with reciprocal-rank fusion initially; keep the algorithm pluggable.

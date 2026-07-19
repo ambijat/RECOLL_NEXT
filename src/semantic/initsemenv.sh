@@ -52,8 +52,8 @@ fi
 ollama pull nomic-embed-text
 
 cp rclsem_common.py  rclsem_embed.py  rclsem_query.py  rclsem_segment.py  rclsem_talk.py  \
-   rclsem_ledger.py slicelist.py cmdtalkplugin.py "$venvdir"
-(cd "$venvdir";chmod a+x rclsem_embed.py  rclsem_query.py  rclsem_talk.py)
+   rclsem_ledger.py rclsem_ollama.py recoll_ai.py slicelist.py cmdtalkplugin.py "$venvdir"
+(cd "$venvdir";chmod a+x rclsem_embed.py rclsem_query.py rclsem_talk.py recoll_ai.py)
 
 rclindex=`which recollindex`
 if test -z "$rclindex" ; then

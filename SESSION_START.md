@@ -19,6 +19,8 @@ must not be contacted.
 - The semantic prototype is Unix-oriented and is not yet reliable on Windows.
 - A standalone hash-chained event ledger foundation lives in
   `src/semantic/rclsem_ledger.py`.
+- The first executable AI artifact is `src/semantic/recoll_ai.py doctor`, backed by the
+  dependency-free local-only adapter in `src/semantic/rclsem_ollama.py`.
 - Inherited manuals, generated documentation, citation metadata, and legacy
   distribution packaging were removed to leave a rebuild skeleton.
 - Existing local edits in `src/filters/cmdtalk.py` and
@@ -37,6 +39,8 @@ Foundation and hardening:
 ## Required reading
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Prismatic Search Charter](docs/PRISMATIC_SEARCH.md)
+- [Local AI runtime](docs/LOCAL_AI_RUNTIME.md)
 - [Event ledger specification](docs/EVENT_LEDGER.md)
 - [Implementation roadmap](docs/ROADMAP.md)
 

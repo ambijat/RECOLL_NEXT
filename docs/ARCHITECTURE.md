@@ -7,6 +7,9 @@ tracks upstream. The inherited Recoll engine remains the stable foundation. New
 capabilities should be attached through explicit adapters so the core index remains
 usable even when Ollama or the vector store is unavailable.
 
+The evidence, privacy, and user-control boundaries are defined normatively by the
+[Prismatic Search Charter](PRISMATIC_SEARCH.md).
+
 ## Logical layers
 
 1. **Acquisition and extraction** — inherited Recoll filters normalize files and
