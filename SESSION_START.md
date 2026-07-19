@@ -21,6 +21,10 @@ must not be contacted.
   `src/semantic/rclsem_ledger.py`.
 - The first executable AI artifact is `src/semantic/recoll_ai.py doctor`, backed by the
   dependency-free local-only adapter in `src/semantic/rclsem_ollama.py`.
+- Deterministic segmentation, model-versioned SQLite storage, and incremental
+  synchronization live in `rclsem_segments.py`, `rclsem_store.py`, and
+  `rclsem_sync.py`; the live `embeddinggemma` path has been validated at 768
+  dimensions.
 - Inherited manuals, generated documentation, citation metadata, and legacy
   distribution packaging were removed to leave a rebuild skeleton.
 - Existing local edits in `src/filters/cmdtalk.py` and
@@ -41,6 +45,7 @@ Foundation and hardening:
 - [Architecture](docs/ARCHITECTURE.md)
 - [Prismatic Search Charter](docs/PRISMATIC_SEARCH.md)
 - [Local AI runtime](docs/LOCAL_AI_RUNTIME.md)
+- [Semantic index foundation](docs/SEMANTIC_INDEX.md)
 - [Event ledger specification](docs/EVENT_LEDGER.md)
 - [Implementation roadmap](docs/ROADMAP.md)
 
@@ -59,12 +64,13 @@ only when it describes the rebuilt product or records legally required provenanc
 
 ## Known immediate defects
 
-- `rclsem_embed.py` skips the last segment of each batch because its loop ends at
-  `len(slice) - 1`.
-- Stale embeddings are not deleted when source documents change or disappear.
-- Changing an embedding model can reuse an incompatible Chroma collection.
+- The inherited `rclsem_embed.py`/Chroma path still contains dropped-segment, stale
+  deletion, and model-compatibility defects. It must be retired after the Recoll
+  adapter and semantic query path move to the new SQLite foundation.
 - Environment setup and worker launch assume Unix `bin/python3` paths.
 - Semantic query failures are mostly surfaced only through logs.
+- The new semantic store does not yet expose similarity retrieval or connect to the
+  installed Recoll document inventory.
 
 ## Definition of the next stable checkpoint
 

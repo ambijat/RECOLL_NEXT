@@ -20,6 +20,7 @@ Start every work session with [SESSION_START.md](SESSION_START.md).
 - [Architecture](docs/ARCHITECTURE.md)
 - [Prismatic Search Charter](docs/PRISMATIC_SEARCH.md)
 - [Local AI runtime](docs/LOCAL_AI_RUNTIME.md)
+- [Semantic index foundation](docs/SEMANTIC_INDEX.md)
 - [Event ledger](docs/EVENT_LEDGER.md)
 - [Roadmap](docs/ROADMAP.md)
 

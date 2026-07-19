@@ -11,6 +11,10 @@ and verify events while detecting mutation.
 
 ## Phase 1 — semantic subsystem hardening
 
+Implemented foundation: the local-only Ollama adapter, deterministic versioned
+segmenter, model-versioned SQLite store, incremental synchronization, stale deletion,
+dimension validation, and privacy-safe synchronization events.
+
 - Separate configuration, Ollama client, segmentation, vector-store, and Recoll
   adapters.
 - Support Windows and Unix virtual environments and worker launch paths.

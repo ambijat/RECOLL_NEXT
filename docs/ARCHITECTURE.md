@@ -60,3 +60,6 @@ All content processing is local by default. Configuration must distinguish an Ol
 endpoint on loopback from a remote endpoint and require an explicit policy change for
 the latter. Logs and ledger events contain identifiers and measurements, not full
 content.
+
+The implemented segmentation, namespace, and synchronization invariants are specified
+in the [Semantic Index Foundation](SEMANTIC_INDEX.md).
