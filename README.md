@@ -19,11 +19,13 @@ Start every work session with [SESSION_START.md](SESSION_START.md).
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Prismatic Search Charter](docs/PRISMATIC_SEARCH.md)
+- [Xapian-first hybrid search protocol](docs/XAPIAN_FIRST_PROTOCOL.md)
 - [Goal Fidelity Covenant](docs/GOAL_FIDELITY.md)
 - [Local AI runtime](docs/LOCAL_AI_RUNTIME.md)
 - [Semantic index foundation](docs/SEMANTIC_INDEX.md)
 - [Semantic retrieval](docs/SEMANTIC_RETRIEVAL.md)
 - [Local cited answers](docs/CITED_ANSWERS.md)
+- [Perspective Memory](docs/PERSPECTIVE_MEMORY.md)
 - [AI Perspective workspace](docs/AI_WORKSPACE.md)
 - [Event ledger](docs/EVENT_LEDGER.md)
 - [Project governance ledger](governance/README.md)

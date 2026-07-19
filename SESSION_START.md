@@ -42,6 +42,10 @@ must not be contacted.
   document authority. The semantic database is a disposable vector sidecar and the
   next retrieval artifact is bounded Xapian candidate generation plus Ollama
   reranking.
+- `rclsem_perspectives.py` stores successfully validated cited answers as local,
+  provenance-gated secondary memory. `ask` remembers by default with a
+  `--no-remember` override, and `memory-search` retrieves current perspectives;
+  memories are not yet fed recursively into new answer prompts.
 - Inherited manuals, generated documentation, citation metadata, and legacy
   distribution packaging were removed to leave a rebuild skeleton.
 - Existing local edits in `src/filters/cmdtalk.py` and
@@ -68,6 +72,7 @@ Foundation and hardening:
 - [Semantic index foundation](docs/SEMANTIC_INDEX.md)
 - [Semantic retrieval](docs/SEMANTIC_RETRIEVAL.md)
 - [Local cited answers](docs/CITED_ANSWERS.md)
+- [Perspective Memory](docs/PERSPECTIVE_MEMORY.md)
 - [AI Perspective workspace](docs/AI_WORKSPACE.md)
 - [Event ledger specification](docs/EVENT_LEDGER.md)
 - [Project governance ledger](governance/README.md)

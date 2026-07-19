@@ -38,7 +38,7 @@ discover the active database through the selected Recoll configuration directory
 | Source revision fingerprint | Semantic sidecar | Store for invalidation only |
 | Embedding model, dimensions, and version | Semantic sidecar | Store as a namespace contract |
 | Dense embedding vector | Semantic sidecar | Store as rebuildable derived data |
-| Generated answer | Presentation/session layer | Do not treat as indexed fact |
+| Generated answer | Perspective Memory or presentation/session layer | May be indexed only as a cited secondary interpretation; never treat as primary fact |
 | Operational evidence | Hash-chained event ledger | Store identifiers and metrics, never document bodies |
 
 ## Retrieval modes
@@ -92,6 +92,11 @@ invalidated by source revision, and clearly marked non-authoritative.
 
 The sidecar must be disposable. Deleting or rebuilding it must not modify original
 files or the Xapian database.
+
+Validated generated perspectives may occupy a separate secondary-memory namespace in
+the sidecar. Their provenance and feedback restrictions are defined by the
+[Perspective Memory Protocol](PERSPECTIVE_MEMORY.md). This exception does not make
+the sidecar authoritative for document facts.
 
 ## Index and synchronization protocol
 
@@ -162,4 +167,3 @@ An implementation conforms to this protocol when:
 5. Migrate the semantic schema to remove duplicated text and metadata.
 6. Replace full vector scans with a local acceleration structure only when corpus
    measurements justify it; retain the exact implementation as the reference oracle.
-

@@ -64,6 +64,13 @@ def _build_parser() -> argparse.ArgumentParser:
     ask.add_argument("--chat-model", default=DEFAULT_CHAT_MODEL)
     ask.add_argument("--evidence-limit", default=6, type=int)
     ask.add_argument(
+        "--no-remember",
+        action="store_false",
+        dest="remember",
+        help="do not add this validated answer to local perspective memory",
+    )
+    ask.set_defaults(remember=True)
+    ask.add_argument(
         "--view",
         default="answer",
         choices=(
@@ -75,6 +82,13 @@ def _build_parser() -> argparse.ArgumentParser:
             "actions",
         ),
     )
+
+    memory_search = subparsers.add_parser(
+        "memory-search", help="retrieve validated prior AI perspectives"
+    )
+    _add_semantic_options(memory_search)
+    memory_search.add_argument("query", help="local perspective-memory query")
+    memory_search.add_argument("--limit", "-n", default=5, type=int)
     return parser
 
 
@@ -252,14 +266,80 @@ def _run_ask(args: argparse.Namespace) -> Dict[str, Any]:
         chat_model=args.chat_model,
         event_sink=sink,
     )
-    result = asdict(
-        composer.ask(
-            args.query,
-            evidence_limit=args.evidence_limit,
-            view=args.view,
-        )
+    cited_answer = composer.ask(
+        args.query,
+        evidence_limit=args.evidence_limit,
+        view=args.view,
     )
-    return {"status": "answered", **result}
+    report = {"status": "answered", **asdict(cited_answer), "remembered": False}
+    if args.remember and not cited_answer.insufficient_evidence:
+        try:
+            from rclsem_perspectives import PerspectiveCitation, PerspectiveMemory
+
+            memory = PerspectiveMemory(args.store)
+            embedding_text = memory.embedding_text(
+                args.query, cited_answer.answer, cited_answer.view
+            )
+            embeddings = client.embed(args.embedding_model, embedding_text)
+            if len(embeddings) != 1:
+                raise ValueError("embedding provider returned the wrong perspective batch size")
+            perspective_id = memory.remember(
+                question=args.query,
+                answer=cited_answer.answer,
+                view=cited_answer.view,
+                chat_model=args.chat_model,
+                embedding_model=args.embedding_model,
+                citations=[
+                    PerspectiveCitation(
+                        segment_id=item.segment_id,
+                        document_id=item.document_id,
+                        source_revision=item.source_revision,
+                    )
+                    for item in cited_answer.citations
+                ],
+                embedding=embeddings[0],
+            )
+            report.update(remembered=True, perspective_id=perspective_id)
+            sink.record(
+                "perspective.memory.stored",
+                {
+                    "citation_segment_ids": [
+                        item.segment_id for item in cited_answer.citations
+                    ],
+                    "embedding_model": args.embedding_model,
+                    "perspective_id": perspective_id,
+                    "view": cited_answer.view,
+                },
+            )
+        except Exception as ex:
+            # A secondary-memory failure must never suppress a valid cited answer.
+            report["memory_error_type"] = type(ex).__name__
+            sink.record(
+                "perspective.memory.failed",
+                {
+                    "embedding_model": args.embedding_model,
+                    "error_type": type(ex).__name__,
+                    "view": cited_answer.view,
+                },
+            )
+    return report
+
+
+def _run_memory_search(args: argparse.Namespace) -> Dict[str, Any]:
+    from rclsem_perspectives import PerspectiveMemory
+
+    client = OllamaClient(args.endpoint, timeout=args.timeout)
+    memory = PerspectiveMemory(args.store)
+    embeddings = client.embed(args.embedding_model, args.query)
+    if len(embeddings) != 1:
+        raise ValueError("embedding provider returned the wrong memory-query batch size")
+    results = [
+        asdict(item)
+        for item in memory.search(
+            embeddings[0], embedding_model=args.embedding_model, limit=args.limit
+        )
+    ]
+    return {"status": "memory_ready", "result_count": len(results), "results": results}
 
 
 def _print_operation(report: Dict[str, Any]) -> None:
@@ -289,6 +369,20 @@ def _print_operation(report: Dict[str, Any]) -> None:
                 f"source={citation['path']} "
                 f"offsets={citation['source_start']}:{citation['source_end']}"
             )
+        if report.get("remembered"):
+            print(f"Perspective memory: {report['perspective_id']}")
+        elif report.get("memory_error_type"):
+            print(f"Perspective memory unavailable: {report['memory_error_type']}")
+        return
+    if report["status"] == "memory_ready":
+        print(f"Perspective memory results: {report['result_count']}")
+        for position, result in enumerate(report["results"], start=1):
+            print(
+                f"{position}. {result['view']} "
+                f"(cosine={result['similarity']:.6f})"
+            )
+            print(f"   Question: {result['question']}")
+            print(f"   {result['answer']}")
         return
     print(f"Semantic results: {report['result_count']}")
     for position, result in enumerate(report["results"], start=1):
@@ -320,8 +414,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             report = _run_sync(args)
         elif args.command == "search":
             report = _run_search(args)
-        else:
+        elif args.command == "ask":
             report = _run_ask(args)
+        else:
+            report = _run_memory_search(args)
     except Exception as ex:
         # The command line is a trust boundary: report the typed failure, never a
         # traceback which might contain extracted document text.

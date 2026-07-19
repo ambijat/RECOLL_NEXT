@@ -28,10 +28,13 @@ The retrieval ownership and hybrid-ranking boundary are defined normatively by t
    an answer plus document/segment citations. It must be able to decline when evidence
    is insufficient. The initial implementation rejects malformed output, invented
    segment identifiers, and supported answers without citations.
-7. **Presentation and API** — the Qt AI Perspective dock and runnable desktop
+7. **Perspective memory** — stores validated, cited AI interpretations and their
+   embeddings as secondary local memory. Stale source revisions suppress retrieval;
+   prior interpretations never replace primary evidence.
+8. **Presentation and API** — the Qt AI Perspective dock and runnable desktop
    companion consume the same JSON retrieval and answer contracts. Model work runs in
    a child process so ordinary Recoll search stays responsive and independent.
-8. **Event ledger** — cross-cutting, append-only evidence about operations and
+9. **Event ledger** — cross-cutting, append-only evidence about operations and
    decisions. It does not store indexed content and is not used as application state.
 
 ## Source-of-truth rules
@@ -72,3 +75,5 @@ in the [Semantic Index Foundation](SEMANTIC_INDEX.md). The inventory and evidenc
 query contracts are specified in [Semantic Retrieval](SEMANTIC_RETRIEVAL.md).
 The generation and validation boundary is specified in
 [Local Cited Answers](CITED_ANSWERS.md).
+The secondary interpretation boundary is specified in
+[Perspective Memory](PERSPECTIVE_MEMORY.md).
