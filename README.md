@@ -19,9 +19,11 @@ Start every work session with [SESSION_START.md](SESSION_START.md).
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Prismatic Search Charter](docs/PRISMATIC_SEARCH.md)
+- [Goal Fidelity Covenant](docs/GOAL_FIDELITY.md)
 - [Local AI runtime](docs/LOCAL_AI_RUNTIME.md)
 - [Semantic index foundation](docs/SEMANTIC_INDEX.md)
 - [Event ledger](docs/EVENT_LEDGER.md)
+- [Project governance ledger](governance/README.md)
 - [Roadmap](docs/ROADMAP.md)
 
 Historical Git metadata is lineage only. Development must not contact its configured

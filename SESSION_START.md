@@ -44,9 +44,11 @@ Foundation and hardening:
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Prismatic Search Charter](docs/PRISMATIC_SEARCH.md)
+- [Goal Fidelity Covenant](docs/GOAL_FIDELITY.md)
 - [Local AI runtime](docs/LOCAL_AI_RUNTIME.md)
 - [Semantic index foundation](docs/SEMANTIC_INDEX.md)
 - [Event ledger specification](docs/EVENT_LEDGER.md)
+- [Project governance ledger](governance/README.md)
 - [Implementation roadmap](docs/ROADMAP.md)
 
 Inherited product documentation is intentionally unavailable. Add new documentation
@@ -58,6 +60,8 @@ only when it describes the rebuilt product or records legally required provenanc
 - Do not log full document content, prompts containing private content, credentials,
   tokens, or environment dumps.
 - Treat the ledger as evidence, not as a queue or source database.
+- Test every feature against the Goal Fidelity Covenant and record major decisions in
+  `governance/events.jsonl`.
 - Every answer must retain document and segment identifiers so the UI can display its
   evidence.
 - Run focused tests after every change and document any test that cannot run locally.

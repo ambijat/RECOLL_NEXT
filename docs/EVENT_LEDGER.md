@@ -32,6 +32,8 @@ inter-process file lock during validation and append.
 
 Initial namespaces:
 
+- `project.*`, `architecture.*`, `milestone.*`, `governance.*` — durable project
+  mission, decision, milestone, and fiduciary-governance events.
 - `session.*` — session start, checkpoint, and completion.
 - `config.*` — configuration changes; store changed key names and value hashes for
   sensitive values, not secrets.
@@ -72,3 +74,7 @@ to the last independently trusted head hash.
 One ledger file supports multiple local processes through a file lock. Keep each
 product profile/configuration in its own ledger. High-volume diagnostic telemetry
 should use ordinary rotating logs; only durable product/audit events belong here.
+
+The versioned project-governance chain is `governance/events.jsonl`. Runtime product
+profiles must use separate ledgers so private operational identifiers are never added
+to repository history.

@@ -37,6 +37,7 @@ CMakeSettings.json
 TAGS
 \#*
 __pycache__
+governance/*.lock
 aclocal.m4
 build**/
 build-*-Debug

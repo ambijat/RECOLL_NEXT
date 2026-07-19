@@ -3,8 +3,8 @@
 This repository is an independent, local-first product derived from Recoll.
 
 Before making changes, read [`SESSION_START.md`](SESSION_START.md). It is the
-authoritative session briefing and links to the architecture, roadmap, and event
-ledger specifications.
+authoritative session briefing and links to the architecture, goal-fidelity covenant,
+roadmap, and event-ledger specifications.
 
 ## Non-negotiable rules
 
@@ -17,9 +17,11 @@ ledger specifications.
 - Prefer small, testable boundaries around the existing Recoll engine.
 - Ollama is the default model runtime; model names and endpoints must remain
   configurable.
+- Test proposed work against `docs/GOAL_FIDELITY.md`; do not weaken an invariant
+  without the documented change-control process.
 
 ## Session completion
 
 Update `SESSION_START.md` when architecture, operating rules, major risks, or the
-current milestone changes. Add a decision event to the ledger once session-level
-instrumentation is available.
+current milestone changes. Record major goals, decisions, and milestones in the
+project governance ledger and verify its head before milestone commits.
