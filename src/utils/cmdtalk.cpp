@@ -34,17 +34,23 @@ using namespace std;
 
 class TimeoutExcept {};
 
+// Timeout advisor class. Periodically checks if execution duration has exceeded
+// the timeout parameter limit. If so, throws a TimeoutExcept to abort and force-kill
+// the helper process.
 class Canceler : public ExecCmdAdvise {
 public:
     Canceler(int tmsecs) 
         : m_timeosecs(tmsecs) {}
 
+    // ExecCmd triggers newData whenever data processing updates occur.
+    // We check elapsed time relative to starting anchor.
     virtual void newData(int) {
         if (m_starttime && (time(nullptr) - m_starttime) > m_timeosecs) {
             throw TimeoutExcept();
         }
     }
 
+    // Re-anchors the start timer to the current system time before an exchange.
     void reset() {
         m_starttime = time(nullptr);
     }
@@ -125,13 +131,16 @@ bool CmdTalk::startCmd(const string& cmdname,
 // An empty line signals the end of the message, so the whole thing
 // would look like:
 // Name1: Len1\nData1Name2: Len2\nData2\n
+// Parses a single key-value block from the subprocess stream.
+// Expected stream format: "<name>: <length>\n<raw_data_bytes>"
+// If it encounters a solitary newline "\n", it denotes the end of the message.
 bool CmdTalk::Internal::readDataElement(string& name, string &data)
 {
     string ibuf;
 
     m_cancel.reset();
     try {
-        // Read name and length
+        // Read header line containing parameter name and data size
         if (cmd->getline(ibuf) <= 0) {
             LOGERR("CmdTalk: getline error\n");
             return false;
@@ -144,13 +153,13 @@ bool CmdTalk::Internal::readDataElement(string& name, string &data)
     
     LOGDEB1("CmdTalk:rde: line [" << ibuf << "]\n");
 
-    // Empty line (end of message) ?
+    // A single newline represents the end-of-message framing boundary.
     if (!ibuf.compare("\n")) {
         LOGDEB1("CmdTalk: Got empty line\n");
         return true;
     }
 
-    // We're expecting something like Name: len\n
+    // Header line structure validation: split into "<Name>:" and "<Length>"
     vector<string> tokens;
     stringToTokens(ibuf, tokens);
     if (tokens.size() != 2) {
@@ -166,7 +175,7 @@ bool CmdTalk::Internal::readDataElement(string& name, string &data)
         return false;
     }
 
-    // Read element data
+    // Read the exact number of raw value bytes following the header
     data.erase();
     if (len > 0 && cmd->receive(data, len) != len) {
         LOGERR("CmdTalk: expected " << len << " bytes of data, got " <<
@@ -194,10 +203,13 @@ bool CmdTalk::Internal::running()
     return true;
 }
 
+// Transmits the request data and populates response fields.
+// Guards the operation with a mutex to ensure multi-threaded calls do not interleave streams.
 bool CmdTalk::Internal::talk(const pair<string, string>& arg0,
                              const unordered_map<string, string>& args,
                              unordered_map<string, string>& rep)
 {
+    // Serialize all access to the subprocess pipe
     std::unique_lock<std::mutex> lock(mmutex);
 
     if (!running()) {
@@ -205,6 +217,7 @@ bool CmdTalk::Internal::talk(const pair<string, string>& arg0,
         return false;
     }
 
+    // Serialize parameters into the request buffer
     ostringstream obuf;
     if (!arg0.first.empty()) {
         obuf << arg0.first << ": " << arg0.second.size() << "\n" << arg0.second;
@@ -212,7 +225,7 @@ bool CmdTalk::Internal::talk(const pair<string, string>& arg0,
     for (const auto& it : args) {
         obuf << it.first << ": " << it.second.size() << "\n" << it.second;
     }
-    obuf << "\n";
+    obuf << "\n"; // Final newline to frame the end of this message
 
     if (cmd->send(obuf.str()) < 0) {
         cmd->zapChild();
@@ -220,7 +233,7 @@ bool CmdTalk::Internal::talk(const pair<string, string>& arg0,
         return false;
     }
 
-    // Read answer (multiple elements)
+    // Loop and read incoming response elements until message end is reached
     LOGDEB1("CmdTalk: reading answer\n");
     for (;;) {
         string name, data;
@@ -228,7 +241,7 @@ bool CmdTalk::Internal::talk(const pair<string, string>& arg0,
             cmd->zapChild();
             return false;
         }
-        if (name.empty()) {
+        if (name.empty()) { // End of message marker encountered
             break;
         }
         trimstring(name, ":");
@@ -236,6 +249,7 @@ bool CmdTalk::Internal::talk(const pair<string, string>& arg0,
         rep[name] = data;
     }
 
+    // If the helper process returned 'cmdtalkstatus', it implies an internal error
     if (rep.find("cmdtalkstatus") != rep.end()) {
         return false;
     } else {

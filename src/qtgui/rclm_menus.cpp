@@ -177,7 +177,6 @@ void RclMain::buildMenus()
     
     helpMenu->addAction(userManualAction);
     helpMenu->addAction(qlCheatSheetAction);
-    helpMenu->addAction(onlineManualAction);
     helpMenu->addAction(showMissingHelpers_Action);
     helpMenu->addAction(showActiveTypes_Action);
     helpMenu->addSeparator();

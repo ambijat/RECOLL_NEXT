@@ -235,11 +235,6 @@ macx:macxbundlebuild() {
 
   ICON = images/recoll.icns
 
-  APP_DOC.files = \
-    ../doc/user/usermanual.html \
-    ../doc/user/docbook-xsl.css
-  APP_DOC.path = Contents/Resources/doc
-
   APP_EXAMPLES.files = \
     ../sampleconf/fragment-buttons.xml \
     ../sampleconf/fields \
@@ -405,7 +400,7 @@ macx:macxbundlebuild() {
   mtpics/wordprocessing.png
   APP_IMAGES.path = Contents/Resources/images
 
-  QMAKE_BUNDLE_DATA = APP_EXAMPLES APP_EXAMPLES_MAC APP_FILTERS APP_IMAGES APP_DOC
+  QMAKE_BUNDLE_DATA = APP_EXAMPLES APP_EXAMPLES_MAC APP_FILTERS APP_IMAGES
 }
 
 unix:!macxbundlebuild() {

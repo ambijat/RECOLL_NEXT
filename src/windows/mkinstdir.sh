@@ -139,10 +139,6 @@ copyrecoll()
     chkcp $LIBXSLT $DESTDIR
 
     chkcp $RCL/COPYING                  $DESTDIR/COPYING.txt
-    chkcp $RCL/doc/user/usermanual.html $DESTDIR/Share/doc
-    chkcp $RCL/doc/user/docbook-xsl.css $DESTDIR/Share/doc
-    mkdir -p $DESTDIR/Share/doc/webhelp
-    rsync -av $RCL/doc/user/webhelp/docs/* $DESTDIR/Share/doc/webhelp || exit 1
     chkcp $RCL/sampleconf/fields          $DESTDIR/Share/examples
     chkcp $RCL/sampleconf/fragment-buttons.xml  $DESTDIR/Share/examples
     chkcp $RCL/sampleconf/mimeconf        $DESTDIR/Share/examples

@@ -516,10 +516,6 @@ set(mtpics_files
     qtgui/mtpics/wordprocessing.png
     )
 
-set(docs_files
-    doc/user/usermanual.html
-    doc/user/docbook-xsl.css)
-
 set(bundle_icon qtgui/images/recoll.icns)
 
 set_source_files_properties(${bundle_icon} PROPERTIES
@@ -530,10 +526,6 @@ set_source_files_properties(${filter_files} PROPERTIES
     MACOSX_PACKAGE_LOCATION Resources/filters)
 set_source_files_properties(${mtpics_files} PROPERTIES
     MACOSX_PACKAGE_LOCATION Resources/images)
-set_source_files_properties(${docs_files} PROPERTIES
-    MACOSX_PACKAGE_LOCATION Resources/doc)
-
-
 set(COMMON_INCLUDES_DIRS
     bincimapmime
     common
@@ -648,7 +640,6 @@ if (APPLE)
         ${filter_files}
         ${mtpics_files}
         ${bundle_icon}
-        ${docs_files}
     )
     set_target_properties(recollindex recollq PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/recoll.app/Contents/MacOS/)
@@ -686,17 +677,6 @@ if (LINUX)
         DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/pixmaps)
     install(FILES desktop/recoll.svg
         DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
-
-    install(FILES ${docs_files}
-       DESTINATION ${CMAKE_INSTALL_DATADIR}/recoll/doc)
-
-    install(FILES
-        doc/man/recollindex.1
-        doc/man/recollq.1
-        doc/man/recoll.1
-        DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
-    install(FILES doc/man/recoll.conf.5
-        DESTINATION ${CMAKE_INSTALL_MANDIR}/man5)
 
     install(FILES ${example_config_files}
         DESTINATION ${CMAKE_INSTALL_DATADIR}/recoll/examples)

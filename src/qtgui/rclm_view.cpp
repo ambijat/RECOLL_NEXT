@@ -605,43 +605,10 @@ void RclMain::execViewer(
 
 void RclMain::startManual(const string& index)
 {
-    string docdir = path_cat(theconfig->getDatadir(), "doc");
-
-    // The single page user manual is nicer if we have an index. Else
-    // the webhelp one is nicer if it is present
-    string usermanual = path_cat(docdir, "usermanual.html");
-    string webhelp = path_cat(docdir, "webhelp");
-    webhelp = path_cat(webhelp, "index.html");
-    bool has_wh = path_exists(webhelp);
-    
-    LOGDEB("RclMain::startManual: help index is " << (index.empty() ? "(null)" : index) << "\n");
-
-#ifndef _WIN32
-    // On Windows I could not find any way to pass the fragment through rclstartw (tried to set
-    // text/html as exception with rclstartw %u).
-    if (!index.empty()) {
-        usermanual += "#";
-        usermanual += index;
-    }
-#endif
-    
-    Rcl::Doc doc;
-    if (has_wh && index.empty()) {
-        doc.url = path_pathtofileurl(webhelp);
-    } else {
-        doc.url = path_pathtofileurl(usermanual);
-    }
-    doc.mimetype = "text/html";
-    doc.meta[Rcl::Doc::keyapptg] = "rclman";
-    startNativeViewer(doc, -1, QString(), -1, false);
-}
-
-void RclMain::startOnlineManual()
-{
-    Rcl::Doc doc;
-    doc.url = "https://www.recoll.org/usermanual/webhelp/docs/index.html";
-    doc.mimetype = "text/html";
-    startNativeViewer(doc, -1, QString(), -1, false);
+    LOGDEB("RclMain::startManual: documentation removed; requested index [" << index << "]\n");
+    QMessageBox::information(
+        this, tr("Documentation"),
+        tr("The inherited manual was removed while this product is being rebuilt."));
 }
 
 #ifdef _WIN32

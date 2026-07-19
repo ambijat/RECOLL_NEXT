@@ -1,0 +1,59 @@
+# Recoll Next architecture
+
+## Product boundary
+
+Recoll Next is a local knowledge-retrieval application, not a fork that continually
+tracks upstream. The inherited Recoll engine remains the stable foundation. New
+capabilities should be attached through explicit adapters so the core index remains
+usable even when Ollama or the vector store is unavailable.
+
+## Logical layers
+
+1. **Acquisition and extraction** — inherited Recoll filters normalize files and
+   metadata.
+2. **Lexical index** — Xapian/Recoll remains the authoritative document inventory and
+   keyword search engine.
+3. **Semantic index** — document segments and embeddings provide similarity search.
+   The vector store is derived data and must always be rebuildable.
+4. **Retrieval coordinator** — combines lexical and semantic candidates, applies
+   filters, deduplicates documents, and produces evidence-bearing ranked results.
+5. **Local model runtime** — an Ollama adapter handles embedding, reranking, and
+   generation. No model name or endpoint is hard-coded at product boundaries.
+6. **Answer composer** — builds bounded context from retrieved segments and returns
+   an answer plus document/segment citations. It must be able to decline when evidence
+   is insufficient.
+7. **Presentation and API** — Qt and future automation interfaces consume the same
+   retrieval and answer contracts.
+8. **Event ledger** — cross-cutting, append-only evidence about operations and
+   decisions. It does not store indexed content and is not used as application state.
+
+## Source-of-truth rules
+
+- Original files are the content source of truth.
+- Recoll is the document identity and searchable metadata source of truth.
+- Embeddings and generated answers are derived artifacts.
+- The event ledger is the audit source of truth for actions that occurred.
+
+## Failure isolation
+
+- Recoll lexical search must continue when Ollama is stopped.
+- A corrupt or incompatible semantic index must be rebuildable without touching the
+  Recoll index.
+- Ledger-write failure must be visible. For security-relevant administrative actions,
+  fail closed; for read-only search telemetry, return the result and emit a prominent
+  diagnostic.
+- Model timeouts and malformed responses must become typed errors, not empty results.
+
+## Stable identifiers
+
+Use Recoll's `rcludi` as the document identity while it is valid. A segment identity
+must also include a segmentation-version identifier and source revision fingerprint.
+Embedding collections must be namespaced by configuration, embedding model, vector
+dimension, and segmentation version.
+
+## Privacy
+
+All content processing is local by default. Configuration must distinguish an Ollama
+endpoint on loopback from a remote endpoint and require an explicit policy change for
+the latter. Logs and ledger events contain identifiers and measurements, not full
+content.

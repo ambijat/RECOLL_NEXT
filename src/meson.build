@@ -1,7 +1,4 @@
-# Note: the project version comes from RECOLL-VERSION.txt and is set by setversion.sh when we
-# bump it. We would like to simply set it into a variable at the top to facilitate the sed job, but
-# meson wants the first statement to be "project". Also there are several "  version: " in the file,
-# hence the comment hack below.
+# The inherited version remains until the rebuilt product defines its own version policy.
 #
 # 
 # - BSD build:
@@ -25,7 +22,7 @@ project(
     license: 'GPL 2+',
     # We'd like to use version: files('RECOLL-VERSION.txt') but this is a 0.57 feature. 
     # Ubuntu focal has 0.53 and is supported until 2025-04.
-    version: '1.44.0', # VERSIONCOMMENT keep this here, used by setversion.sh
+    version: '1.44.0',
     # Note: follow_symlinks will be needed in the future but not supported by all the versions we
     # need at the moment
     default_options: ['cpp_std=c++17', 'buildtype=debugoptimized',
@@ -41,7 +38,7 @@ project(
 #
 # Linked binaries only depend on soversion, e.g. ldd recollindex: librecoll.so.39 which is a
 # link to, e.g., .so.<version>
-recoll_soversion = '39' # SONAMECOMMENT keep this here, used by setversion.sh
+recoll_soversion = '39'
 
 cpp = meson.get_compiler('cpp')
 cc = meson.get_compiler('c')
@@ -266,13 +263,6 @@ cfile = configure_file(output: 'autoconfig.h', configuration: recoll_conf)
 #  command: ['./ylwrap', '@INPUT@'],
 #)
 
-# The config file manpage is the only one that's always installed.
-# Others will be added to the files() set created here,
-# based on which tools are enabled in the build configuration.
-manfiles = files(
-'doc/man/recoll.conf.5',
-)
-
 librecoll_sources = [
     'aspell/rclaspell.cpp',
     'bincimapmime/convert.cc',
@@ -469,7 +459,6 @@ if get_option('indexer')
         install: true,
     )
 
-    manfiles += 'doc/man/recollindex.1'
 endif
 
 ############# Recollq
@@ -487,7 +476,6 @@ if get_option('recollq')
         install: true,
     )
 
-    manfiles += 'doc/man/recollq.1'
 endif
 
 ############# Xadump
@@ -510,7 +498,6 @@ if get_option('xadump')
         install: true,
     )
 
-    manfiles += 'doc/man/xadump.1'
 endif
 
 py_mod = import('python')
@@ -533,17 +520,13 @@ if get_option('testmains')
 endif
 if get_option('rclgrep')
     subdir('rclgrep')
-    manfiles += 'doc/man/rclgrep.1'
 endif
 if get_option('qtgui')
     subdir('qtgui')
-    manfiles += 'doc/man/recoll.1'
 endif
 if get_option('catch')
    subdir('catch')
 endif
-
-install_man(manfiles)
 
 example_files = files(
 'desktop/recollindex.desktop',
@@ -571,12 +554,6 @@ install_subdir(
     exclude_directories: '__pycache__',
     exclude_files: ['recfiltcommon', 'injectcommon.sh',],
 )
-
-doc_files = files(
-'doc/user/docbook-xsl.css',
-'doc/user/usermanual.html',
-)
-install_data(doc_files, install_dir: get_option('datadir') / 'recoll' / 'doc')
 
 if get_option('indexer') and get_option('systemd')
    install_data('index/recollindex@.service', install_dir: get_option('systemd-system-unit-dir'))

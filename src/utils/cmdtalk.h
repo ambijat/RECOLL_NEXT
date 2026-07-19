@@ -66,20 +66,37 @@ text/plainData: 10
 #include <vector>
 #include <unordered_map>
 
+/**
+ * C++ Master/Client implementation of the CmdTalk IPC/RPC protocol.
+ * Manages spawning a persistent subprocess (using ExecCmd) and handles
+ * bidirectional key-value stream exchange.
+ */
 class CmdTalk {
  public:
+    /**
+     * Constructor.
+     * @param timeosecs Timeout in seconds. If the child process takes longer
+     *                  than this limit to read/write, a timeout exception is
+     *                  triggered and the child process is terminated.
+     */
     CmdTalk(int timeosecs);
     virtual ~CmdTalk();
+
+    // Disable copy constructor and assignment operator to prevent double-free
+    // of the Pimpl instance.
     CmdTalk(const CmdTalk&) = delete;
     CmdTalk& operator=(const CmdTalk&) = delete;
 
-    // @param env each entry should be of the form name=value. They
-    //   augment the subprocess environnement.
-    // @param path replaces the PATH variable when looking for the command.
-    // 
-    // Note that cmdtalk.py:main() method is a test routine which
-    // expects data pairs on the command line. If actual parameters
-    // need to be passed, it can't be used by the processor.
+    /**
+     * Spawns the helper subprocess command.
+     * 
+     * @param cmdname Name or path of the executable command to run.
+     * @param args Command-line arguments to pass to the command.
+     * @param env Subprocess environment variables (each entry formatted as "NAME=VALUE").
+     * @param path Custom search path directories to locate cmdname.
+     * 
+     * @return True if the process successfully started, false otherwise.
+     */
     virtual bool startCmd(const std::string& cmdname,
               const std::vector<std::string>& args =
               std::vector<std::string>(),
@@ -88,14 +105,38 @@ class CmdTalk {
               const std::vector<std::string>& path =
               std::vector<std::string>()
     );
+
+    /**
+     * Checks if the subprocess is currently running.
+     * 
+     * @return True if the subprocess is active, false if it has exited or failed.
+     */
     virtual bool running();
     
-    // Single exchange: send and receive data.
+    /**
+     * Performs a single synchronous request-response exchange.
+     * Serializes args map to stdin pipe, flushes, and reads the child's response
+     * from stdout pipe until the empty line boundary is reached.
+     * 
+     * @param args Key-value map of parameters to send to the child.
+     * @param rep Key-value map to store the child's response parameters.
+     * 
+     * @return True if exchange was successful, false if process failed/timed out,
+     *         or if 'cmdtalkstatus' error parameter was returned by the child.
+     */
     virtual bool talk(const std::unordered_map<std::string, std::string>& args,
               std::unordered_map<std::string, std::string>& rep);
 
-    // Specialized version with special argument used by dispatcher to call
-    // designated method
+    /**
+     * Invokes a specific RPC method on the helper subprocess.
+     * Convenience wrapper around talk() that inserts a "cmdtalk:proc" parameter.
+     * 
+     * @param proc The name of the procedure/method to invoke.
+     * @param args Key-value map of parameters to send.
+     * @param rep Key-value map to populate with response parameters.
+     * 
+     * @return True on success, false on failure or error.
+     */
     virtual bool callproc(
     const std::string& proc,
     const std::unordered_map<std::string, std::string>& args,
@@ -103,7 +144,7 @@ class CmdTalk {
 
 private:
     class Internal;
-    Internal *m{0};
+    Internal *m{0}; // Pointer to implementation (Pimpl pattern) to keep headers clean.
 };
 
 #endif /* _CMDTALK_H_INCLUDED_ */

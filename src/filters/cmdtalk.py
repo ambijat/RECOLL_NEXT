@@ -28,6 +28,10 @@ from typing import Any, Union, TextIO, BinaryIO, Text, AnyStr, Callable, Optiona
 
 
 def makebytes(data: AnyStr) -> bytes:
+    """Helper to convert unicode string to UTF-8 bytes.
+
+    If input is already bytes, it returns it unchanged.
+    """
     if data is None:
         return b""
     if isinstance(data, str):
@@ -37,6 +41,13 @@ def makebytes(data: AnyStr) -> bytes:
 
 
 def breakwrite(outfile: BinaryIO, data: bytes) -> None:
+    """Writes binary data to the output stream.
+
+    On Windows, writing large contiguous buffers (e.g. > 32KB) directly to
+    stdout/pipes can fail with a 'not enough space' or pipe-ended error.
+    This function avoids the issue by splitting the payload into small 4KB chunks
+    and writing them sequentially.
+    """
     if sys.platform != "win32":
         outfile.write(data)
     else:
@@ -62,9 +73,15 @@ def breakwrite(outfile: BinaryIO, data: bytes) -> None:
 # process. It calls an external method to use the args and produce
 # return data.
 class CmdTalk(object):
+    """Implements the Python side of the CmdTalk protocol.
+
+    It handles stream binary modes, reads and parses structured parameters
+    from stdin, dispatches processing, and sends answers back to the stdout pipe.
+    """
 
     def __init__(self, outfile: TextIO = sys.stdout, infile: TextIO = sys.stdin,
                  exitfunc: Optional[Callable] = None):
+        """Initializes pipes and configures Windows binary stream mode if needed."""
         try:
             self.myname = os.path.basename(sys.argv[0])
         except:
@@ -74,6 +91,9 @@ class CmdTalk(object):
         self.infile = infile
         self.exitfunc = exitfunc
 
+        # On Windows, stdin and stdout must be set to binary mode.
+        # This prevents newline translation (\n <-> \r\n) and prevents
+        # early EOF on Ctrl-Z (0x1A) byte characters.
         if sys.platform == "win32":
             import msvcrt
             msvcrt.setmode(self.outfile.fileno(), os.O_BINARY)
@@ -88,6 +108,7 @@ class CmdTalk(object):
             self.errfout: TextIO = open(self.debugfile, "a")
 
     def log(self, s: AnyStr, doexit: int = 0, exitvalue: int = 1) -> None:
+        """Logs a debug/error message to stderr or log file, and optionally exits."""
         print(f"CMDTALK: {self.myname}: {s!r}", file=self.errfout)
         if doexit:
             if self.exitfunc:
@@ -98,9 +119,20 @@ class CmdTalk(object):
     # followed by data. The param name is returned as str/unicode, the data
     # as bytes or str, depending on the nodecodeinput option.
     def readparam(self) -> Tuple[Text, Union[bytes, str]]:
+        """Reads a single key-value parameter from standard input.
+
+        Expects a line containing '<paramname>: <size>\n' followed by exactly
+        <size> bytes of value data.
+
+        Returns:
+            A tuple of (paramname, paramvalue), where paramvalue is decoded to str/unicode
+            unless nodecodeinput is enabled.
+            If the end of the current message is reached (an empty line '\n'), returns ("", b"").
+        """
         inf = self.infile.buffer
         s = inf.readline()
         if s == b"":
+            # Empty read indicates stdin is closed (parent process terminated)
             if self.exitfunc:
                 self.exitfunc(0)
             # Our father process is probably going to send us a SIGTERM.  On some platforms (BSD,
@@ -143,6 +175,7 @@ class CmdTalk(object):
         return (paramname, paramdata)
 
     def senditem(self, nm: Text, _data: AnyStr) -> None:
+        """Sends a single key-value parameter back to the master process stdout."""
         data: bytes = makebytes(_data)
         l = len(data)
         self.outfile.buffer.write(makebytes("%s: %d\n" % (nm, l)))
@@ -150,6 +183,11 @@ class CmdTalk(object):
 
     # Send answer
     def answer(self, outfields: Dict[Text, AnyStr]) -> None:
+        """Sends a dictionary of output fields as a complete response message.
+
+        Each dictionary item is sent as a separate key-value parameter,
+        followed by a final empty line to terminate the message framing.
+        """
         for nm, value in outfields.items():
             # self.log("Senditem: [%s] -> [%s]" % (nm, value))
             self.senditem(nm, value)
@@ -162,6 +200,11 @@ class CmdTalk(object):
     # Call processor with input params, send result. This base version works with, for example
     # the cmdtalkplugin processor.
     def processmessage(self, processor, params: Dict[Text, Union[bytes, str]]) -> None:
+        """Invokes the processor's process method to handle the parameters.
+
+        Sends the generated response fields back. Handles exceptions gracefully by
+        returning cmdtalkstatus and error description parameters.
+        """
         # In normal usage we try to recover from processor errors, but
         # we sometimes want to see the real stack trace when testing
         safeexec = True
@@ -181,6 +224,10 @@ class CmdTalk(object):
 
     # Loop on messages from our master
     def mainloop(self, processor: Any) -> None:
+        """Loops continuously, reading requests and processing messages.
+
+        Stops reading a message when an empty parameter name is returned (empty line).
+        """
         while 1:
             # self.log("waiting for command")
             params = dict()
@@ -202,6 +249,12 @@ class CmdTalk(object):
 # cmdtalk.main(proto,processor) instead of proto.mainloop(processor)
 # from your module, and get the benefits of command line testing
 def main(proto: CmdTalk, processor: Any) -> None:
+    """Helper entry point for testing and execution.
+
+    If run without arguments, launches the normal persistent protocol mainloop.
+    If run with arguments, parses the command-line arguments as key-value pairs,
+    runs the processor once, writes the raw results to stdout, and exits.
+    """
     if len(sys.argv) == 1:
         proto.mainloop(processor)
         # mainloop does not return. Just in case

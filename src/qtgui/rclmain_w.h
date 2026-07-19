@@ -123,7 +123,6 @@ public slots:
     virtual void showAboutDialog();
     virtual void showMissingHelpers();
     virtual void showActiveTypes();
-    virtual void startOnlineManual();
 #ifdef _WIN32
     virtual void checkWinVersion();
 #endif 

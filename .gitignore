@@ -56,9 +56,6 @@ ltmain.sh
 missing
 ptrans
 src/common/autoconfig.h
-src/doc/user/usermanual.pdf
-src/doc/user/webhelp/docs/*
-src/doc/user/webhelp/xincluded-profiled.xml
 src/kde/kioslave/kio_recoll/builddir
 src/python/pyaspell/aspell_python_py3.egg-info/
 src/python/pyaspell/dist/
