@@ -17,6 +17,7 @@ later appends do not modify earlier entries.
 | 2026-07-19 | 16 | `b19ef108e95217b594dfa985bc8faa560951c0665aba6bdd4b1348704ac6a87d` | Visible AI Perspective workspace committed as `92909a45`; runnable Tk GUI validated, native Qt source awaiting SDK compilation. |
 | 2026-07-19 | 17 | `d2cdc02f894b3b991bfb3d35e0c4f4a1bbd0ab1fc1265917c6a5278e93492d8e` | Xapian-first hybrid retrieval recorded: Recoll remains authoritative and the Ollama vector sidecar remains minimal and rebuildable. |
 | 2026-07-19 | 18 | `f420ebf62f447924fd593d1702500d977122dfedeff05d3d44de3a0b34a43c05` | Provenance-gated Perspective Memory recorded as secondary interpretation, never primary documentary evidence. |
+| 2026-07-19 | 19 | `2dad13dc244efdbd2daf62a28763a64327ad2d2a5555aec7df4c34eb4b11b4e8` | Perspective Memory milestone committed as `95c83da0` after 59 tests and a live local embedding smoke test. |
 
 Verify the current head before adding another row:
 
