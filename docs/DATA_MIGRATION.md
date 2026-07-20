@@ -84,13 +84,15 @@ JSONL ledger beside the database; its `.lock` sibling is optional coordination s
 Recommended local bundle:
 
 ```powershell
-git bundle create recoll-next.bundle --all
+git bundle create recoll-next.bundle master
 git bundle verify recoll-next.bundle
 Get-FileHash -Algorithm SHA256 -LiteralPath recoll-next.bundle
 ```
 
-The bundle excludes ignored `.local`, `.venv`, `.idea`, and build products, and it
-excludes uncommitted files. Handle every intentional exception explicitly.
+Use the explicitly selected local product branch in place of `master` when needed.
+Avoid `--all`, which can include unrelated remote-tracking and tool-owned refs. The
+bundle excludes ignored `.local`, `.venv`, `.idea`, and build products, and it excludes
+uncommitted files. Handle every intentional exception explicitly.
 
 A cold directory copy may be used instead, but it must include `.git` and must not
 be performed while a commit is being created.
@@ -273,4 +275,3 @@ Accept only the fidelity levels that passed. Record deviations and retained roll
 locations. If a derived layer fails, preserve it for diagnosis and rebuild into a new
 path. Never repair a failed hash chain by editing JSON Lines, and never overwrite the
 source machine's only accepted Xapian or SQLite database.
-

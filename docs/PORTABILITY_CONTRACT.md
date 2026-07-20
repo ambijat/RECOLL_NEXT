@@ -179,12 +179,19 @@ A direct cold copy must include `.git`, tracked files, and intentional untracked
 files, while excluding disposable `.venv`, build outputs, and `.local` unless those
 capsules were selected.
 
-A local Git bundle preserves committed history without contacting a remote:
+A branch-scoped local Git bundle preserves the complete history reachable from the
+selected product branch without contacting a remote or exporting unrelated local,
+remote-tracking, or agent-checkpoint refs:
 
 ```powershell
-git bundle create recoll-next.bundle --all
+git bundle create recoll-next.bundle master
 git bundle verify recoll-next.bundle
 ```
+
+Replace `master` only with the explicitly selected local product branch. Do not use
+`--all` by default: development environments may contain remote-tracking or tool-owned
+refs that are not part of the intended transfer capsule. Record the exported ref and
+tip commit in the manifest.
 
 Uncommitted and ignored files are not included in a Git bundle. Commit intentional
 source changes or list and copy them separately. On the destination, cloning from the
@@ -243,4 +250,3 @@ reading, or acceptance gates requires:
 2. tests or a documented reason a check cannot run;
 3. an `architecture.decision.*` project-ledger event; and
 4. a local checkpoint commit. No remote action is part of this process.
-

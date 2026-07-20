@@ -21,6 +21,7 @@ later appends do not modify earlier entries.
 | 2026-07-19 | 20 | `f813720751f9c0c8c964803d936b4d7ff41edef3989dedf03d60bf1b2f9c8597` | Portable source/data/model/build fidelity gates and mandatory tracked agent orientation recorded as the continuity contract. |
 | 2026-07-19 | 21 | `4a4386257d1c7ca484ea8aeec608926fba463ef1cbf148df70e6bd35d81adf08` | Portable project and agent continuity suite committed as `b93379a6` with 25 Markdown documents and 63 passing tests. |
 | 2026-07-20 | 22 | `94fddd8bb70839331aee1fbdf612e6bffda8c970c53fc1feb4474c26d0cbbfc7` | Audit debt-clearance milestone: retired Chroma implementation, offline-safe cross-platform bootstrap, and privacy-safe Perspective Memory read events with 68 passing tests. |
+| 2026-07-20 | 23 | `43cbfb0f3eabcf0ef70d23c817e8ac405136e02553693ece4066fffa0b3dc64a` | Portability experiment corrected source capsules to export only the selected product branch and ignore recreated `.venv` environments; 69 tests pass. |
 
 Verify the current head before adding another row:
 

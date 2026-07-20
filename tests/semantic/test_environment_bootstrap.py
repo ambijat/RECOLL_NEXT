@@ -28,6 +28,10 @@ class EnvironmentBootstrapTest(unittest.TestCase):
             source = path.read_text(encoding="utf-8")
             self.assertNotIn("import chromadb", source, path.name)
 
+    def test_recreated_environment_is_ignored_by_source_capsules(self):
+        ignore_rules = (REPOSITORY_ROOT / ".gitignore").read_text(encoding="utf-8")
+        self.assertIn(".venv/", ignore_rules.splitlines())
+
     def test_retired_entry_point_fails_with_supported_commands(self):
         with self.assertRaisesRegex(LegacySemanticPathRetired, "recoll_ai.py sync"):
             common_init()

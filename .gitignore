@@ -25,6 +25,7 @@
 .dirstamp
 .idea/
 .local/
+.venv/
 .kdev4/
 .libs
 .moc
