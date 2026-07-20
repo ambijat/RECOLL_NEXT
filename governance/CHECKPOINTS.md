@@ -25,6 +25,7 @@ later appends do not modify earlier entries.
 | 2026-07-20 | 24 | `42f1bacfa547ba82ba2f69ade24b8d4b246b5e933203f420942e8680b4bf5935` | Project ledger is byte-stable across Git checkout through a `-text` attribute after portability testing exposed line-ending hash drift; 70 tests pass. |
 | 2026-07-20 | 25 | `019c5836c9a7852bf2c180f508f21d22330f694a90de0311d8fba4b113523773` | Isolated clean rebuild accepted source, lexical, AI, and event fidelity at source commit `abc79e90`; native Qt Level B and physical second-machine validation remain open. |
 | 2026-07-20 | 26 | `396fa010deaedd374b03006a75659fa10fc3bd4021a5c848eea0edd14dd4ff5d` | Xapian-first Exact, Prismatic, and Conceptual retrieval implemented with weighted RRF, live stale-vector gates, lexical fallback, 80 passing tests, and active-profile validation. |
+| 2026-07-20 | 27 | `3f98757f719a9071292de73e187f586317b0bbfabfcffdfdf4895e3f626231e3` | Portable restart capsule records the `ad45283a` implementation anchor, verified state, transfer cautions, and ordered next course after 81 passing tests. |
 
 Verify the current head before adding another row:
 

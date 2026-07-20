@@ -85,6 +85,7 @@ Foundation and hardening:
 
 ## Required reading
 
+- [Next-session restart capsule](RESUME_NEXT_SESSION.md)
 - [Documentation map](docs/README.md)
 - [Portability contract](docs/PORTABILITY_CONTRACT.md)
 - [Mandatory agent handoff](docs/AGENT_HANDOFF.md)
