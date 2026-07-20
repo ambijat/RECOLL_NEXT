@@ -111,3 +111,16 @@ JSONL ledgers, lock files, and local process logs. It is not included in a Git b
 - Rebuilding Xapian can change `rcludi`, requiring semantic and perspective rebuilds.
 - Exact semantic cosine search scans all stored segments and is not yet suitable for
   the full 144,253-document inventory without an acceleration layer.
+
+## Subsequent isolated portability proof
+
+On 2026-07-20, a clean destination under an ignored `.local` capsule reconstructed a
+branch-scoped source bundle, dependency-free Python environment, synthetic corpus,
+Recoll/Xapian index, semantic SQLite store, cited answer, Perspective Memory result,
+runtime ledger, and Tk launch. Source, lexical, AI, and event fidelity passed with 70
+tests at accepted source commit `abc79e90`; the private transfer manifest records the
+hashes and deviations.
+
+This is strong path-isolation and reconstruction evidence on the same workstation.
+It does not replace the remaining second-physical-machine, cross-OS, or native Qt
+build validation.

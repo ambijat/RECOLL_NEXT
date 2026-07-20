@@ -64,7 +64,8 @@ and never require cloud services.
 ## Phase 4 — integrity and operations
 
 - Document source/data capsules, workstation reconstruction, configuration, build,
-  migration, security, routine operations, and agent handoff. (Implemented; live
+  migration, security, routine operations, and agent handoff. (Implemented; an
+  isolated same-workstation clean rebuild passed Levels S/L/A/E, while a physical
   second-machine validation remains.)
 - Add ledger head checkpoints and optional local asymmetric signatures.
 - Add retention, export, redaction-by-tombstone policy, and recovery tooling.

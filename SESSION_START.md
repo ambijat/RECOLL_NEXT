@@ -54,6 +54,11 @@ must not be contacted.
   reconstruction, configuration, build/test requirements, migration, operations,
   recovery, and mandatory cross-agent handoff. `AGENTS.md` requires every agent to
   read the complete `Required reading` set before mutation.
+- A clean rebuild in an isolated local destination validated source, lexical, AI, and
+  event fidelity at source commit `abc79e90`. It recreated Python without downloads,
+  rebuilt a three-document Recoll/Xapian and semantic corpus, produced and rejected
+  citations correctly, retrieved Perspective Memory, and launched the Tk companion.
+  The private manifest is under `.local/portability-proof-20260720`.
 - Inherited manuals, generated documentation, citation metadata, and legacy
   distribution packaging were removed to leave a rebuild skeleton.
 - Existing local edits in `src/filters/cmdtalk.py` and
@@ -69,8 +74,8 @@ Foundation and hardening:
 4. Add hybrid lexical/semantic retrieval; semantic-only retrieval is complete.
 5. Compile and package the implemented Recoll Qt AI Perspective dock; the runnable
    desktop companion is available for immediate validation.
-6. Validate the documented clean-rebuild portability procedure on a second desktop
-   or isolated destination environment.
+6. Repeat the validated isolated clean-rebuild portability procedure on a second
+   physical desktop and establish the native Qt build toolchain.
 
 ## Required reading
 
@@ -132,6 +137,9 @@ only when it describes the rebuilt product or records legally required provenanc
 - The native Qt AI Perspective dock is implemented in source but cannot be compiled
   on this workstation until a matching Qt/C++ development SDK is installed. The
   Tk 8.6 desktop companion exercises the same customer workflow immediately.
+- Same-workstation path isolation now passes Levels S/L/A/E, but cross-host and
+  cross-OS portability remain unproven. The proof exposed and fixed overly broad Git
+  bundles, missing `.venv` exclusion, and project-ledger line-ending conversion.
 
 ## Definition of the next stable checkpoint
 
