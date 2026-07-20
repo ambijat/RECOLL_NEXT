@@ -10,7 +10,7 @@ Original files
   -> deterministic source-preserving segments
   -> local Ollama embeddings
   -> SQLite semantic namespace
-  -> exact semantic retrieval (hybrid coordinator planned)
+  -> Xapian-first Exact / Prismatic RRF / Conceptual retrieval
   -> bounded local Ollama generation
   -> citation validator
   -> optional Perspective Memory
@@ -28,9 +28,10 @@ Cross-cutting: runtime JSONL ledger and versioned project governance chain
 | `rclsem_segments.py` | Deterministic segmentation | `SourceDocument`, target/overlap settings | Stable revision and segment identities with offsets |
 | `rclsem_store.py` | Semantic SQLite ownership | Namespaces, documents, segments, vectors | Atomic records, exact iteration, compatibility errors |
 | `rclsem_sync.py` | Incremental synchronization | Recoll inventory, segmenter, embedder | Add/update/unchanged/delete report and runtime events |
-| `rclsem_recoll.py` | Lazy authoritative inventory adapter | Recoll profile/query | `SourceDocument` stream; automatic Windows ABI bridge |
-| `rclsem_recoll_bridge.py` | Matching-ABI child process | Profile/query under bundled Python | Private JSON Lines document stream |
+| `rclsem_recoll.py` | Authoritative inventory, bounded lexical query, and live-resolution adapter | Recoll profile/query/`rcludi` | Ordered `SourceDocument` records; automatic Windows ABI bridge |
+| `rclsem_recoll_bridge.py` | Matching-ABI child process | Profile/query or private-stdin identities under bundled Python | Private JSON Lines document stream |
 | `rclsem_retrieve.py` | Reference semantic ranker | Query embedding and stored vectors | Deterministic cosine-ranked `EvidenceResult` records |
+| `rclsem_hybrid.py` | Xapian-first retrieval coordinator | Lexical documents, semantic evidence, mode and RRF policy | Provenance-bearing, stale-gated Exact/Prismatic/Conceptual reports |
 | `rclsem_answer.py` | Bounded cited generation | Query, view, primary evidence, chat model | Validated `CitedAnswer` or explicit rejection/decline |
 | `rclsem_perspectives.py` | Secondary interpretation memory and audited retrieval | Validated cited answer, query, and embedding | Deduplicated memory, stale-gated retrieval, and `search.memory.*` events |
 | `rclsem_events.py` | Component-to-ledger adapter | Typed event and minimized payload | Hash-chained runtime append |
@@ -103,6 +104,7 @@ selected private migration capsule even though it is never primary documentary t
 | `test_ollama_client.py` | Loopback privacy, model inventory, response validation |
 | `test_semantic_sync.py` | Determinism, dimensions, atomic incremental lifecycle |
 | `test_semantic_retrieval.py` | Recoll identity bridge and exact cosine evidence |
+| `test_hybrid_retrieval.py` | Xapian order, RRF, stale rejection, outage fallback, query privacy, store-free Exact |
 | `test_cited_answer.py` | Bounded prompt, supported views, citation rejection |
 | `test_perspective_memory.py` | Deduplication, namespace dimensions, stale provenance |
 | `test_ai_perspective_gui.py` | GUI process arguments, cancellation/source contracts, native wiring |
@@ -111,12 +113,13 @@ selected private migration capsule even though it is never primary documentary t
 
 ## Implemented versus planned
 
-Implemented: local doctor, Recoll inventory bridge, deterministic semantic sync,
-exact cosine retrieval, cited answer views, Perspective Memory indexing/search,
+Implemented: local doctor, Recoll inventory/query bridge, deterministic semantic sync,
+exact cosine retrieval, Xapian-first Exact/Prismatic/Conceptual search with RRF and
+live revision gates, cited answer views, Perspective Memory indexing/search,
 runtime/project ledgers, Tk GUI, and native dock source.
 
-Planned/incomplete: lexical result adapter for the shared JSON API, hybrid
-candidate fusion, full-corpus vector acceleration, memory-assisted generation with
+Planned/incomplete: semantic-schema de-duplication after live hydration, full-corpus
+vector acceleration, memory-assisted generation with
 strict primary/secondary labels, memory management UI, native Windows build/package,
 schema migration tools, signed ledger checkpoints, and second-machine portability
 validation.

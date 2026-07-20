@@ -47,6 +47,10 @@ not parse or edit Glass files directly.
 | Segment target | 900 characters | Deterministic segmenter |
 | Segment overlap | 150 characters | Deterministic segmenter |
 | Search limit | 10 | Semantic evidence results |
+| Search mode | `prismatic` | `exact`, `prismatic`, or `conceptual` |
+| Hybrid candidate limit | 50 | Per-channel candidates before fusion |
+| RRF constant | 60 | Reciprocal-rank fusion smoothing |
+| Lexical/semantic weights | 1.0 / 1.0 | Prismatic channel influence |
 | Ask evidence limit | 6 | Primary segments in generation context |
 | Memory-search limit | 5 | Prior perspective results |
 | Ask memory | Enabled for supported cited answers | Disable with `--no-remember` |
@@ -84,9 +88,11 @@ later narrow query could delete records from an earlier scope.
 
 ### `search`
 
-Embeds the query and performs deterministic exact cosine ranking over the selected
-semantic namespace. Required: `--store` and positional query. Optional shared
-settings plus `--limit`/`-n`.
+Runs Exact Recoll ranking, Conceptual cosine retrieval, or Prismatic weighted RRF.
+The positional query is always required. `--store` is required for Prismatic and
+Conceptual but deliberately optional for Exact. Options include `--mode`, `--confdir`,
+`--recoll-python`, `--limit`/`-n`, `--candidate-limit`, `--rrf-k`,
+`--lexical-weight`, and `--semantic-weight`, plus the shared local-AI settings.
 
 ### `ask`
 
@@ -168,4 +174,3 @@ The Ollama adapter accepts loopback endpoints by default. A non-loopback host is
 privacy boundary change, not routine configuration. It requires explicit policy,
 documentation, tests, and governance approval. No agent may infer authorization to
 send corpus content to a remote model from the mere presence of an endpoint.
-

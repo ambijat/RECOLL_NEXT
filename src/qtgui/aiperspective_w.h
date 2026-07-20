@@ -62,6 +62,7 @@ private:
 
     QLineEdit *m_queryEdit{nullptr};
     QLineEdit *m_storeEdit{nullptr};
+    QComboBox *m_modeCombo{nullptr};
     QComboBox *m_viewCombo{nullptr};
     QPushButton *m_searchButton{nullptr};
     QPushButton *m_askButton{nullptr};

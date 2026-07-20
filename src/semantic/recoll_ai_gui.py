@@ -17,6 +17,7 @@ import webbrowser
 
 
 VIEWS = ("answer", "summary", "timeline", "contradictions", "decisions", "actions")
+MODES = ("exact", "prismatic", "conceptual")
 
 
 class GUIContractError(Exception):
@@ -30,22 +31,21 @@ def build_command(
     operation: str,
     *,
     view: str = "answer",
+    mode: str = "prismatic",
 ) -> List[str]:
     if operation not in ("search", "ask"):
         raise GUIContractError("operation must be search or ask")
     if not query_text.strip():
         raise GUIContractError("enter a query first")
-    command = [
-        sys.executable,
-        str(script),
-        operation,
-        "--store",
-        str(store),
-        "--json",
-    ]
+    command = [sys.executable, str(script), operation]
     if operation == "search":
-        command.extend(("--timeout", "120", "--limit", "5"))
+        if mode not in MODES:
+            raise GUIContractError("unsupported retrieval mode")
+        if mode != "exact":
+            command.extend(("--store", str(store)))
+        command.extend(("--json", "--mode", mode, "--timeout", "120", "--limit", "5"))
     else:
+        command.extend(("--store", str(store), "--json"))
         if view not in VIEWS:
             raise GUIContractError("unsupported perspective")
         command.extend(
@@ -106,6 +106,7 @@ class AIPerspectiveApp:
         self.query_var = tk.StringVar(value=query_text)
         self.store_var = tk.StringVar(value=str(store))
         self.view_var = tk.StringVar(value="answer")
+        self.mode_var = tk.StringVar(value="prismatic")
         self.status_var = tk.StringVar(value="Ready — local only")
 
         outer = ttk.Frame(root, padding=12)
@@ -136,13 +137,22 @@ class AIPerspectiveApp:
         controls = ttk.Frame(outer)
         controls.grid(row=4, column=0, columnspan=3, sticky="ew", pady=(2, 10))
         self.search_button = ttk.Button(
-            controls, text="Concept Search", command=lambda: self.start("search")
+            controls, text="Search Evidence", command=lambda: self.start("search")
         )
         self.search_button.pack(side="left")
         self.ask_button = ttk.Button(
             controls, text="Ask AI", command=lambda: self.start("ask")
         )
         self.ask_button.pack(side="left", padx=6)
+        ttk.Label(controls, text="Retrieval").pack(side="left", padx=(14, 4))
+        self.mode_combo = ttk.Combobox(
+            controls,
+            textvariable=self.mode_var,
+            values=MODES,
+            state="readonly",
+            width=12,
+        )
+        self.mode_combo.pack(side="left")
         ttk.Label(controls, text="Perspective").pack(side="left", padx=(14, 4))
         self.view_combo = ttk.Combobox(
             controls,
@@ -185,7 +195,7 @@ class AIPerspectiveApp:
             selectmode="browse",
         )
         self.evidence_tree.heading("title", text="Document")
-        self.evidence_tree.heading("score", text="Similarity")
+        self.evidence_tree.heading("score", text="Score")
         self.evidence_tree.heading("source", text="Source")
         self.evidence_tree.column("title", width=280)
         self.evidence_tree.column("score", width=90, anchor="center")
@@ -221,7 +231,8 @@ class AIPerspectiveApp:
         if self.process is not None:
             return
         store = Path(self.store_var.get().strip())
-        if not store.is_file():
+        mode = self.mode_var.get()
+        if not (operation == "search" and mode == "exact") and not store.is_file():
             self.show_error("Choose an existing semantic knowledge store.")
             return
         try:
@@ -231,6 +242,7 @@ class AIPerspectiveApp:
                 self.query_var.get(),
                 operation,
                 view=self.view_var.get(),
+                mode=mode,
             )
         except GUIContractError as ex:
             self.show_error(str(ex))
@@ -240,7 +252,7 @@ class AIPerspectiveApp:
         self.cancelled = False
         self.set_busy(True)
         self.status_var.set(
-            "Retrieving semantic evidence…"
+            f"Retrieving {mode} evidence…"
             if operation == "search"
             else "Retrieving evidence and generating with local Ollama…"
         )
@@ -310,7 +322,13 @@ class AIPerspectiveApp:
             evidence = response.get("citations") or []
         else:
             evidence = response.get("results") or []
-            answer = f"Conceptual evidence: {len(evidence)} segments found."
+            mode = str(response.get("mode") or "conceptual").title()
+            degraded = (
+                " Semantic retrieval unavailable; showing lexical fallback."
+                if response.get("degraded")
+                else ""
+            )
+            answer = f"{mode} evidence: {len(evidence)} segments found.{degraded}"
         self.set_answer(answer)
         for position, item in enumerate(evidence, start=1):
             if isinstance(item, dict):
@@ -319,8 +337,15 @@ class AIPerspectiveApp:
     def add_evidence(self, position: int, item: Dict[str, Any]) -> None:
         title = str(item.get("title") or item.get("document_id") or "Untitled")
         path = str(item.get("path") or "")
-        similarity = item.get("similarity")
-        score = f"{float(similarity):.3f}" if isinstance(similarity, (int, float)) else ""
+        value = item.get("fusion_score")
+        if not isinstance(value, (int, float)):
+            value = item.get("similarity")
+        if isinstance(value, (int, float)):
+            score = f"{float(value):.3f}"
+        elif item.get("lexical_rank") is not None:
+            score = f"#{item['lexical_rank']}"
+        else:
+            score = ""
         identifier = self.evidence_tree.insert(
             "", "end", values=(f"[{position}] {title}", score, path)
         )
@@ -394,6 +419,7 @@ class AIPerspectiveApp:
         self.store_entry.configure(state=state)
         self.query_entry.configure(state=state)
         self.view_combo.configure(state="disabled" if busy else "readonly")
+        self.mode_combo.configure(state="disabled" if busy else "readonly")
         self.cancel_button.configure(state="normal" if busy else "disabled")
         if busy:
             self.progress.start(10)

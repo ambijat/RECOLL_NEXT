@@ -47,7 +47,9 @@ QString evidenceLabel(const QJsonObject& evidence, int position)
     if (label.isEmpty())
         label = QObject::tr("Untitled evidence");
 
-    const double similarity = evidence.value("similarity").toDouble(-1.0);
+    double similarity = evidence.value("fusion_score").toDouble(-1.0);
+    if (similarity < 0.0)
+        similarity = evidence.value("similarity").toDouble(-1.0);
     if (similarity >= 0.0) {
         return QString("[%1] %2  ·  %3")
             .arg(position)
@@ -89,6 +91,13 @@ AIPerspectiveDock::AIPerspectiveDock(QWidget *parent)
     storeLayout->addWidget(browseButton);
     form->addRow(tr("Knowledge scope"), storeRow);
 
+    m_modeCombo = new QComboBox(body);
+    m_modeCombo->addItem(tr("Exact"), "exact");
+    m_modeCombo->addItem(tr("Prismatic"), "prismatic");
+    m_modeCombo->addItem(tr("Conceptual"), "conceptual");
+    m_modeCombo->setCurrentIndex(1);
+    form->addRow(tr("Retrieval"), m_modeCombo);
+
     m_viewCombo = new QComboBox(body);
     m_viewCombo->addItem(tr("Answer"), "answer");
     m_viewCombo->addItem(tr("Summary"), "summary");
@@ -100,7 +109,7 @@ AIPerspectiveDock::AIPerspectiveDock(QWidget *parent)
     layout->addLayout(form);
 
     auto *buttons = new QHBoxLayout();
-    m_searchButton = new QPushButton(tr("Concept Search"), body);
+    m_searchButton = new QPushButton(tr("Search Evidence"), body);
     m_askButton = new QPushButton(tr("Ask AI"), body);
     m_cancelButton = new QPushButton(tr("Cancel"), body);
     m_cancelButton->setEnabled(false);
@@ -196,11 +205,13 @@ void AIPerspectiveDock::startOperation(Operation operation)
         return;
     const QString query = m_queryEdit->text().trimmed();
     const QString store = QDir::fromNativeSeparators(m_storeEdit->text().trimmed());
+    const QString mode = m_modeCombo->currentData().toString();
+    const bool exactSearch = operation == Operation::Search && mode == "exact";
     if (query.isEmpty()) {
         showFailure(tr("Enter a query or run a Recoll search first."));
         return;
     }
-    if (store.isEmpty() || !QFileInfo::exists(store)) {
+    if (!exactSearch && (store.isEmpty() || !QFileInfo::exists(store))) {
         showFailure(tr("Choose an existing semantic knowledge store."));
         return;
     }
@@ -222,7 +233,10 @@ void AIPerspectiveDock::startOperation(Operation operation)
     QStringList arguments;
     arguments << script;
     if (operation == Operation::Search) {
-        arguments << "search" << "--store" << store << "--json"
+        arguments << "search";
+        if (!exactSearch)
+            arguments << "--store" << store;
+        arguments << "--json" << "--mode" << mode
                   << "--timeout" << "120" << "--limit" << "5" << query;
         setBusy(true, tr("Retrieving semantic evidence…"));
     } else {
@@ -310,10 +324,14 @@ void AIPerspectiveDock::renderResponse(const QJsonObject& response)
 void AIPerspectiveDock::renderSearch(const QJsonObject& response)
 {
     const QJsonArray results = response.value("results").toArray();
+    const QString mode = response.value("mode").toString("conceptual");
+    const QString degraded = response.value("degraded").toBool()
+        ? tr(" Semantic retrieval was unavailable; these are lexical results.")
+        : QString();
     m_answerView->setHtml(QString("<h3>%1</h3><p>%2</p>")
-        .arg(tr("Conceptual evidence"))
+        .arg(tr("%1 evidence").arg(mode.toHtmlEscaped()))
         .arg(tr("%1 evidence segments found. Double-click a source below to open it.")
-            .arg(results.size())));
+            .arg(results.size()) + degraded));
     for (int index = 0; index < results.size(); ++index)
         addEvidence(results.at(index).toObject(), index + 1);
 }
@@ -361,6 +379,7 @@ void AIPerspectiveDock::setBusy(bool busy, const QString& status)
     m_storeEdit->setEnabled(!busy);
     m_queryEdit->setEnabled(!busy);
     m_viewCombo->setEnabled(!busy);
+    m_modeCombo->setEnabled(!busy);
     if (busy) {
         m_progress->setRange(0, 0);
     } else {

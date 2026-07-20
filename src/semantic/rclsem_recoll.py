@@ -7,7 +7,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
-from typing import Any, Callable, Iterator, Optional
+from typing import Any, Callable, Iterable, Iterator, Optional
 
 from rclsem_segments import SourceDocument
 
@@ -126,6 +126,115 @@ class RecollInventory:
             )
 
 
+class RecollQueryService:
+    """Run bounded lexical queries and resolve live documents through Recoll."""
+
+    def __init__(
+        self,
+        *,
+        confdir: str = "",
+        connector: Optional[Callable[[str], Any]] = None,
+        bridge_python: Optional[os.PathLike[str] | str] = None,
+    ):
+        self.confdir = confdir
+        self.connector = connector
+        self.bridge_python = Path(bridge_python) if bridge_python else None
+
+    def search(self, query_text: str, *, limit: int) -> list[SourceDocument]:
+        if not isinstance(query_text, str) or not query_text.strip():
+            raise RecollInventoryError("lexical query must be non-empty")
+        if limit <= 0:
+            raise RecollInventoryError("lexical result limit must be positive")
+        if self.connector is not None:
+            return self._binding_search(self.connector, query_text, limit)
+        try:
+            return self._binding_search(_connect_recoll, query_text, limit)
+        except RecollBindingUnavailable as binding_error:
+            bridge_python = self.bridge_python or discover_recoll_python()
+            if bridge_python is None:
+                raise RecollBindingUnavailable(
+                    f"{binding_error} No bundled Recoll Python runtime was found."
+                ) from binding_error
+        return list(self._bridge_search(bridge_python, query_text, limit))
+
+    def resolve(self, document_ids: Iterable[str]) -> dict[str, SourceDocument]:
+        identities = tuple(dict.fromkeys(document_ids))
+        if any(not isinstance(item, str) or not item for item in identities):
+            raise RecollInventoryError("document identities must be non-empty strings")
+        if not identities:
+            return {}
+        if self.connector is not None:
+            return self._binding_resolve(self.connector, identities)
+        try:
+            return self._binding_resolve(_connect_recoll, identities)
+        except RecollBindingUnavailable as binding_error:
+            bridge_python = self.bridge_python or discover_recoll_python()
+            if bridge_python is None:
+                raise RecollBindingUnavailable(
+                    f"{binding_error} No bundled Recoll Python runtime was found."
+                ) from binding_error
+        return self._bridge_resolve(bridge_python, identities)
+
+    def _binding_search(
+        self, connector: Callable[[str], Any], query_text: str, limit: int
+    ) -> list[SourceDocument]:
+        database = connector(self.confdir)
+        query = database.query()
+        query.execute(query_text, fetchtext=True)
+        documents = []
+        for result in query:
+            try:
+                documents.append(_source_document(result))
+            except RecollInventoryError:
+                continue
+            if len(documents) >= limit:
+                break
+        return documents
+
+    def _binding_resolve(
+        self, connector: Callable[[str], Any], document_ids: tuple[str, ...]
+    ) -> dict[str, SourceDocument]:
+        database = connector(self.confdir)
+        documents = {}
+        for document_id in document_ids:
+            try:
+                document = _source_document(database.getDoc(document_id))
+            except (AttributeError, RecollInventoryError):
+                continue
+            if document.document_id == document_id:
+                documents[document_id] = document
+        return documents
+
+    def _bridge_search(
+        self, python_executable: Path, query_text: str, limit: int
+    ) -> Iterator[SourceDocument]:
+        yield from _run_bridge(
+            python_executable,
+            self.confdir,
+            (
+                "--query",
+                query_text,
+                "--limit",
+                str(limit),
+                "--skip-missing-identity",
+            ),
+        )
+
+    def _bridge_resolve(
+        self, python_executable: Path, document_ids: tuple[str, ...]
+    ) -> dict[str, SourceDocument]:
+        input_text = "".join(
+            json.dumps(item, ensure_ascii=True) + "\n" for item in document_ids
+        )
+        documents = _run_bridge(
+            python_executable,
+            self.confdir,
+            ("--resolve",),
+            input_text=input_text,
+        )
+        return {item.document_id: item for item in documents}
+
+
 def discover_recoll_python() -> Optional[Path]:
     """Find the matching Python runtime shipped by the Windows Recoll installer."""
 
@@ -164,6 +273,58 @@ def _decode_bridge_document(line: str, line_number: int) -> SourceDocument:
             f"Recoll inventory bridge returned an empty identity at line {line_number}"
         )
     return SourceDocument(**value)
+
+
+def _run_bridge(
+    python_executable: Path,
+    confdir: str,
+    extra_arguments: tuple[str, ...],
+    *,
+    input_text: Optional[str] = None,
+) -> list[SourceDocument]:
+    if not python_executable.is_file():
+        raise RecollBindingUnavailable(
+            f"configured Recoll Python runtime does not exist: {python_executable}"
+        )
+    bridge = Path(__file__).with_name("rclsem_recoll_bridge.py")
+    process = subprocess.run(
+        [
+            str(python_executable),
+            str(bridge),
+            "--confdir",
+            confdir,
+            *extra_arguments,
+        ],
+        input=input_text,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if process.returncode != 0:
+        detail = _last_nonempty_line(process.stderr)
+        suffix = f": {detail}" if detail else ""
+        raise RecollInventoryError(
+            f"Recoll query bridge exited with code {process.returncode}{suffix}"
+        )
+    return [
+        _decode_bridge_document(line, line_number)
+        for line_number, line in enumerate(process.stdout.splitlines(), start=1)
+        if line.strip()
+    ]
+
+
+def _source_document(result: Any) -> SourceDocument:
+    document_id = _text_field(result, "rcludi")
+    if not document_id:
+        raise RecollInventoryError("Recoll result has no stable rcludi")
+    return SourceDocument(
+        document_id=document_id,
+        text=_text_field(result, "text"),
+        title=_text_field(result, "title"),
+        path=_text_field(result, "url") or _text_field(result, "filename"),
+    )
 
 
 def _last_nonempty_line(value: str) -> str:

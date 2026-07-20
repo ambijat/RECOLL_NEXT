@@ -52,10 +52,17 @@ From the repository root:
 python src\semantic\recoll_ai.py sync --store .local\semantic.sqlite3
 ```
 
-Then search with local Ollama:
+Run default Prismatic search with local Ollama:
 
 ```powershell
 python src\semantic\recoll_ai.py search --store .local\semantic.sqlite3 `
+  "integrity of cited evidence" --limit 10
+```
+
+Or run authoritative Exact search with no semantic store or Ollama dependency:
+
+```powershell
+python src\semantic\recoll_ai.py search --mode exact `
   "integrity of cited evidence" --limit 10
 ```
 
@@ -78,8 +85,10 @@ Recoll document through Recoll's bundled Python 3.12 binding. A live synthetic s
 through `embeddinggemma` returned 768-dimensional vectors and ranked the governance
 document first for `integrity of cited evidence`.
 
-## Next boundary
+## Hybrid boundary
 
-The semantic evidence contract now feeds the [Local Cited Answers](CITED_ANSWERS.md)
-artifact. The next retrieval artifact combines authoritative Recoll lexical candidates
-with semantic results using reciprocal-rank fusion and lexical-only fallback.
+`rclsem_hybrid.py` now combines bounded authoritative Recoll candidates and exact
+semantic results concurrently. Exact preserves Recoll order, Prismatic uses
+configurable weighted reciprocal-rank fusion with lexical-only fallback, and
+Conceptual accepts a vector hit only after its identity and revision resolve against
+live Recoll. All results expose their contributing channels and source ranks.

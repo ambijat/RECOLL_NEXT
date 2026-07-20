@@ -27,11 +27,11 @@ The workspace provides:
 - a query copied from the completed Recoll search in the native dock, or entered
   directly in the companion;
 - a browsable semantic knowledge-scope store;
-- **Concept Search** for evidence cards;
+- **Search Evidence** with Exact, Prismatic, and Conceptual retrieval modes;
 - **Ask AI** for answer, summary, timeline, contradiction, decision, and action views;
 - indeterminate progress that never blocks the ordinary Recoll result list;
 - **Cancel** for the current local child process;
-- evidence rows showing title, similarity, and source;
+- evidence rows showing title, channel-appropriate score/rank, and source;
 - double-click source opening;
 - Markdown export in the runnable companion.
 
@@ -63,17 +63,19 @@ RECOLL_AI_STORE
 - Recoll lexical search never waits for the AI process.
 - Starting or parsing failure appears inside the perspective panel.
 - Cancellation terminates only the AI child process.
-- An absent semantic store produces an actionable scope-selection message.
+- An absent semantic store disables Prismatic, Conceptual, and Ask while Exact
+  continues through Recoll without Ollama.
 - Empty evidence produces the backend's explicit insufficient-evidence response.
 - Generated citations remain subject to the cited-answer validator before display.
 
 ## Current validation
 
-The semantic and GUI-contract suite has 70 passing tests. Tests cover command
+The semantic and GUI-contract suite has 81 passing tests. Tests cover command
 construction, workstation limits, response-status validation, clickable file URLs,
 native build-file inclusion, main-window query handoff, asynchronous `QProcess` use,
 the retired Chroma boundary, cross-platform offline bootstrap, audited memory reads,
-and the established retrieval, answer, privacy, and ledger invariants.
+hybrid rank/provenance and outage behavior, and the established answer, privacy, and
+ledger invariants.
 
 The desktop companion was launched successfully on Tk 8.6 against the academic PDF
 semantic store. Native Qt source compilation remains pending because this workstation

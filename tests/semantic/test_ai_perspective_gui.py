@@ -27,8 +27,20 @@ class DesktopCompanionContractTest(unittest.TestCase):
         )
         self.assertIn("--json", command)
         self.assertEqual("search", command[2])
+        self.assertEqual("prismatic", command[command.index("--mode") + 1])
         self.assertEqual("5", command[command.index("--limit") + 1])
         self.assertEqual("energy policy", command[-1])
+
+    def test_exact_search_command_has_no_semantic_store_dependency(self):
+        command = build_command(
+            Path("recoll_ai.py"),
+            Path("missing.sqlite3"),
+            "title:policy",
+            "search",
+            mode="exact",
+        )
+        self.assertNotIn("--store", command)
+        self.assertEqual("exact", command[command.index("--mode") + 1])
 
     def test_ask_command_uses_safe_workstation_limits(self):
         command = build_command(
@@ -91,6 +103,10 @@ class NativeQtIntegrationContractTest(unittest.TestCase):
         self.assertIn("sSearch->currentText()", main)
         self.assertIn("QProcess", dock)
         self.assertIn('"--json"', dock)
+        self.assertIn('"--mode"', dock)
+        self.assertIn('m_modeCombo->addItem(tr("Exact"), "exact")', dock)
+        self.assertIn('m_modeCombo->addItem(tr("Prismatic"), "prismatic")', dock)
+        self.assertIn('m_modeCombo->addItem(tr("Conceptual"), "conceptual")', dock)
         self.assertIn("openSourceRequested", dock)
 
 

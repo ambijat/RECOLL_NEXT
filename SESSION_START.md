@@ -15,8 +15,8 @@ must not be contacted.
 ## Current state
 
 - Recoll's C++/Qt application and Python bindings are present.
-- An experimental Ollama + ChromaDB semantic search exists in `src/semantic`.
-- The semantic prototype is Unix-oriented and is not yet reliable on Windows.
+- The inherited Chroma implementation is retired; the active semantic subsystem uses
+  a local SQLite sidecar and configurable loopback Ollama.
 - A standalone hash-chained event ledger foundation lives in
   `src/semantic/rclsem_ledger.py`.
 - The first executable AI artifact is `src/semantic/recoll_ai.py doctor`, backed by the
@@ -28,6 +28,11 @@ must not be contacted.
 - `rclsem_recoll.py` exposes Recoll's `rcludi` inventory lazily, and
   `rclsem_retrieve.py` performs deterministic exact cosine retrieval with source
   metadata and offsets. `recoll_ai.py` exposes both as `sync` and `search`.
+- `rclsem_hybrid.py` implements the Xapian-first search boundary: Exact preserves
+  Recoll order without SQLite or Ollama, Prismatic concurrently fuses lexical and
+  semantic candidates with configurable RRF, and Conceptual rejects evidence that
+  cannot be resolved to the current Recoll revision. Both desktop surfaces expose
+  all three modes and Prismatic reports lexical fallback when semantics fail.
 - On Windows, a Python-ABI mismatch falls back automatically to
   `rclsem_recoll_bridge.py` running under the Python runtime bundled with the local
   Recoll installation. Document transfer remains local over a private pipe.
@@ -38,10 +43,10 @@ must not be contacted.
   `recoll_ai_gui.py` provides an immediately runnable dependency-free desktop
   companion. Both consume the same asynchronous `search --json` and `ask --json`
   contracts and expose evidence, cancellation, and source opening.
-- The Xapian-first protocol establishes the active Recoll database as the lexical and
-  document authority. The semantic database is a disposable vector sidecar and the
-  next retrieval artifact is bounded Xapian candidate generation plus Ollama
-  reranking.
+- The Xapian-first protocol establishes the active Recoll database as lexical and
+  document authority. The semantic database remains a disposable vector sidecar;
+  the next retrieval refinement is removing transitional duplicated evidence fields
+  after fully live hydration and measuring relevance on the representative corpus.
 - `rclsem_perspectives.py` stores successfully validated cited answers as local,
   provenance-gated secondary memory. `ask` remembers by default with a
   `--no-remember` override, and `memory-search` retrieves current perspectives;
@@ -71,7 +76,8 @@ Foundation and hardening:
 1. Make the semantic subsystem deterministic, testable, and cross-platform.
 2. Introduce the event ledger at subsystem boundaries.
 3. Synchronize embeddings correctly for additions, updates, and deletions.
-4. Add hybrid lexical/semantic retrieval; semantic-only retrieval is complete.
+4. Measure and refine the implemented Exact/Prismatic/Conceptual retrieval slice on
+   the representative private corpus, then remove transitional sidecar duplication.
 5. Compile and package the implemented Recoll Qt AI Perspective dock; the runnable
    desktop companion is available for immediate validation.
 6. Repeat the validated isolated clean-rebuild portability procedure on a second

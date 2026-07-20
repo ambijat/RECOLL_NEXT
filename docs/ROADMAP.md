@@ -36,11 +36,16 @@ correctly, deleted files disappear, and failures are diagnosed.
 ## Phase 2 — hybrid retrieval
 
 - Implement the duties and acceptance criteria in the Prismatic Search Charter.
-- Define a shared evidence result contract.
-- Retrieve lexical and semantic candidates concurrently.
-- Normalize/rank with reciprocal-rank fusion initially; keep the algorithm pluggable.
-- Preserve Recoll filters and expose result provenance and scores.
-- Add corpus-based relevance regression tests.
+  (First complete search slice implemented.)
+- Define a shared evidence result contract. (Implemented.)
+- Retrieve lexical and semantic candidates concurrently. (Implemented.)
+- Normalize/rank with configurable weighted reciprocal-rank fusion. (Implemented.)
+- Preserve Recoll query/filter syntax and expose result provenance and source ranks.
+  (Implemented.)
+- Reject stale/orphaned semantic evidence by resolving `rcludi` and source revision
+  against live Recoll. (Implemented.)
+- Add corpus-based relevance regression tests. (A deterministic two-channel fixture
+  is implemented; measurement on the representative private corpus remains.)
 
 Exit: hybrid search is never materially worse than either source on the reference
 corpus and remains usable without Ollama.

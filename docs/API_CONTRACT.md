@@ -71,12 +71,20 @@ Non-ready states may include `unavailable`, `models_missing`, `policy_error`, or
 Counts describe one completed operation. Deletion occurs only after complete
 enumeration when `--keep-missing` is absent.
 
-## Semantic search response
+## Evidence search response
+
+`search` accepts `--mode exact|prismatic|conceptual` (default `prismatic`). Exact
+requires only the selected Recoll profile. Prismatic and Conceptual also require
+`--store`; candidate count, RRF constant, and channel weights are configurable.
 
 ```json
 {
   "status": "ready",
+  "mode": "prismatic",
   "result_count": 1,
+  "degraded": false,
+  "semantic_error_type": null,
+  "stale_rejected": 0,
   "results": [
     {
       "segment_id": "stable segment hash",
@@ -87,14 +95,23 @@ enumeration when `--keep-missing` is absent.
       "text": "bounded indexed segment",
       "source_start": 0,
       "source_end": 420,
-      "similarity": 0.8123
+      "similarity": 0.8123,
+      "retrieval_mode": "prismatic",
+      "provenance": ["lexical", "semantic"],
+      "lexical_rank": 2,
+      "semantic_rank": 1,
+      "fusion_score": 0.0325
     }
   ]
 }
 ```
 
-Current results are semantic-only. Exact and Prismatic hybrid modes described in the
-Xapian-first protocol are planned coordinator/API additions, not current statuses.
+Exact preserves Recoll rank and returns `similarity` and `fusion_score` as null.
+Conceptual returns live-resolved semantic evidence. Prismatic uses weighted
+reciprocal-rank fusion, deduplicates at document level, and retains both source ranks.
+If semantic retrieval fails after lexical retrieval starts, Prismatic succeeds with
+`degraded: true`, a typed `semantic_error_type`, and lexical evidence. Stale or
+orphaned semantic records are excluded and counted by `stale_rejected`.
 
 ## Cited answer response
 

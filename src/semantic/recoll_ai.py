@@ -23,6 +23,16 @@ DEFAULT_EMBEDDING_MODEL = "embeddinggemma"
 DEFAULT_CHAT_MODEL = "gemma3:4b"
 
 
+class _UnavailableSemanticSearcher:
+    """Defer semantic setup failure so Prismatic can return lexical evidence."""
+
+    def __init__(self, error: Exception):
+        self.error = error
+
+    def search(self, query: str, *, limit: int = 10):
+        raise self.error
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -49,11 +59,25 @@ def _build_parser() -> argparse.ArgumentParser:
     sync.add_argument("--keep-missing", action="store_true")
 
     search = subparsers.add_parser(
-        "search", help="retrieve locally indexed evidence by semantic similarity"
+        "search", help="retrieve indexed evidence through Xapian-first search"
     )
-    _add_semantic_options(search)
-    search.add_argument("query", help="local semantic query")
+    _add_semantic_options(search, store_required=False)
+    search.add_argument("query", help="local evidence query")
     search.add_argument("--limit", "-n", default=10, type=int)
+    search.add_argument(
+        "--mode",
+        choices=("exact", "prismatic", "conceptual"),
+        default="prismatic",
+    )
+    search.add_argument("--confdir", default="", help="Recoll configuration directory")
+    search.add_argument(
+        "--recoll-python",
+        help="Python runtime containing recoll.recoll (auto-detected on Windows)",
+    )
+    search.add_argument("--candidate-limit", default=50, type=int)
+    search.add_argument("--rrf-k", default=60, type=int)
+    search.add_argument("--lexical-weight", default=1.0, type=float)
+    search.add_argument("--semantic-weight", default=1.0, type=float)
 
     ask = subparsers.add_parser(
         "ask", help="generate a local answer grounded in semantic evidence"
@@ -92,8 +116,12 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _add_semantic_options(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--store", required=True, help="semantic SQLite sidecar path")
+def _add_semantic_options(
+    parser: argparse.ArgumentParser, *, store_required: bool = True
+) -> None:
+    parser.add_argument(
+        "--store", required=store_required, help="semantic SQLite sidecar path"
+    )
     parser.add_argument("--endpoint", default=DEFAULT_ENDPOINT)
     parser.add_argument("--embedding-model", default=DEFAULT_EMBEDDING_MODEL)
     parser.add_argument("--timeout", default=30.0, type=float)
@@ -198,6 +226,22 @@ def _event_sink(store_path: str, ledger_path: Optional[str], session_id: Optiona
     return LedgerEventSink(EventLedger(path), actor="recoll-ai", session_id=identity)
 
 
+def _optional_event_sink(
+    store_path: Optional[str], ledger_path: Optional[str], session_id: Optional[str]
+):
+    if store_path is None and ledger_path is None:
+        return None
+    if store_path is None:
+        from rclsem_events import LedgerEventSink
+        from rclsem_ledger import EventLedger
+
+        identity = session_id or "cli-" + uuid.uuid4().hex
+        return LedgerEventSink(
+            EventLedger(Path(ledger_path)), actor="recoll-ai", session_id=identity
+        )
+    return _event_sink(store_path, ledger_path, session_id)
+
+
 def _run_sync(args: argparse.Namespace) -> Dict[str, Any]:
     from rclsem_recoll import RecollInventory
     from rclsem_segments import DeterministicSegmenter, SegmenterConfig
@@ -234,17 +278,55 @@ def _run_sync(args: argparse.Namespace) -> Dict[str, Any]:
 
 
 def _run_search(args: argparse.Namespace) -> Dict[str, Any]:
-    from rclsem_retrieve import SemanticSearcher
-    from rclsem_store import SemanticStore
+    from rclsem_hybrid import HybridSearchCoordinator, LexicalSearcher
+    from rclsem_recoll import RecollQueryService
 
-    searcher = SemanticSearcher(
-        SemanticStore(args.store),
-        OllamaClient(args.endpoint, timeout=args.timeout),
-        embedding_model=args.embedding_model,
-        event_sink=_event_sink(args.store, args.ledger, args.session_id),
+    sink = _optional_event_sink(args.store, args.ledger, args.session_id)
+    documents = RecollQueryService(
+        confdir=args.confdir, bridge_python=args.recoll_python
     )
-    results = [asdict(result) for result in searcher.search(args.query, limit=args.limit)]
-    return {"status": "ready", "result_count": len(results), "results": results}
+    lexical = LexicalSearcher(documents, event_sink=sink)
+    semantic = None
+    if args.mode != "exact":
+        if not args.store:
+            raise ValueError(f"--store is required for {args.mode} retrieval")
+        from rclsem_retrieve import SemanticSearcher
+        from rclsem_store import SemanticStore
+
+        try:
+            if not Path(args.store).is_file():
+                raise FileNotFoundError(f"semantic store does not exist: {args.store}")
+            semantic = SemanticSearcher(
+                SemanticStore(args.store),
+                OllamaClient(args.endpoint, timeout=args.timeout),
+                embedding_model=args.embedding_model,
+                event_sink=sink,
+            )
+        except Exception as ex:
+            if args.mode == "conceptual":
+                raise
+            semantic = _UnavailableSemanticSearcher(ex)
+    coordinator = HybridSearchCoordinator(
+        lexical,
+        documents,
+        semantic,
+        candidate_limit=args.candidate_limit,
+        rrf_k=args.rrf_k,
+        lexical_weight=args.lexical_weight,
+        semantic_weight=args.semantic_weight,
+        event_sink=sink,
+    )
+    report = coordinator.search(args.query, mode=args.mode, limit=args.limit)
+    results = [asdict(result) for result in report.results]
+    return {
+        "status": "ready",
+        "mode": report.mode,
+        "result_count": len(results),
+        "degraded": report.degraded,
+        "semantic_error_type": report.semantic_error_type,
+        "stale_rejected": report.stale_rejected,
+        "results": results,
+    }
 
 
 def _run_ask(args: argparse.Namespace) -> Dict[str, Any]:
@@ -384,10 +466,20 @@ def _print_operation(report: Dict[str, Any]) -> None:
             print(f"   Question: {result['question']}")
             print(f"   {result['answer']}")
         return
-    print(f"Semantic results: {report['result_count']}")
+    mode = report.get("mode", "conceptual")
+    suffix = (
+        " (semantic unavailable; lexical fallback)" if report.get("degraded") else ""
+    )
+    print(f"{mode.title()} results: {report['result_count']}{suffix}")
     for position, result in enumerate(report["results"], start=1):
         label = result["title"] or result["path"] or result["document_id"]
-        print(f"{position}. {label} (cosine={result['similarity']:.6f})")
+        if result.get("fusion_score") is not None:
+            score = f"RRF={result['fusion_score']:.6f}"
+        elif result.get("similarity") is not None:
+            score = f"cosine={result['similarity']:.6f}"
+        else:
+            score = f"Xapian rank={result.get('lexical_rank', position)}"
+        print(f"{position}. {label} ({score})")
         print(
             f"   source={result['path']} offsets="
             f"{result['source_start']}:{result['source_end']}"
