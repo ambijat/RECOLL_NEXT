@@ -22,6 +22,7 @@ later appends do not modify earlier entries.
 | 2026-07-19 | 21 | `4a4386257d1c7ca484ea8aeec608926fba463ef1cbf148df70e6bd35d81adf08` | Portable project and agent continuity suite committed as `b93379a6` with 25 Markdown documents and 63 passing tests. |
 | 2026-07-20 | 22 | `94fddd8bb70839331aee1fbdf612e6bffda8c970c53fc1feb4474c26d0cbbfc7` | Audit debt-clearance milestone: retired Chroma implementation, offline-safe cross-platform bootstrap, and privacy-safe Perspective Memory read events with 68 passing tests. |
 | 2026-07-20 | 23 | `43cbfb0f3eabcf0ef70d23c817e8ac405136e02553693ece4066fffa0b3dc64a` | Portability experiment corrected source capsules to export only the selected product branch and ignore recreated `.venv` environments; 69 tests pass. |
+| 2026-07-20 | 24 | `42f1bacfa547ba82ba2f69ade24b8d4b246b5e933203f420942e8680b4bf5935` | Project ledger is byte-stable across Git checkout through a `-text` attribute after portability testing exposed line-ending hash drift; 70 tests pass. |
 
 Verify the current head before adding another row:
 

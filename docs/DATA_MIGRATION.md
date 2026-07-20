@@ -214,6 +214,10 @@ python -W error::ResourceWarning -m unittest discover -s tests\semantic
 Expected commit and ledger head must match the manifest. A clean working tree is the
 default; list intentional destination configuration separately.
 
+The SHA-256 of `governance/events.jsonl` must also match. The repository marks this
+file `-text`; a hash difference indicates a transfer or checkout defect even when the
+logical chain still verifies.
+
 ### Recoll/Xapian
 
 - Profile path validation succeeds.

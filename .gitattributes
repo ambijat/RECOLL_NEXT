@@ -1,0 +1,2 @@
+# Hash-chained evidence is byte-sensitive. Never rewrite line endings on checkout.
+governance/events.jsonl -text

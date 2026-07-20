@@ -30,6 +30,9 @@ checks for the fidelity levels claimed by the operator.
 10. Every destination receives the mandatory agent contract and documentation with
     the source history.
 
+The tracked project ledger is marked `-text` in `.gitattributes` because its transfer
+hash is byte-sensitive. Git must not convert its line endings during checkout.
+
 ## Portable units
 
 Recoll Next consists of independent capsules. An operator must declare which capsules
@@ -85,6 +88,8 @@ when reproducibility matters.
 - The project governance chain verifies before and after transfer.
 - Every transferred runtime ledger verifies independently.
 - The transfer manifest records chain counts and head hashes.
+- The tracked project-ledger file SHA-256 matches the source capsule; line-ending
+  conversion is not an accepted difference.
 - Lock files are not evidence and need not be transferred.
 
 ### Level B — binary/UI fidelity

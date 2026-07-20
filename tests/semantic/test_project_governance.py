@@ -34,6 +34,10 @@ class ProjectGovernanceLedgerTest(unittest.TestCase):
         )
         self.assertIn(report.head_hash, checkpoints)
 
+    def test_project_ledger_is_exempt_from_line_ending_conversion(self):
+        attributes = (REPOSITORY_ROOT / ".gitattributes").read_text(encoding="utf-8")
+        self.assertIn("governance/events.jsonl -text", attributes.splitlines())
+
 
 if __name__ == "__main__":
     unittest.main()

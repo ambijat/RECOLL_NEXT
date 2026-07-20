@@ -69,7 +69,7 @@ RECOLL_AI_STORE
 
 ## Current validation
 
-The semantic and GUI-contract suite has 69 passing tests. Tests cover command
+The semantic and GUI-contract suite has 70 passing tests. Tests cover command
 construction, workstation limits, response-status validation, clickable file URLs,
 native build-file inclusion, main-window query handoff, asynchronous `QProcess` use,
 the retired Chroma boundary, cross-platform offline bootstrap, audited memory reads,
