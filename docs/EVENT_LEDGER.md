@@ -39,9 +39,9 @@ Initial namespaces:
   sensitive values, not secrets.
 - `index.lexical.*` — Recoll indexing start, completion, failure, and document counts.
 - `index.semantic.*` — embedding synchronization and collection rebuilds.
-- `search.lexical.*`, `search.semantic.*`, `search.hybrid.*` — query lifecycle,
-  latency, filters, result identifiers, and scores. Avoid raw query text by default;
-  store a digest unless diagnostic consent is enabled.
+- `search.lexical.*`, `search.semantic.*`, `search.memory.*`, `search.hybrid.*` — query
+  lifecycle, latency, filters, result identifiers, and scores. Avoid raw query text
+  by default; store a digest unless diagnostic consent is enabled.
 - `model.embedding.*`, `model.generation.*` — model, duration, token/size metrics, and
   outcome. Never store full prompts or returned private passages.
 - `answer.*` — answer lifecycle and cited segment identifiers.

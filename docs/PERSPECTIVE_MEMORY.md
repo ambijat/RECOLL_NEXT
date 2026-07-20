@@ -29,6 +29,11 @@ Perspective search dynamically checks those citations against the semantic docum
 inventory. If a cited segment or source revision no longer exists, that perspective
 is suppressed. It is not silently treated as current knowledge.
 
+Every memory query records a privacy-safe `search.memory.*` lifecycle. The event
+contains a query digest, configured model and limit, result count and perspective
+identifiers, or typed failure; it never contains the query, stored interpretation,
+source text, path, embedding, or exception message.
+
 ## Retrieval policy
 
 Perspective Memory is a secondary RAG layer:
@@ -90,4 +95,3 @@ Memory is enabled as an invisible background feature in a packaged release.
 - Stale or unverifiable citations suppress the perspective from retrieval.
 - Perspective results are explicitly presented as prior AI interpretations.
 - Primary evidence remains mandatory for factual claims in future RAG composition.
-

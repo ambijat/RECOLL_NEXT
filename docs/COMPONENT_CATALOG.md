@@ -32,7 +32,7 @@ Cross-cutting: runtime JSONL ledger and versioned project governance chain
 | `rclsem_recoll_bridge.py` | Matching-ABI child process | Profile/query under bundled Python | Private JSON Lines document stream |
 | `rclsem_retrieve.py` | Reference semantic ranker | Query embedding and stored vectors | Deterministic cosine-ranked `EvidenceResult` records |
 | `rclsem_answer.py` | Bounded cited generation | Query, view, primary evidence, chat model | Validated `CitedAnswer` or explicit rejection/decline |
-| `rclsem_perspectives.py` | Secondary interpretation memory | Validated cited answer and embedding | Deduplicated memory and stale-gated retrieval |
+| `rclsem_perspectives.py` | Secondary interpretation memory and audited retrieval | Validated cited answer, query, and embedding | Deduplicated memory, stale-gated retrieval, and `search.memory.*` events |
 | `rclsem_events.py` | Component-to-ledger adapter | Typed event and minimized payload | Hash-chained runtime append |
 | `rclsem_ledger.py` | Append-only SHA-256 chain | Canonical bounded JSON events | Verified JSONL chain and head hash |
 | `recoll_ai_gui.py` | Immediately runnable Tk workspace | Query, store, selected view | Async search/ask, evidence, source open, export |
@@ -49,19 +49,19 @@ Cross-cutting: runtime JSONL ledger and versioned project governance chain
 The installed Recoll executable is an external runtime build and does not reflect
 uncompiled source changes.
 
-## Legacy/superseded semantic modules
+## Retired semantic modules
 
 | Module | Historical role | Current rule |
 | --- | --- | --- |
-| `rclsem_common.py` | Chroma/Ollama helper and configuration | Superseded; do not use for new product code |
-| `rclsem_embed.py` | Chroma population | Superseded by `recoll_ai.py sync` |
-| `rclsem_query.py` | Chroma semantic query | Superseded by `recoll_ai.py search` |
-| `rclsem_segment.py` | Earlier segmentation helpers | Superseded by deterministic plural module |
-| `rclsem_talk.py`, `cmdtalkplugin.py`, `slicelist.py` | Experimental worker plumbing | Retained for lineage pending explicit retirement |
-| `initsemenv.sh` | POSIX Chroma environment bootstrap | Not the portable product setup path |
+| `rclsem_common.py` | Chroma/Ollama helper and configuration | Retirement tombstone; fails with migration guidance |
+| `rclsem_embed.py` | Chroma population | Retirement tombstone; use `recoll_ai.py sync` |
+| `rclsem_query.py` | Chroma semantic query | Retirement tombstone; use `recoll_ai.py search` |
+| `rclsem_talk.py` | Older native semantic worker | Retirement tombstone for an older `ENABLE_SEMANTIC` build |
+| `cmdtalkplugin.py`, `slicelist.py`, `rclsem_segment.py` | Superseded helper lineage | No active callers; retained pending native-path removal review |
+| `initsemenv.py` | Dependency-free environment creation | Active cross-platform, offline-safe bootstrap |
 
-Legacy retention is not endorsement. Removal requires checking build/source callers,
-licensing, and lineage before a governed retirement commit.
+The tombstones preserve a bounded compatibility failure while the older conditional
+native path is still present. They contain no Chroma implementation or dependency.
 
 ## Inherited Recoll engine areas
 
@@ -120,4 +120,3 @@ candidate fusion, full-corpus vector acceleration, memory-assisted generation wi
 strict primary/secondary labels, memory management UI, native Windows build/package,
 schema migration tools, signed ledger checkpoints, and second-machine portability
 validation.
-

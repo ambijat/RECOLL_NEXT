@@ -13,7 +13,9 @@ import os
 from pathlib import Path
 import sqlite3
 import struct
-from typing import Iterator, Sequence, Tuple
+from typing import Iterator, Optional, Protocol, Sequence, Tuple
+
+from rclsem_events import EventSink
 
 
 class PerspectiveMemoryError(Exception):
@@ -38,6 +40,76 @@ class PerspectiveResult:
     created_at: str
     citations: Tuple[PerspectiveCitation, ...]
     similarity: float
+
+
+class PerspectiveEmbeddingProvider(Protocol):
+    def embed(
+        self, model: str, inputs: str | Sequence[str]
+    ) -> Sequence[Sequence[float]]:
+        ...
+
+
+class PerspectiveSearcher:
+    """Embed and audit a query before searching secondary memory."""
+
+    def __init__(
+        self,
+        memory: "PerspectiveMemory",
+        embedding_provider: PerspectiveEmbeddingProvider,
+        *,
+        embedding_model: str,
+        event_sink: Optional[EventSink] = None,
+    ):
+        if not isinstance(embedding_model, str) or not embedding_model.strip():
+            raise PerspectiveMemoryError("embedding model must be non-empty")
+        self.memory = memory
+        self.embedding_provider = embedding_provider
+        self.embedding_model = embedding_model
+        self.event_sink = event_sink
+
+    def search(self, query: str, *, limit: int = 5) -> list[PerspectiveResult]:
+        if not isinstance(query, str) or not query.strip():
+            raise PerspectiveMemoryError("memory query must be a non-empty string")
+        if limit <= 0:
+            raise PerspectiveMemoryError("perspective result limit must be positive")
+        query_hash = hashlib.sha256(query.encode("utf-8")).hexdigest()
+        base_payload = {
+            "embedding_model": self.embedding_model,
+            "limit": limit,
+            "query_sha256": query_hash,
+        }
+        self._record("search.memory.started", base_payload)
+        try:
+            embeddings = self.embedding_provider.embed(self.embedding_model, query)
+            if len(embeddings) != 1:
+                raise PerspectiveMemoryError(
+                    "embedding provider returned the wrong memory-query batch size"
+                )
+            results = self.memory.search(
+                embeddings[0], embedding_model=self.embedding_model, limit=limit
+            )
+        except Exception as ex:
+            self._record(
+                "search.memory.failed",
+                {
+                    **base_payload,
+                    "error_type": type(ex).__name__,
+                },
+            )
+            raise
+        self._record(
+            "search.memory.completed",
+            {
+                **base_payload,
+                "perspective_ids": [item.perspective_id for item in results],
+                "result_count": len(results),
+            },
+        )
+        return results
+
+    def _record(self, event_type: str, payload: dict[str, object]) -> None:
+        if self.event_sink is not None:
+            self.event_sink.record(event_type, payload)
 
 
 class PerspectiveMemory:

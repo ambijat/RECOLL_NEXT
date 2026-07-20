@@ -45,7 +45,11 @@ must not be contacted.
 - `rclsem_perspectives.py` stores successfully validated cited answers as local,
   provenance-gated secondary memory. `ask` remembers by default with a
   `--no-remember` override, and `memory-search` retrieves current perspectives;
-  memories are not yet fed recursively into new answer prompts.
+  memory reads now emit privacy-safe `search.memory.*` lifecycle events, and memories
+  are not yet fed recursively into new answer prompts.
+- The inherited Chroma entry points are explicit retirement stubs, and
+  `src/semantic/initsemenv.py` creates a dependency-free environment on Windows or
+  POSIX without downloading packages, models, or runtimes.
 - The portability documentation suite defines source/data capsules, workstation
   reconstruction, configuration, build/test requirements, migration, operations,
   recovery, and mandatory cross-agent handoff. `AGENTS.md` requires every agent to
@@ -114,16 +118,15 @@ only when it describes the rebuilt product or records legally required provenanc
 
 ## Known immediate defects
 
-- The inherited `rclsem_embed.py`/Chroma path is superseded but not yet retired;
-  callers must move to `recoll_ai.py sync` and `recoll_ai.py search`.
-- Environment setup and worker launch assume Unix `bin/python3` paths.
+- An older native build configured with `ENABLE_SEMANTIC` still launches the retired
+  `rclsem_talk.py` protocol and now fails explicitly. The supported native integration
+  is the AI Perspective dock consuming `recoll_ai.py`; remove the older conditional
+  path when the dock is compiled and validated.
 - The repository `.venv` uses Python 3.14 while Recoll 1.43.5 ships bindings through
   Python 3.12.4. The automatic bundled-Python bridge is validated on this workstation;
   packaging still needs a general Windows installation-discovery contract.
 - Exact cosine retrieval scans every stored segment. This is the reference-correct
   implementation, not the eventual large-corpus acceleration strategy.
-- `memory-search` accepts shared ledger arguments but does not yet emit runtime search
-  events; secondary-memory read auditing remains incomplete.
 - The first `gemma3:4b` cited answer took approximately 107 seconds on this machine;
   the GUI must expose progress and cancellation and must never block lexical search.
 - The native Qt AI Perspective dock is implemented in source but cannot be compiled

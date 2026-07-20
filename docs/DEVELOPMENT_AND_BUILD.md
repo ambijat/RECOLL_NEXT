@@ -41,6 +41,16 @@ python --version
 python -m unittest discover -s tests\semantic
 ```
 
+The dependency-free cross-platform bootstrap performs the environment creation
+without contacting a package index or model registry:
+
+```powershell
+python src\semantic\initsemenv.py .venv --verify
+```
+
+It deliberately does not install Recoll, Ollama, Python packages, or models. Those
+remain separately authorized workstation-provisioning steps.
+
 Python 3.14.0 is the verified project runtime. Do not infer that copying its `.venv`
 to another machine is supported. If a different Python is selected, run the full
 suite and record the version in the transfer manifest.
@@ -157,16 +167,18 @@ acceptance run must verify the dock's View-menu toggle, query handoff, asynchron
 child process, cancellation, source opening, and lack of interference with ordinary
 Recoll search.
 
-## Legacy semantic prototype
+## Retired semantic prototype
 
-`rclsem_common.py`, `rclsem_embed.py`, `rclsem_query.py`, and related Chroma-oriented
-files are inherited experiments. `initsemenv.sh` installs unpinned `chromadb` and
-`ollama` packages, assumes POSIX paths, and pulls `nomic-embed-text`. It is not the
-portable product setup contract.
+The inherited Chroma implementation has been retired. `rclsem_common.py`,
+`rclsem_embed.py`, and `rclsem_query.py` remain only as small failure tombstones so an
+older caller receives actionable migration guidance instead of an optional-package
+import error. No active or tombstone module imports `chromadb` or the Python `ollama`
+package.
 
 New work uses `recoll_ai.py`, `rclsem_ollama.py`, `rclsem_store.py`, and the tested
-modules linked from `SESSION_START.md`. Do not delete the prototype without an
-explicit retirement decision, but do not use it to provision a destination.
+modules linked from `SESSION_START.md`. `initsemenv.py` replaces the downloading,
+POSIX-only bootstrap. An older native `ENABLE_SEMANTIC` worker remains a known
+retirement boundary until the AI Perspective dock is compiled and validated.
 
 ## Build and dependency change control
 
@@ -179,4 +191,3 @@ extension, or runtime service:
 4. test a clean environment rather than an upgraded existing `.venv`;
 5. update the portability contract and workstation baseline; and
 6. record the architectural decision in the governance ledger.
-

@@ -20,6 +20,7 @@ later appends do not modify earlier entries.
 | 2026-07-19 | 19 | `2dad13dc244efdbd2daf62a28763a64327ad2d2a5555aec7df4c34eb4b11b4e8` | Perspective Memory milestone committed as `95c83da0` after 59 tests and a live local embedding smoke test. |
 | 2026-07-19 | 20 | `f813720751f9c0c8c964803d936b4d7ff41edef3989dedf03d60bf1b2f9c8597` | Portable source/data/model/build fidelity gates and mandatory tracked agent orientation recorded as the continuity contract. |
 | 2026-07-19 | 21 | `4a4386257d1c7ca484ea8aeec608926fba463ef1cbf148df70e6bd35d81adf08` | Portable project and agent continuity suite committed as `b93379a6` with 25 Markdown documents and 63 passing tests. |
+| 2026-07-20 | 22 | `94fddd8bb70839331aee1fbdf612e6bffda8c970c53fc1feb4474c26d0cbbfc7` | Audit debt-clearance milestone: retired Chroma implementation, offline-safe cross-platform bootstrap, and privacy-safe Perspective Memory read events with 68 passing tests. |
 
 Verify the current head before adding another row:
 

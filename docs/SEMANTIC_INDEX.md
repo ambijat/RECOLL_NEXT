@@ -10,6 +10,10 @@ privacy-safe lifecycle events.
 The live inventory adapter and similarity query layer are specified separately in
 [Semantic Retrieval](SEMANTIC_RETRIEVAL.md).
 
+The earlier Chroma implementation is retired. Its three former entry points are
+bounded tombstones that direct callers to `recoll_ai.py sync` and `search`; they no
+longer import Chroma or define a second semantic-store contract.
+
 ## Components
 
 - `rclsem_segments.py` defines source documents, stable segments, and

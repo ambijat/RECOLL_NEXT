@@ -183,10 +183,10 @@ Adding a command, status, required field, enum value, or error semantic requires
 Fields may be added compatibly. Removing or changing the meaning/type of an existing
 field requires an explicit versioned contract rather than an undocumented edit.
 
-## Current instrumentation limitation
+## Perspective Memory instrumentation
 
-`memory-search` accepts the shared `--ledger` and `--session` arguments through the
-parser but does not yet emit its own runtime search events. This is a known gap; do
-not claim complete audit coverage for secondary-memory reads until implemented and
-tested.
-
+`memory-search` emits `search.memory.started`, `search.memory.completed`, or
+`search.memory.failed` through the selected runtime ledger. Payloads contain the
+embedding model, limit, SHA-256 query digest, result count and perspective identifiers,
+or a typed failure. They exclude the query, remembered question and answer text,
+citations, paths, embeddings, and exception messages.

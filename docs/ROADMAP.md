@@ -27,6 +27,8 @@ retrieval.
 - Add health checks and actionable GUI errors.
 - Emit `index.semantic.*` and `search.semantic.*` events. (`model.embedding.*`
   remains for worker-level instrumentation.)
+- Retire the inherited Chroma implementation, provide an offline-safe cross-platform
+  environment bootstrap, and emit privacy-safe `search.memory.*` events. (Implemented.)
 
 Exit: repeated synchronization produces the same semantic index, changed files update
 correctly, deleted files disappear, and failures are diagnosed.

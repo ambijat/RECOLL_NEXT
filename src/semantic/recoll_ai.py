@@ -326,18 +326,18 @@ def _run_ask(args: argparse.Namespace) -> Dict[str, Any]:
 
 
 def _run_memory_search(args: argparse.Namespace) -> Dict[str, Any]:
-    from rclsem_perspectives import PerspectiveMemory
+    from rclsem_perspectives import PerspectiveMemory, PerspectiveSearcher
 
     client = OllamaClient(args.endpoint, timeout=args.timeout)
-    memory = PerspectiveMemory(args.store)
-    embeddings = client.embed(args.embedding_model, args.query)
-    if len(embeddings) != 1:
-        raise ValueError("embedding provider returned the wrong memory-query batch size")
+    searcher = PerspectiveSearcher(
+        PerspectiveMemory(args.store),
+        client,
+        embedding_model=args.embedding_model,
+        event_sink=_event_sink(args.store, args.ledger, args.session_id),
+    )
     results = [
         asdict(item)
-        for item in memory.search(
-            embeddings[0], embedding_model=args.embedding_model, limit=args.limit
-        )
+        for item in searcher.search(args.query, limit=args.limit)
     ]
     return {"status": "memory_ready", "result_count": len(results), "results": results}
 

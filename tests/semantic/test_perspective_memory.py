@@ -1,4 +1,5 @@
 from pathlib import Path
+import hashlib
 import sys
 import tempfile
 import unittest
@@ -12,6 +13,7 @@ from rclsem_perspectives import (  # noqa: E402
     PerspectiveCitation,
     PerspectiveMemory,
     PerspectiveMemoryError,
+    PerspectiveSearcher,
 )
 from rclsem_segments import SourceDocument, TextSegment  # noqa: E402
 from rclsem_store import SemanticStore  # noqa: E402
@@ -121,6 +123,69 @@ class PerspectiveMemoryTest(unittest.TestCase):
         self.assertFalse(private.remember)
         self.assertEqual("memory-search", search.command)
         self.assertEqual(5, search.limit)
+
+    def test_memory_search_events_hash_query_and_report_result_ids(self):
+        perspective_id = self.remember()
+        events = FakeEventSink()
+        query = "private prior decision"
+        searcher = PerspectiveSearcher(
+            self.memory,
+            StaticEmbeddingProvider([1.0, 0.0, 0.0]),
+            embedding_model="embeddinggemma",
+            event_sink=events,
+        )
+
+        results = searcher.search(query, limit=3)
+
+        self.assertEqual(
+            ["search.memory.started", "search.memory.completed"],
+            [event_type for event_type, _ in events.events],
+        )
+        self.assertNotIn(query, str(events.events))
+        self.assertEqual(
+            hashlib.sha256(query.encode("utf-8")).hexdigest(),
+            events.events[0][1]["query_sha256"],
+        )
+        self.assertEqual([perspective_id], events.events[-1][1]["perspective_ids"])
+        self.assertEqual([perspective_id], [item.perspective_id for item in results])
+
+    def test_memory_search_failure_is_audited_without_private_query(self):
+        events = FakeEventSink()
+        query = "private malformed embedding request"
+        searcher = PerspectiveSearcher(
+            self.memory,
+            StaticEmbeddingProvider([]),
+            embedding_model="embeddinggemma",
+            event_sink=events,
+        )
+
+        with self.assertRaisesRegex(PerspectiveMemoryError, "batch size"):
+            searcher.search(query)
+
+        self.assertEqual(
+            ["search.memory.started", "search.memory.failed"],
+            [event_type for event_type, _ in events.events],
+        )
+        self.assertNotIn(query, str(events.events))
+        self.assertEqual(
+            "PerspectiveMemoryError", events.events[-1][1]["error_type"]
+        )
+
+
+class FakeEventSink:
+    def __init__(self):
+        self.events = []
+
+    def record(self, event_type, payload):
+        self.events.append((event_type, dict(payload)))
+
+
+class StaticEmbeddingProvider:
+    def __init__(self, embedding):
+        self.embedding = embedding
+
+    def embed(self, model, inputs):
+        return [self.embedding] if self.embedding else []
 
 
 if __name__ == "__main__":
