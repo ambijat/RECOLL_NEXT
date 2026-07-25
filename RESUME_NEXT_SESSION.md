@@ -7,13 +7,13 @@ the safest order for resuming work.
 
 ## Resume anchor
 
-- Product implementation anchor: `a12c5c780f8fb7f6c87a8124af6d759c1f22463f`
-  (`Retire obsolete native semantic route`).
-- Project ledger at that milestone: 28 events.
+- Product implementation anchor: `41696e1ec88085ac59928c7d26f5927d479c658b`
+  (`Constrain generated citations to supplied evidence`).
+- Project ledger at that milestone: 29 events.
 - Verified ledger head:
-  `f2e2ce5f685148fa5d431a985cffed7988337449c130bf491eab9421ba1482f2`.
-- Native-route retirement decision: sequence 28 at the verified head above.
-- Semantic test suite: 82 tests passing.
+  `f8e1035fab6a35f43f674649e3086fc0b1fbbdc3b8b721118104ad38cebd85e0`.
+- Citation-schema allowlist decision: sequence 29 at the verified head above.
+- Semantic test suite: 83 tests passing.
 - No Git remote operation was performed or authorized.
 - The user-supplied `RecollNext-Audit-and-Development-Pathway.md` is intentionally
   untracked and untouched. A cold directory copy will carry it; a Git bundle will
@@ -45,6 +45,8 @@ The active search boundary is Xapian-first:
   dependency, and Qt simple-search mode are removed. The supported AI Perspective
   dock remains wired through `recoll_ai.py --json`; tombstones remain only for older
   installed callers.
+- Cited-answer structured output enumerates only the supplied segment IDs, while the
+  independent validator still rejects any unknown or missing required citation.
 
 Primary implementation files:
 
@@ -65,7 +67,7 @@ $env:PYTHONPATH='src/semantic'
 python -m unittest discover -s tests/semantic
 ```
 
-Expected summary: `Ran 82 tests` and `OK`.
+Expected summary: `Ran 83 tests` and `OK`.
 
 Store-free Exact search succeeded against the active Recoll profile:
 
@@ -85,10 +87,10 @@ The project ledger verified as:
 {"event_count":26,"head_hash":"396fa010deaedd374b03006a75659fa10fc3bd4021a5c848eea0edd14dd4ff5d"}
 ```
 
-That is the hybrid-retrieval milestone anchor. The restart capsule is event 27, and
-the retired-native-route decision is event 28. The expected current chain has 28
-events with head
-`f2e2ce5f685148fa5d431a985cffed7988337449c130bf491eab9421ba1482f2`.
+That is the hybrid-retrieval milestone anchor. The restart capsule is event 27, the
+retired-native-route decision is event 28, and the citation-schema decision is event
+29. The expected current chain has 29 events with head
+`f8e1035fab6a35f43f674649e3086fc0b1fbbdc3b8b721118104ad38cebd85e0`.
 
 ## Known limitations that remain
 
@@ -103,7 +105,7 @@ events with head
    These are transitional caches, not authoritative data.
 5. Same-workstation portability passed source, lexical, AI, and event fidelity. A
    physical second-machine and cross-OS proof remain outstanding.
-6. A fresh `a12c5c78` audit package has not been created. The existing audit ZIP under
+6. A fresh `41696e1e` audit package has not been created. The existing audit ZIP under
    `.local` belongs to the older `d9500690` checkpoint and must not be represented as
    proof of the hybrid milestone.
 7. The active workstation Recoll profile resolves repository content from the
@@ -114,20 +116,20 @@ events with head
 
 Proceed in this order unless the user explicitly changes priorities.
 
-### 1. Freeze the `a12c5c78` audit baseline
+### 1. Freeze the `41696e1e` audit baseline
 
 Create a new local source bundle and manifest without contacting a remote. Prove:
 
-- the full 28-event chain verifies from genesis;
+- the full 29-event chain verifies from genesis;
 - event 21 reproduces old head
   `4a4386257d1c7ca484ea8aeec608926fba463ef1cbf148df70e6bd35d81adf08`;
   confirm the same value independently from the old audit manifest rather than
   trusting this handoff alone;
 - event 26 terminates at `396fa010...ff5d`, event 27 at `3f98757f...31e3`,
-  and event 28 at `f2e2ce5f...82f2`;
-- `d9500690` is an ancestor of `a12c5c78` and the range contains seven commits;
+  event 28 at `f2e2ce5f...82f2`, and event 29 at `f8e1035f...85e0`;
+- `d9500690` is an ancestor of `41696e1e` and the range contains nine commits;
 - the new bundle digest matches its manifest;
-- an isolated clone resolves exactly to `a12c5c78`, is clean, and passes 82 tests;
+- an isolated clone resolves exactly to `41696e1e`, is clean, and passes 83 tests;
 - Exact succeeds in an isolated environment where no sidecar path exists;
 - Prismatic rejects a deliberately stale copied fixture while returning lexical
   evidence; and
