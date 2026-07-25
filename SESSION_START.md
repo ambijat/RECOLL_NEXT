@@ -43,6 +43,10 @@ must not be contacted.
   `recoll_ai_gui.py` provides an immediately runnable dependency-free desktop
   companion. Both consume the same asynchronous `search --json` and `ask --json`
   contracts and expose evidence, cancellation, and source opening.
+- The obsolete native `ENABLE_SEMANTIC`/`DocSequenceSem` route has been removed from
+  the build and Qt simple-search surface. The supported AI Perspective dock remains
+  independent, while Python retirement tombstones continue to guide older installed
+  binaries without keeping the dead route active.
 - The Xapian-first protocol establishes the active Recoll database as lexical and
   document authority. The semantic database remains a disposable vector sidecar;
   the next retrieval refinement is removing transitional duplicated evidence fields
@@ -130,13 +134,13 @@ only when it describes the rebuilt product or records legally required provenanc
 
 ## Known immediate defects
 
-- An older native build configured with `ENABLE_SEMANTIC` still launches the retired
-  `rclsem_talk.py` protocol and now fails explicitly. The supported native integration
-  is the AI Perspective dock consuming `recoll_ai.py`; remove the older conditional
-  path when the dock is compiled and validated.
 - The repository `.venv` uses Python 3.14 while Recoll 1.43.5 ships bindings through
   Python 3.12.4. The automatic bundled-Python bridge is validated on this workstation;
   packaging still needs a general Windows installation-discovery contract.
+- The active workstation Recoll profile currently resolves repository documents from
+  the predecessor `recoll` working tree rather than this `recoll_next` tree. Use a
+  deliberately scoped profile or rebuild before treating repository search as a
+  current relevance baseline.
 - Exact cosine retrieval scans every stored segment. This is the reference-correct
   implementation, not the eventual large-corpus acceleration strategy.
 - The first `gemma3:4b` cited answer took approximately 107 seconds on this machine;

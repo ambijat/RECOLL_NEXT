@@ -109,6 +109,43 @@ class NativeQtIntegrationContractTest(unittest.TestCase):
         self.assertIn('m_modeCombo->addItem(tr("Conceptual"), "conceptual")', dock)
         self.assertIn("openSourceRequested", dock)
 
+    def test_obsolete_native_semantic_worker_route_is_removed(self):
+        active_files = [
+            REPOSITORY / "src" / "meson.build",
+            REPOSITORY / "src" / "meson_options.txt",
+            REPOSITORY / "src" / "qtgui" / "main.cpp",
+            REPOSITORY / "src" / "qtgui" / "recoll.h",
+            REPOSITORY / "src" / "qtgui" / "rclm_menus.cpp",
+            REPOSITORY / "src" / "qtgui" / "rclmain_w.cpp",
+            REPOSITORY / "src" / "qtgui" / "ssearch_w.cpp",
+            REPOSITORY / "src" / "qtgui" / "ssearch_w.h",
+            REPOSITORY / "src" / "qtgui" / "xmltosd.cpp",
+        ]
+        active_text = "\n".join(
+            path.read_text(encoding="utf-8") for path in active_files
+        )
+        for retired_symbol in (
+            "ENABLE_SEMANTIC",
+            "DocSequenceSem",
+            "docseqsem",
+            "SST_SEM",
+            "semantic_enabled",
+            "rclsem_talk.py",
+        ):
+            self.assertNotIn(retired_symbol, active_text)
+        self.assertFalse((REPOSITORY / "src" / "query" / "docseqsem.cpp").exists())
+        self.assertFalse((REPOSITORY / "src" / "query" / "docseqsem.h").exists())
+
+        tombstone = (
+            REPOSITORY / "src" / "semantic" / "rclsem_talk.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("retired", tombstone.lower())
+        self.assertIn("RETIREMENT_MESSAGE", tombstone)
+        retirement_message = (
+            REPOSITORY / "src" / "semantic" / "rclsem_common.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("recoll_ai.py", retirement_message)
+
 
 if __name__ == "__main__":
     unittest.main()

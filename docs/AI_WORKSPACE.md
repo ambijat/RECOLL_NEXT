@@ -70,12 +70,12 @@ RECOLL_AI_STORE
 
 ## Current validation
 
-The semantic and GUI-contract suite has 81 passing tests. Tests cover command
+The semantic and GUI-contract suite has 82 passing tests. Tests cover command
 construction, workstation limits, response-status validation, clickable file URLs,
 native build-file inclusion, main-window query handoff, asynchronous `QProcess` use,
-the retired Chroma boundary, cross-platform offline bootstrap, audited memory reads,
-hybrid rank/provenance and outage behavior, and the established answer, privacy, and
-ledger invariants.
+the retired Chroma boundary, removal of the obsolete native semantic worker route,
+cross-platform offline bootstrap, audited memory reads, hybrid rank/provenance and
+outage behavior, and the established answer, privacy, and ledger invariants.
 
 The desktop companion was launched successfully on Tk 8.6 against the academic PDF
 semantic store. Native Qt source compilation remains pending because this workstation

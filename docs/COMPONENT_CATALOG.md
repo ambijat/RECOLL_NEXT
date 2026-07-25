@@ -57,12 +57,14 @@ uncompiled source changes.
 | `rclsem_common.py` | Chroma/Ollama helper and configuration | Retirement tombstone; fails with migration guidance |
 | `rclsem_embed.py` | Chroma population | Retirement tombstone; use `recoll_ai.py sync` |
 | `rclsem_query.py` | Chroma semantic query | Retirement tombstone; use `recoll_ai.py search` |
-| `rclsem_talk.py` | Older native semantic worker | Retirement tombstone for an older `ENABLE_SEMANTIC` build |
-| `cmdtalkplugin.py`, `slicelist.py`, `rclsem_segment.py` | Superseded helper lineage | No active callers; retained pending native-path removal review |
+| `rclsem_talk.py` | Older native semantic worker | Retirement tombstone for already-installed legacy binaries; no active source route |
+| `cmdtalkplugin.py`, `slicelist.py`, `rclsem_segment.py` | Superseded helper lineage | No active callers; retained as compatibility lineage |
 | `initsemenv.py` | Dependency-free environment creation | Active cross-platform, offline-safe bootstrap |
 
-The tombstones preserve a bounded compatibility failure while the older conditional
-native path is still present. They contain no Chroma implementation or dependency.
+The `ENABLE_SEMANTIC` build option, `DocSequenceSem` implementation, Qt simple-search
+mode, and jsoncpp dependency have been removed. The Python tombstones preserve a
+bounded compatibility failure for older installed callers without keeping that route
+active. They contain no Chroma implementation or dependency.
 
 ## Inherited Recoll engine areas
 

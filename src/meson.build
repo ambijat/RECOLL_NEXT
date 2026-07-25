@@ -61,9 +61,6 @@ if get_option('testmains') or get_option('python-module') or get_option('indexer
     librecolldeps = []
     xapian = dependency('xapian-core')
     librecolldeps += xapian
-    if get_option('semantic')
-        librecolldeps += dependency('jsoncpp', version: '>=1.9.0')
-    endif
     if get_option('idxthreads')
         librecolldeps += dependency('threads')
     endif
@@ -121,7 +118,6 @@ recoll_conf.set('ENABLE_LIBMAGIC', get_option('libmagic'))
 recoll_conf.set('DISABLE_X11MON', not get_option('x11mon'))
 recoll_conf.set('RCL_USE_ASPELL', get_option('aspell'))
 recoll_conf.set('PREVIEW_FORCETEXTBROWSER', not get_option('webpreview'))
-recoll_conf.set('ENABLE_SEMANTIC', get_option('semantic'))
 
 # TBD: DEF_EXT4_BIRTH_TIME in python recoll setup.py
 # For qtgui this was done by running qmake with DEFINE_BTIME=1 on the command line but the affected
@@ -309,7 +305,6 @@ librecoll_sources = [
     'query/docseq.cpp',
     'query/docseqdb.cpp',
     'query/docseqhist.cpp',
-    'query/docseqsem.cpp',
     'query/dynconf.cpp',
     'query/filtseq.cpp',
     'query/hldata.cpp',

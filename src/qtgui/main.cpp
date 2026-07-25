@@ -59,7 +59,6 @@ using std::vector;
 
 extern RclConfig *theconfig;
 AdvSearchHist *g_advshistory;
-bool semantic_enabled{false};
 
 std::mutex thetempfileslock;
 // Use a list not a vector so that contained objects have stable
@@ -442,11 +441,6 @@ int main(int argc, char **argv)
         if (theconfig->getConfParam("preferStoredTextMimes", value)) {
             stringToStrings(value, prefs.preferStoredTextMimes);
         }
-#ifdef ENABLE_SEMANTIC
-        if (theconfig->getConfParam("sem_venv", value) && !value.empty()) {
-            semantic_enabled = true;
-        }
-#endif // SEMANTIC        
     }
 
     string historyfile = path_cat(theconfig->getConfDir(), "history");

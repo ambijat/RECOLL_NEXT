@@ -76,10 +76,6 @@ public:
                 data.mode = SSearch::SST_ANY;
             } else if (curtxt == "AND") {
                 data.mode = SSearch::SST_ALL;
-#ifdef ENABLE_SEMANTIC
-            } else if (curtxt == "SEM") {
-                data.mode = SSearch::SST_SEM;
-#endif // SEMANTIC
             } else {
                 LOGERR("BAD SEARCH MODE: [" << curtxt << "]\n");
                 contentsOk = false;

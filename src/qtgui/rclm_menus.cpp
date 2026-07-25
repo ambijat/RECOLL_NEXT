@@ -15,8 +15,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "autoconfig.h" // For ENABLE_SEMANTIC
-
 #include "rclmain_w.h"
 #include "ssearch_w.h"
 
@@ -126,15 +124,6 @@ void RclMain::buildMenus()
     actSSQuery->setCheckable(true);
     sstypGroup->addAction(actSSQuery);
     queryMenu->addAction(actSSQuery);
-#ifdef ENABLE_SEMANTIC
-    if (semantic_enabled) {
-        auto actSSSem = new QAction(tr("Semantic"), this);
-        actSSSem->setData(QVariant(SSearch::SST_SEM));
-        actSSSem->setCheckable(true);
-        sstypGroup->addAction(actSSSem);
-        queryMenu->addAction(actSSSem);
-    }
-#endif // SEMANTIC
     queryMenu->addSeparator();
     queryMenu->addAction(enbSynAction);
     queryMenu->addSeparator();

@@ -177,8 +177,10 @@ package.
 
 New work uses `recoll_ai.py`, `rclsem_ollama.py`, `rclsem_store.py`, and the tested
 modules linked from `SESSION_START.md`. `initsemenv.py` replaces the downloading,
-POSIX-only bootstrap. An older native `ENABLE_SEMANTIC` worker remains a known
-retirement boundary until the AI Perspective dock is compiled and validated.
+POSIX-only bootstrap. The older native `ENABLE_SEMANTIC`/`DocSequenceSem` route and
+its jsoncpp build dependency have been removed. The supported native integration is
+the AI Perspective dock consuming the shared `recoll_ai.py --json` boundary; Python
+tombstones remain only to guide already-installed legacy callers.
 
 ## Build and dependency change control
 

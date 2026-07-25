@@ -14,8 +14,6 @@
  *   Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "autoconfig.h" // For ENABLE_SEMANTIC
-
 #include <sstream>
 #include <set>
 #include <vector>
@@ -207,11 +205,6 @@ void SSearch::init()
     searchTypCMB->addItem(tr("All terms"));
     searchTypCMB->addItem(tr("File name"));
     searchTypCMB->addItem(tr("Query language"));
-#ifdef ENABLE_SEMANTIC
-    if (semantic_enabled) {
-        searchTypCMB->addItem(tr("Semantic"));
-    }
-#endif
     connect(queryText, SIGNAL(returnPressed()), this, SLOT(startSimpleSearch()));
     connect(queryText, SIGNAL(textChanged(const QString&)),
             this, SLOT(searchTextChanged(const QString&)));
@@ -615,11 +608,6 @@ bool SSearch::startSimpleSearch(const std::string& u8, int maxexp)
             } else if (tp == SST_ALL) {
                 xml << "  <SM>AND</SM>\n";
                 clp = new Rcl::SearchDataClauseSimple(Rcl::SCLT_AND, u8);
-#ifdef ENABLE_SEMANTIC
-            } else if (tp == SST_SEM) {
-                xml << "  <SM>SEM</SM>\n";
-                clp = new Rcl::SearchDataClauseSimple(Rcl::SCLT_AND, u8);
-#endif // SEMANTIC
             } else {
                 std::cerr << "UNEXPECTED SEARCH TYPE\n";
                 abort();
@@ -628,14 +616,12 @@ bool SSearch::startSimpleSearch(const std::string& u8, int maxexp)
         sdata->addClause(clp);
     }
 
-    if (tp != SST_SEM) {
-        if (prefs.ssearchAutoPhrase && rcldb) {
-            xml << "  <AP/>\n";
-            sdata->maybeAddAutoPhrase(*rcldb, prefs.ssearchAutoPhraseThreshPC / 100.0);
-        }
-        if (maxexp != -1) {
-            sdata->setMaxExpand(maxexp);
-        }
+    if (prefs.ssearchAutoPhrase && rcldb) {
+        xml << "  <AP/>\n";
+        sdata->maybeAddAutoPhrase(*rcldb, prefs.ssearchAutoPhraseThreshPC / 100.0);
+    }
+    if (maxexp != -1) {
+        sdata->setMaxExpand(maxexp);
     }
     
     for (const auto& dbdir : prefs.activeExtraDbs) {
