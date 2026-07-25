@@ -81,10 +81,44 @@ class CitedAnswerTest(unittest.TestCase):
         self.assertEqual((item,), result.citations)
         self.assertEqual([("Why Ollama?", 4)], retriever.calls)
         self.assertEqual("gemma3:4b", provider.calls[0][0])
-        self.assertEqual(ANSWER_SCHEMA, provider.calls[0][2])
+        response_schema = provider.calls[0][2]
+        self.assertEqual(
+            [item.segment_id],
+            response_schema["properties"]["citations"]["items"]["enum"],
+        )
         prompt = provider.calls[0][1][1]["content"]
         self.assertIn(item.segment_id, prompt)
         self.assertIn(item.text, prompt)
+
+    def test_chat_schema_allows_only_supplied_unique_segment_ids(self):
+        first = evidence("segment-1")
+        second = evidence("segment-2")
+        provider = FakeChatProvider(
+            json.dumps(
+                {
+                    "answer": "The available evidence is insufficient.",
+                    "insufficient_evidence": True,
+                    "citations": [],
+                }
+            )
+        )
+        composer = CitedAnswerComposer(
+            FakeRetriever([first, second, first]),
+            provider,
+            chat_model="gemma3:4b",
+        )
+
+        composer.ask("Question")
+
+        response_schema = provider.calls[0][2]
+        self.assertEqual(
+            ["segment-1", "segment-2"],
+            response_schema["properties"]["citations"]["items"]["enum"],
+        )
+        self.assertEqual(
+            {"type": "string"},
+            ANSWER_SCHEMA["properties"]["citations"]["items"],
+        )
 
     def test_empty_retrieval_declines_without_calling_chat_model(self):
         provider = FakeChatProvider("unused")

@@ -39,6 +39,8 @@ must not be contacted.
 - `rclsem_answer.py` implements bounded local synthesis with `gemma3:4b`. The `ask`
   command validates every generated citation against retrieved segment IDs and
   supports answer, summary, timeline, contradiction, decision, and action views.
+  Structured generation now constrains citation values to the exact supplied segment
+  allowlist before the independent fail-closed validator runs.
 - `aiperspective_w.{h,cpp}` wires a native AI Perspective dock into `RclMain`, while
   `recoll_ai_gui.py` provides an immediately runnable dependency-free desktop
   companion. Both consume the same asynchronous `search --json` and `ask --json`

@@ -145,7 +145,10 @@ false. If storing secondary memory fails, the valid answer still succeeds with
 `remembered: false` and `memory_error_type`; private exception details are not added.
 
 The validator accepts only citation IDs present in the supplied evidence. A supported
-answer without citations fails rather than returning this envelope.
+answer without citations fails rather than returning this envelope. The local
+structured-output schema also enumerates the supplied segment IDs as the only allowed
+citation strings; this improves generation reliability but does not replace the
+independent validator.
 
 ## Perspective Memory response
 

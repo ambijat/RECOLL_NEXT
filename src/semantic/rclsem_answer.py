@@ -122,7 +122,7 @@ class CitedAnswerComposer:
                 response = self.chat_provider.chat(
                     self.chat_model,
                     _messages(query, view, evidence),
-                    response_format=ANSWER_SCHEMA,
+                    response_format=_answer_schema(evidence),
                 )
                 result = _validated_answer(response, view, evidence)
         except Exception as ex:
@@ -183,6 +183,24 @@ def _messages(
         separators=(",", ":"),
     )
     return ({"role": "system", "content": system}, {"role": "user", "content": user})
+
+
+def _answer_schema(evidence: Sequence[EvidenceResult]) -> Mapping[str, object]:
+    """Constrain structured generation to the exact supplied segment identifiers."""
+    citation_ids = list(dict.fromkeys(item.segment_id for item in evidence))
+    return {
+        **ANSWER_SCHEMA,
+        "properties": {
+            **ANSWER_SCHEMA["properties"],
+            "citations": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": citation_ids,
+                },
+            },
+        },
+    }
 
 
 def _validated_answer(

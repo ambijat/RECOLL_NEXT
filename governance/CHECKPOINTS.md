@@ -27,6 +27,7 @@ later appends do not modify earlier entries.
 | 2026-07-20 | 26 | `396fa010deaedd374b03006a75659fa10fc3bd4021a5c848eea0edd14dd4ff5d` | Xapian-first Exact, Prismatic, and Conceptual retrieval implemented with weighted RRF, live stale-vector gates, lexical fallback, 80 passing tests, and active-profile validation. |
 | 2026-07-20 | 27 | `3f98757f719a9071292de73e187f586317b0bbfabfcffdfdf4895e3f626231e3` | Portable restart capsule records the `ad45283a` implementation anchor, verified state, transfer cautions, and ordered next course after 81 passing tests. |
 | 2026-07-25 | 28 | `f2e2ce5f685148fa5d431a985cffed7988337449c130bf491eab9421ba1482f2` | Obsolete native semantic worker route retired; the AI Perspective JSON boundary remains supported and compatibility tombstones remain bounded. |
+| 2026-07-25 | 29 | `f8e1035fab6a35f43f674649e3086fc0b1fbbdc3b8b721118104ad38cebd85e0` | Structured answer generation is constrained to supplied citation IDs while independent fail-closed validation remains mandatory. |
 
 Verify the current head before adding another row:
 

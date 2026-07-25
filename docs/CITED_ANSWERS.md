@@ -36,9 +36,11 @@ The answer composer:
 2. Sends only those segments and the local question to loopback Ollama.
 3. Requires structured JSON containing an answer, an insufficient-evidence flag, and
    exact cited segment IDs.
-4. Rejects malformed JSON, unknown segment IDs, and supported answers without a
+4. Constrains the structured-output citation field to an enum of the exact supplied
+   segment IDs, reducing model copy errors without permitting any new identifier.
+5. Independently rejects malformed JSON, unknown segment IDs, and supported answers without a
    citation.
-5. Resolves accepted citations back to document identity, revision, path, source
+6. Resolves accepted citations back to document identity, revision, path, source
    offsets, text, and retrieval score for presentation.
 
 Generated prose is never stored as indexed fact. Original files and the Recoll index
@@ -56,14 +58,20 @@ Semantic search emits its own `search.semantic.*` events in the same command ses
 
 ## Validation
 
-The semantic suite has 48 passing tests. It covers citation resolution, invented
-citation rejection, mandatory citations, invalid model JSON, empty-store decline,
-question privacy, and command/view parsing.
+The semantic suite covers citation resolution, structured-output citation allowlists,
+invented citation rejection, mandatory citations, invalid model JSON, empty-store
+decline, question privacy, and command/view parsing.
 
 A live run embedded two synthetic project decisions with `embeddinggemma`, retrieved
 them for a local-AI question, and generated a supported `gemma3:4b` answer citing the
 supplied segment. The first generation took about 107 seconds, establishing the need
 for asynchronous progress and cancellation in the Qt interface.
+
+A later live regression of the academic-PDF `contradictions` view reproduced an
+unknown-citation rejection under the former generic-string schema. Constraining that
+schema to the two supplied segment IDs produced a supported answer with two validated
+citations in 179 seconds. The validator remains mandatory even when constrained
+generation succeeds.
 
 ## GUI boundary
 
