@@ -7,14 +7,13 @@ the safest order for resuming work.
 
 ## Resume anchor
 
-- Product implementation anchor: `ad45283a887ff1e8a9bad560194fce31fb5516dd`
-  (`Implement Xapian-first hybrid retrieval`).
-- Project ledger at that milestone: 26 events.
+- Product implementation anchor: `a12c5c780f8fb7f6c87a8124af6d759c1f22463f`
+  (`Retire obsolete native semantic route`).
+- Project ledger at that milestone: 28 events.
 - Verified ledger head:
-  `396fa010deaedd374b03006a75659fa10fc3bd4021a5c848eea0edd14dd4ff5d`.
-- Restart-capsule governance event: sequence 27, head
-  `3f98757f719a9071292de73e187f586317b0bbfabfcffdfdf4895e3f626231e3`.
-- Semantic test suite: 81 tests passing.
+  `f2e2ce5f685148fa5d431a985cffed7988337449c130bf491eab9421ba1482f2`.
+- Native-route retirement decision: sequence 28 at the verified head above.
+- Semantic test suite: 82 tests passing.
 - No Git remote operation was performed or authorized.
 - The user-supplied `RecollNext-Audit-and-Development-Pathway.md` is intentionally
   untracked and untouched. A cold directory copy will carry it; a Git bundle will
@@ -42,6 +41,10 @@ The active search boundary is Xapian-first:
 - The CLI, Tk companion, and native Qt source expose all three modes.
 - The old Chroma entry points and `rclsem_talk.py` are loud retirement tombstones;
   they contain no active Chroma pipeline.
+- The obsolete `ENABLE_SEMANTIC` build option, `DocSequenceSem` C++ worker, jsoncpp
+  dependency, and Qt simple-search mode are removed. The supported AI Perspective
+  dock remains wired through `recoll_ai.py --json`; tombstones remain only for older
+  installed callers.
 
 Primary implementation files:
 
@@ -62,7 +65,7 @@ $env:PYTHONPATH='src/semantic'
 python -m unittest discover -s tests/semantic
 ```
 
-Expected summary: `Ran 81 tests` and `OK`.
+Expected summary: `Ran 82 tests` and `OK`.
 
 Store-free Exact search succeeded against the active Recoll profile:
 
@@ -82,47 +85,49 @@ The project ledger verified as:
 {"event_count":26,"head_hash":"396fa010deaedd374b03006a75659fa10fc3bd4021a5c848eea0edd14dd4ff5d"}
 ```
 
-That is the product-milestone anchor. After recording this restart capsule, the
-expected current chain is 27 events with head
-`3f98757f719a9071292de73e187f586317b0bbfabfcffdfdf4895e3f626231e3`.
+That is the hybrid-retrieval milestone anchor. The restart capsule is event 27, and
+the retired-native-route decision is event 28. The expected current chain has 28
+events with head
+`f2e2ce5f685148fa5d431a985cffed7988337449c130bf491eab9421ba1482f2`.
 
 ## Known limitations that remain
 
 1. The repository environment uses Python 3.14 while the installed Recoll 1.43.5
    binding is for Python 3.12.4. The private bundled-Python bridge works on the
    validated workstation; general Windows discovery and packaging remain open.
-2. An older native `ENABLE_SEMANTIC` route can still reach the retired
-   `rclsem_talk.py` tombstone. Remove that build/runtime route before the first native
-   Qt compilation, and record the architecture change in the project ledger.
-3. The native Qt AI dock is source- and contract-tested but has not been compiled on
+2. The native Qt AI dock is source- and contract-tested but has not been compiled on
    the baseline workstation because the matching Qt/C++ SDK is absent.
-4. First generation with `gemma3:4b` was approximately 107 seconds. Exact and lexical
+3. First generation with `gemma3:4b` was approximately 107 seconds. Exact and lexical
    fallback avoid that latency, but generation performance itself is unchanged.
-5. The semantic sidecar still duplicates extracted segment text, title, and path.
+4. The semantic sidecar still duplicates extracted segment text, title, and path.
    These are transitional caches, not authoritative data.
-6. Same-workstation portability passed source, lexical, AI, and event fidelity. A
+5. Same-workstation portability passed source, lexical, AI, and event fidelity. A
    physical second-machine and cross-OS proof remain outstanding.
-7. A fresh `ad45283a` audit package has not been created. The existing audit ZIP under
+6. A fresh `a12c5c78` audit package has not been created. The existing audit ZIP under
    `.local` belongs to the older `d9500690` checkpoint and must not be represented as
    proof of the hybrid milestone.
+7. The active workstation Recoll profile resolves repository content from the
+   predecessor `recoll` working tree. Relevance work must use a deliberately scoped
+   current profile rather than treating those stale repository results as evidence.
 
 ## Immediate next course
 
 Proceed in this order unless the user explicitly changes priorities.
 
-### 1. Freeze the `ad45283a` audit baseline
+### 1. Freeze the `a12c5c78` audit baseline
 
 Create a new local source bundle and manifest without contacting a remote. Prove:
 
-- the full 26-event chain verifies from genesis;
+- the full 28-event chain verifies from genesis;
 - event 21 reproduces old head
   `4a4386257d1c7ca484ea8aeec608926fba463ef1cbf148df70e6bd35d81adf08`;
   confirm the same value independently from the old audit manifest rather than
   trusting this handoff alone;
-- event 26 terminates at `396fa010...ff5d`;
-- `d9500690` is an ancestor of `ad45283a` and the range contains five commits;
+- event 26 terminates at `396fa010...ff5d`, event 27 at `3f98757f...31e3`,
+  and event 28 at `f2e2ce5f...82f2`;
+- `d9500690` is an ancestor of `a12c5c78` and the range contains seven commits;
 - the new bundle digest matches its manifest;
-- an isolated clone resolves exactly to `ad45283a`, is clean, and passes 81 tests;
+- an isolated clone resolves exactly to `a12c5c78`, is clean, and passes 82 tests;
 - Exact succeeds in an isolated environment where no sidecar path exists;
 - Prismatic rejects a deliberately stale copied fixture while returning lexical
   evidence; and
@@ -132,15 +137,7 @@ Create a new local source bundle and manifest without contacting a remote. Prove
 Do not rename or mutate the user's live sidecar for this proof. Use an isolated clone,
 copied fixture, and temporary runtime ledger.
 
-### 2. Remove the obsolete native semantic route
-
-Remove the `ENABLE_SEMANTIC` path that launches `rclsem_talk.py`, while preserving the
-supported AI Perspective dock. Add static/build-contract tests, update the component
-catalog and session briefing, append an `architecture.decision.*` or milestone event,
-verify the ledger, and commit locally. Do not delete the tombstones until compatibility
-policy explicitly permits it.
-
-### 3. Establish the relevance baseline
+### 2. Establish the relevance baseline
 
 Add a versioned evaluation schema and harness. Keep private corpus queries and graded
 judgments under `.local/evaluation/` by default; version only the schema, sanitized
@@ -156,7 +153,7 @@ Operate on a copied store and send runtime events to a temporary ledger. Hash th
 source bundle and original store before and after so the benchmark cannot silently
 mutate its baseline.
 
-### 4. Resynchronize, measure, then deduplicate
+### 3. Resynchronize, measure, then deduplicate
 
 Resynchronize a copied representative semantic store before collecting the accepted
 baseline. Record size, document/segment counts, query latency, stale rejection rate,
