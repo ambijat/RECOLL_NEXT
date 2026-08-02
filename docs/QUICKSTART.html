@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recoll Next — Quick Start Guide</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --panel: #ffffff;
+    --text: #1c2430;
+    --muted: #5b6675;
+    --border: #e1e5eb;
+    --accent: #1f6feb;
+    --accent-ink: #0b3d91;
+    --code-bg: #0f172a;
+    --code-text: #e2e8f0;
+    --ok: #1a7f37;
+    --warn: #9a6700;
+    --chip-bg: #eef3fc;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1420;
+      --panel: #161d2b;
+      --text: #e6eaf2;
+      --muted: #9aa5b6;
+      --border: #263049;
+      --accent: #6ea8fe;
+      --accent-ink: #bcd6ff;
+      --code-bg: #0a0e17;
+      --code-text: #d7e2f4;
+      --ok: #56d364;
+      --warn: #e3b341;
+      --chip-bg: #17233d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1420; --panel: #161d2b; --text: #e6eaf2; --muted: #9aa5b6;
+    --border: #263049; --accent: #6ea8fe; --accent-ink: #bcd6ff;
+    --code-bg: #0a0e17; --code-text: #d7e2f4; --ok: #56d364; --warn: #e3b341;
+    --chip-bg: #17233d;
+  }
+  :root[data-theme="light"] {
+    --bg: #f7f8fa; --panel: #ffffff; --text: #1c2430; --muted: #5b6675;
+    --border: #e1e5eb; --accent: #1f6feb; --accent-ink: #0b3d91;
+    --code-bg: #0f172a; --code-text: #e2e8f0; --ok: #1a7f37; --warn: #9a6700;
+    --chip-bg: #eef3fc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 40px 24px 96px; }
+  header.hero {
+    padding: 28px 24px; border: 1px solid var(--border); border-radius: 14px;
+    background: linear-gradient(135deg, var(--chip-bg), var(--panel));
+    margin-bottom: 28px;
+  }
+  header.hero p.kicker {
+    text-transform: uppercase; letter-spacing: .08em; font-size: .78rem;
+    color: var(--accent-ink); font-weight: 700; margin: 0 0 8px;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 1.9rem; }
+  header.hero p.lede { margin: 0; color: var(--muted); font-size: 1.05rem; }
+
+  nav.toc {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; margin-bottom: 32px;
+  }
+  nav.toc h2 { margin: 0 0 10px; font-size: .95rem; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--muted); }
+  nav.toc ol { margin: 0; padding-left: 1.3em; }
+  nav.toc li { margin: 4px 0; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  section {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px 26px; margin-bottom: 20px; scroll-margin-top: 20px;
+  }
+  section h2 {
+    margin: 0 0 6px; font-size: 1.25rem; display: flex; align-items: center; gap: 10px;
+  }
+  section h2 .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%; background: var(--accent);
+    color: #fff; font-size: .85rem; font-weight: 700; flex: none;
+  }
+  section p { color: var(--text); }
+  section .note {
+    background: var(--chip-bg); border-left: 3px solid var(--accent);
+    padding: 10px 14px; border-radius: 6px; color: var(--text); font-size: .95rem;
+    margin: 12px 0;
+  }
+  section .warn {
+    background: var(--chip-bg); border-left: 3px solid var(--warn);
+    padding: 10px 14px; border-radius: 6px; font-size: .95rem; margin: 12px 0;
+  }
+  pre {
+    background: var(--code-bg); color: var(--code-text); padding: 14px 16px;
+    border-radius: 8px; overflow-x: auto; font-size: .88rem; line-height: 1.55;
+  }
+  code { font-family: "Cascadia Code", Consolas, "SF Mono", Menlo, monospace; }
+  p code, li code { background: var(--chip-bg); padding: .1em .4em; border-radius: 4px; }
+  a { color: var(--accent); }
+  .backtotop { display: inline-block; margin-top: 6px; font-size: .85rem; }
+  .badge {
+    display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .03em;
+    padding: 2px 8px; border-radius: 999px; background: var(--chip-bg);
+    color: var(--accent-ink); margin-left: 6px; vertical-align: middle;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: .92rem; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--chip-bg); }
+  footer { color: var(--muted); font-size: .85rem; text-align: center; margin-top: 40px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+  .checklist { list-style: none; padding-left: 0; }
+  .checklist li { margin: 8px 0; padding-left: 1.7rem; position: relative; }
+  .checklist li::before { content: "□"; position: absolute; left: 0; font-weight: 700; color: var(--accent); }
+  .plain { color: var(--muted); font-size: .94rem; }
+  details { border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-top: 12px; }
+  summary { cursor: pointer; font-weight: 700; color: var(--accent-ink); }
+  .success { border-left-color: var(--ok) !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero" id="top">
+    <p class="kicker">Recoll Next</p>
+    <h1>Beginner-Friendly Quick Start</h1>
+    <p class="lede">First prove ordinary search works. Then build a small idea index, find
+      visible evidence, and ask local AI to explain only that evidence.</p>
+  </header>
+
+  <nav class="toc" aria-label="Table of contents">
+    <h2>Jump to a step</h2>
+    <ol>
+      <li><a href="#map">See the whole journey</a></li>
+      <li><a href="#prereqs">Gather the four tools</a></li>
+      <li><a href="#environment">Make a safe Python workspace</a></li>
+      <li><a href="#exact">Get a first win with Exact search</a></li>
+      <li><a href="#ollama">Check the local AI</a></li>
+      <li><a href="#index">Build a small practice idea index</a></li>
+      <li><a href="#launch">Open the AI Perspective workspace</a></li>
+      <li><a href="#find">Find and inspect evidence</a></li>
+      <li><a href="#interpret">Interpret selected evidence</a></li>
+      <li><a href="#memory">Remember or forget a perspective</a></li>
+      <li><a href="#troubleshooting">Fix common problems</a></li>
+      <li><a href="#next">Learn more</a></li>
+    </ol>
+  </nav>
+
+  <section id="map">
+    <h2><span class="num">1</span>See the whole journey</h2>
+    <p>You will build the project in layers. Stop after any successful layer and return later.</p>
+    <table>
+      <tr><th>Layer</th><th>What you prove</th><th>AI needed?</th></tr>
+      <tr><td>1. Exact search</td><td>Recoll can find your indexed documents.</td><td>No</td></tr>
+      <tr><td>2. Idea search</td><td>A local model can match passages with similar meanings.</td><td>Yes, through local Ollama</td></tr>
+      <tr><td>3. Cited explanation</td><td>The model can organize selected evidence and return valid source IDs.</td><td>Yes</td></tr>
+    </table>
+    <div class="note"><strong>For younger students:</strong> ask an adult or teacher to help
+      install Recoll, Python, Ollama, and model files. Searching and checking sources can be
+      the student's job; changing computer-wide software should be supervised.</div>
+    <p class="plain">Commands in this guide run in PowerShell from the repository root:
+      <code>G:\GPTWORKFLOW\recoll_next</code> on the documented workstation. Your path may differ.</p>
+    <div class="warn"><strong>Check the prompt before every command.</strong> It should end
+      in <code>recoll_next&gt;</code>, not <code>src\semantic&gt;</code> or
+      <code>C:\Users\...&gt;</code>. In a new terminal, run
+      <code>cd G:\GPTWORKFLOW\recoll_next</code> and activate <code>.venv</code> again.</div>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="prereqs">
+    <h2><span class="num">2</span>Gather the four tools</h2>
+    <table>
+      <tr><th>Tool</th><th>Its job</th><th>Simple check</th></tr>
+      <tr><td><strong>Recoll</strong></td><td>Reads your chosen files and makes the main word index.</td><td>Open Recoll and find one known file.</td></tr>
+      <tr><td><strong>Python</strong></td><td>Runs the Recoll Next helper programs and desktop companion.</td><td><code>python --version</code></td></tr>
+      <tr><td><strong>Ollama</strong></td><td>Runs the idea and chat models on this computer.</td><td><code>ollama --version</code></td></tr>
+      <tr><td><strong>Two local models</strong></td><td><code>embeddinggemma</code> compares meanings; <code>gemma3:4b</code> writes cited explanations.</td><td><code>ollama list</code></td></tr>
+    </table>
+    <ul class="checklist">
+      <li>Recoll has already indexed a small practice collection.</li>
+      <li>You can find one practice file using ordinary Recoll.</li>
+      <li>Python is installed. Python 3.14 is the verified project version; another version needs the full test suite.</li>
+      <li>There is enough private disk space for local indexes and model files.</li>
+    </ul>
+    <div class="warn"><strong>Privacy check:</strong> use copies of non-sensitive practice
+      files while learning. Semantic stores contain passages, paths, number vectors,
+      questions, and saved answers. The <code>.local</code> folder is ignored by Git, but it
+      is still sensitive data on your computer.</div>
+    <details><summary>What does “indexed” mean?</summary><p>An index is a lookup map, like the
+      index at the back of a textbook. Recoll reads the selected files first and records
+      searchable words and metadata. Recoll Next does not secretly crawl every folder.</p></details>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="environment">
+    <h2><span class="num">3</span>Make a safe Python workspace</h2>
+    <p>A virtual environment is a project-sized toolbox. It keeps this project's Python
+      setup separate from other Python projects.</p>
+    <p>Use the offline-safe project helper:</p>
+    <pre><code>python src\semantic\initsemenv.py .venv --verify
+.\.venv\Scripts\Activate.ps1
+python --version</code></pre>
+    <p>Or create it directly with the verified Python version:</p>
+    <pre><code>py -3.14 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python --version</code></pre>
+    <p>Run the automated project checks:</p>
+    <pre><code>python -W error::ResourceWarning -m unittest discover -s tests\semantic</code></pre>
+    <p class="note success"><strong>Success looks like:</strong> the final lines report a
+      number of tests followed by <code>OK</code>. The exact count can grow as the project grows.</p>
+    <p class="plain">The environment helper does not download packages, Recoll, Ollama, or
+      models. A copied <code>.venv</code> is not considered portable to another computer.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="exact">
+    <h2><span class="num">4</span>Get a first win with Exact search</h2>
+    <p>Exact search is the safety net. It uses Recoll's normal index and needs neither
+      Ollama nor a semantic SQLite store.</p>
+    <pre><code>python src\semantic\recoll_ai.py search --mode exact --limit 3 'filename:"GOAL_FIDELITY.md"'</code></pre>
+    <p>If that file is not in your Recoll profile, substitute the real name of one small,
+      non-sensitive text or Markdown file. Text written in capital placeholders is never
+      meant to be entered literally.</p>
+    <p class="note success"><strong>Success looks like:</strong> up to three results appear
+      in Recoll's order, with titles or source paths. If this fails, fix Recoll before
+      adding the AI layers.</p>
+    <details><summary>Why start here?</summary><p>It proves that document discovery, the
+      active Recoll profile, and the Python bridge work. It also demonstrates the project's
+      promise that ordinary search survives when AI is unavailable.</p></details>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="ollama">
+    <h2><span class="num">5</span>Check the local AI</h2>
+    <p>Install Ollama and the two configured models through an adult-, operator-, or
+      organization-approved method. Then inspect what is already available:</p>
+    <pre><code>ollama --version
+ollama list
+python src\semantic\recoll_ai.py doctor</code></pre>
+    <p>The defaults are the embedding model <code>embeddinggemma</code>, the chat model
+      <code>gemma3:4b</code>, and the loopback endpoint <code>http://127.0.0.1:11434</code>.
+      All three are configurable.</p>
+    <p class="note success"><strong>Success looks like:</strong> <code>doctor</code> reports
+      <code>ready</code>, a loopback address, and no missing models. The check only inspects
+      readiness; it does not install, start, or change Ollama.</p>
+    <div class="warn"><strong>Model downloads are an outside action.</strong> Commands such
+      as <code>ollama pull embeddinggemma</code> and <code>ollama pull gemma3:4b</code> contact
+      a model registry. Run them only with explicit permission and after reviewing model
+      license, network, disk-space, and school or workplace rules.</div>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="index">
+    <h2><span class="num">6</span>Build a small practice idea index</h2>
+    <p>The semantic index stores passages and meaning vectors in a separate SQLite file.
+      Start with a few known practice documents, not an entire drive.</p>
+    <ol>
+      <li>Double-click <code>Rebuild-Index.bat</code>, or run the command below.</li>
+      <li>Choose <code>.local\practice-small.sqlite3</code> as the store.</li>
+      <li>Enter <code>filename:"GOAL_FIDELITY.md"</code>, or the verified filename of one small document.</li>
+      <li>Test that same query in ordinary Recoll first.</li>
+      <li>Leave the safety checkbox checked and click <strong>Run Semantic Indexing</strong>.</li>
+    </ol>
+    <pre><code>python src\semantic\recoll_ai_index_builder.py --store .local\practice-small.sqlite3</code></pre>
+    <p>The builder now exposes <strong>request timeout</strong>, <strong>batch size</strong>,
+      and <strong>total limit</strong>. Its beginner defaults are 120 seconds, 4 segments,
+      and 900 seconds. It reports document and batch progress and stops at the total limit.
+      A large PDF is a later performance test, not a first-run test.</p>
+    <div class="warn">
+      <strong>Keep documents missing from this scope (never delete)</strong> is checked by
+      default. Leave it checked whenever your scope query only covers part of what the
+      store holds — unchecking it deletes every document in the store that the current
+      query didn't match. Only uncheck it when the query intentionally represents the
+      store's <em>entire</em> intended scope.
+    </div>
+    <p>An immediate second run over an unchanged scope should report zero newly embedded
+      segments — that's the synchronizer confirming it is idempotent.</p>
+    <p class="plain">Idempotent means “running the same completed job again does not redo
+      unchanged work.” New or changed documents are embedded; unchanged ones are skipped.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="launch">
+    <h2><span class="num">7</span>Open the AI Perspective workspace</h2>
+    <p>Double-click <code>AI-Perspective.bat</code>, or launch the Tk desktop companion:</p>
+    <pre><code>python src\semantic\recoll_ai_gui.py --store .local\practice-small.sqlite3</code></pre>
+    <p>The window separates two jobs: first find evidence, then choose whether to interpret
+      it. AI operations run in a separate child process, so they can be cancelled without
+      stopping ordinary Recoll search.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="find">
+    <h2><span class="num">8</span>Find and inspect evidence <span class="badge">Step 1</span></h2>
+    <ol>
+      <li>Type a question whose answer appears in the practice documents.</li>
+      <li>Choose <strong>Prismatic</strong> for a blend of word and idea matches.</li>
+      <li>Click <strong>Find evidence</strong>.</li>
+      <li>Click each result and read its preview. Notice its source and “found via” label.</li>
+      <li>Double-click a row when you want to inspect the original file.</li>
+    </ol>
+    <div class="warn"><strong>Keep both channels in the same practice scope.</strong> A
+      one-document semantic store combined with an unrestricted, drive-wide Recoll query
+      can rank unrelated lexical results beside the semantic result. For this practice run,
+      query <code>filename:"GOAL_FIDELITY.md" original purpose</code>.</div>
+    <table>
+      <tr><th>Mode</th><th>Use it when…</th></tr>
+      <tr><td><strong>Exact</strong></td><td>You know the words, phrase, filename, or Recoll filter. It needs no AI store.</td></tr>
+      <tr><td><strong>Prismatic</strong></td><td>You want both word matches and idea matches. If semantics fail, lexical evidence can still appear with a fallback notice.</td></tr>
+      <tr><td><strong>Conceptual</strong></td><td>You remember the idea but not the wording. Every hit must still match a current Recoll document revision.</td></tr>
+    </table>
+    <p class="note success"><strong>Pause and check:</strong> do the visible passages really
+      relate to the question? Retrieval can be imperfect. Select evidence because you read
+      it, not merely because it ranked first.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="interpret">
+    <h2><span class="num">9</span>Interpret selected evidence <span class="badge">Step 2</span></h2>
+    <ol>
+      <li>Select one or two useful evidence rows. If none are selected, the top two are used.</li>
+      <li>Choose <em>answer, summary, timeline, contradictions, decisions,</em> or <em>actions</em>.</li>
+      <li>For the first practice run, leave <strong>Remember validated perspective locally</strong> unchecked.</li>
+      <li>Click <strong>Interpret selected (or top 2)</strong>.</li>
+      <li>Wait or use <strong>Cancel</strong>. CPU generation may take several minutes.</li>
+      <li>Read the result and open every cited source before relying on it.</li>
+    </ol>
+    <p>Before generation, the app repeats the search and checks each selected rank and
+      segment ID. After generation, it rejects unknown, missing, or unresolved citation
+      IDs. This is called <strong>fail closed</strong>: an error is safer than an unsupported answer.</p>
+    <div class="warn"><strong>Citations do not make AI automatically correct.</strong> They
+      show which supplied passages support the answer. You must still decide whether the
+      wording is fair, complete, and appropriate for your assignment or decision.</div>
+    <details><summary>Command-line version</summary><pre><code>python src\semantic\recoll_ai.py ask `
+  --store .local\practice-small.sqlite3 `
+  --mode conceptual `
+  --view summary `
+  --evidence-limit 2 `
+  --timeout 300 `
+  --no-remember `
+  "What rules prevent this project from losing its original purpose?"</code></pre></details>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="memory">
+    <h2><span class="num">10</span>Remember or forget a perspective</h2>
+    <p>If you deliberately check <strong>Remember validated perspective locally</strong>, a
+      successfully cited answer is saved as secondary memory. Search saved perspectives:</p>
+    <pre><code>python src\semantic\recoll_ai.py memory-search --store .local\practice-small.sqlite3 --limit 5 "original purpose"</code></pre>
+    <p>Only memories whose cited segment, document, and source revision still resolve are
+      returned — a memory whose source has since changed is suppressed rather than shown
+      stale.</p>
+    <p>Leave the checkbox off, or use <code>--no-remember</code>, for private or temporary
+      questions. Remembered question and answer text stays local but is stored inside the
+      SQLite file. The current GUI does not yet include a memory manager for viewing and deleting entries.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="troubleshooting">
+    <h2><span class="num">11</span>Fix common problems</h2>
+    <div class="grid2">
+      <div>
+        <p><strong>Ollama unavailable</strong><br>Exact search keeps working. Start or repair
+          Ollama, then re-run <code>doctor</code>.</p>
+        <p><strong>Models missing</strong><br><code>doctor</code> tells you which configured
+          tags are absent. Provision them only through an approved method.</p>
+        <p><strong>Empty semantic results</strong><br>Confirm the store path, the embedding
+          model/namespace, the sync scope query, and the document count.</p>
+        <p><strong>"Visible evidence changed; run Find Evidence again"</strong><br>The
+          underlying result set moved since you selected it — re-run Find Evidence and
+          re-select before interpreting.</p>
+      </div>
+      <div>
+        <p><strong>Recoll binding unavailable</strong><br>Windows Python-ABI mismatches are
+          bridged automatically; pass <code>--recoll-python</code> explicitly if
+          auto-discovery fails.</p>
+        <p><strong>GUI looks frozen</strong><br>Generation can take minutes on CPU. Use
+          <strong>Cancel</strong> — it only stops the AI child process, never ordinary
+          Recoll search.</p>
+        <p><strong>Ledger verification failure</strong><br>Preserve the file untouched and
+          diagnose the first bad line; never hand-edit <code>governance/events.jsonl</code>.</p>
+      </div>
+    </div>
+    <p class="note">Typed errors are intentional. The program avoids dumping full internal
+      tracebacks because those could reveal private passages or paths.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="next">
+    <h2><span class="num">12</span>Learn more</h2>
+    <ul>
+      <li><a href="BROCHURE.html">Read the project brochure</a> for the full picture of what Recoll Next is and why it's built this way.</li>
+      <li><a href="OPERATIONS_RUNBOOK.md">Operations Runbook</a> — daily startup, backups, and recovery procedures.</li>
+      <li><a href="PRISMATIC_SEARCH.md">Prismatic Search Charter</a> — the evidence and privacy duties every feature must honor.</li>
+      <li><a href="AI_WORKSPACE.md">AI Perspective Workspace</a> — the full desktop-presentation reference.</li>
+      <li><a href="README.md">Documentation map</a> — every contract and reference document in one place.</li>
+    </ul>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <footer>Recoll Next is local-first: document content, prompts, and answers stay on this
+    machine by default. This guide describes the working Tk companion. The native Qt dock
+    exists in source but has not yet been compiled on the documented workstation.</footer>
+</div>
+</body>
+</html>

@@ -4,20 +4,19 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import os
 from pathlib import Path
-import queue
-import subprocess
+import re
 import sys
-import threading
 from typing import Any, Dict, List, Optional, Sequence
 from urllib.parse import unquote, urlparse
-import webbrowser
 
 
 VIEWS = ("answer", "summary", "timeline", "contradictions", "decisions", "actions")
 MODES = ("exact", "prismatic", "conceptual")
+PROGRESS_PREFIX = "RECOLL_PROGRESS "
 
 
 class GUIContractError(Exception):
@@ -32,9 +31,45 @@ def build_command(
     *,
     view: str = "answer",
     mode: str = "prismatic",
+    remember: bool = False,
+    evidence_selection: Sequence[tuple[int, str]] = (),
+    scope_query: str = "mime:*",
+    keep_missing: bool = False,
+    sync_timeout: int = 120,
+    sync_batch_size: int = 4,
+    sync_max_runtime: int = 900,
+    confdir: str = "",
+    answer_max_runtime: int = 660,
 ) -> List[str]:
-    if operation not in ("search", "ask"):
-        raise GUIContractError("operation must be search or ask")
+    if operation not in ("search", "ask", "sync"):
+        raise GUIContractError("operation must be search, ask, or sync")
+    if operation == "sync":
+        if not scope_query.strip():
+            raise GUIContractError("enter a Recoll scope query first")
+        if sync_timeout <= 0 or sync_batch_size <= 0 or sync_max_runtime <= 0:
+            raise GUIContractError("timeout, batch size, and runtime limit must be positive")
+        command = [
+            sys.executable,
+            str(script),
+            "sync",
+            "--store",
+            str(store),
+            "--json",
+            "--query",
+            scope_query.strip(),
+            "--timeout",
+            str(sync_timeout),
+            "--batch-size",
+            str(sync_batch_size),
+            "--max-runtime",
+            str(sync_max_runtime),
+            "--progress",
+        ]
+        if confdir.strip():
+            command.extend(("--confdir", confdir.strip()))
+        if keep_missing:
+            command.append("--keep-missing")
+        return command
     if not query_text.strip():
         raise GUIContractError("enter a query first")
     command = [sys.executable, str(script), operation]
@@ -45,21 +80,92 @@ def build_command(
             command.extend(("--store", str(store)))
         command.extend(("--json", "--mode", mode, "--timeout", "120", "--limit", "5"))
     else:
-        command.extend(("--store", str(store), "--json"))
+        if mode not in MODES:
+            raise GUIContractError("unsupported retrieval mode")
+        command.extend(("--store", str(store), "--json", "--mode", mode))
+        command.append("--progress")
         if view not in VIEWS:
             raise GUIContractError("unsupported perspective")
+        if answer_max_runtime <= 0:
+            raise GUIContractError("answer runtime limit must be positive")
+        if not remember:
+            command.append("--no-remember")
+        for rank, segment_id in evidence_selection:
+            if rank <= 0 or not segment_id:
+                raise GUIContractError("selected evidence is incomplete")
+            command.extend(("--evidence-rank", str(rank)))
+            command.extend(("--expected-segment-id", segment_id))
         command.extend(
             (
                 "--timeout",
                 "600",
+                "--max-runtime",
+                str(answer_max_runtime),
                 "--evidence-limit",
-                "2",
+                str(max(2, len(evidence_selection))),
                 "--view",
                 view,
             )
         )
     command.append(query_text.strip())
     return command
+
+
+def parse_progress_line(line: str) -> Optional[Dict[str, Any]]:
+    if not line.startswith(PROGRESS_PREFIX):
+        return None
+    try:
+        value = json.loads(line[len(PROGRESS_PREFIX) :])
+    except json.JSONDecodeError:
+        return None
+    return value if isinstance(value, dict) and isinstance(value.get("stage"), str) else None
+
+
+def clean_title(value: object) -> str:
+    title = html.unescape(str(value or "")).strip()
+    return re.sub(r"\s+", " ", title)
+
+
+def provenance_label(item: Dict[str, Any]) -> str:
+    values = item.get("provenance") or ()
+    if not isinstance(values, (list, tuple)):
+        return ""
+    return " + ".join(str(value).title() for value in values)
+
+
+def score_label(item: Dict[str, Any], mode: str) -> str:
+    if mode == "exact":
+        rank = item.get("lexical_rank")
+        return f"Rank #{rank}" if isinstance(rank, int) else ""
+    if mode == "conceptual":
+        value = item.get("similarity")
+        return (
+            f"Similarity {float(value):.3f}"
+            if isinstance(value, (int, float))
+            else ""
+        )
+    value = item.get("fusion_score")
+    if isinstance(value, (int, float)):
+        return f"Fusion {float(value):.3f}"
+    rank = item.get("lexical_rank")
+    return f"Lexical fallback #{rank}" if isinstance(rank, int) else ""
+
+
+def scope_description(mode: str, store: Path) -> str:
+    if mode == "exact":
+        return (
+            "Scope: active Recoll profile. The semantic store is not used for "
+            "Exact retrieval."
+        )
+    if mode == "conceptual":
+        return (
+            f"Scope: semantic store {store.name}, with every result revalidated "
+            "against the active Recoll profile."
+        )
+    return (
+        f"Scope: active Recoll profile + semantic store {store.name}. "
+        "The configured corpora may differ."
+    )
 
 
 def parse_response(raw_output: str) -> Dict[str, Any]:
@@ -71,7 +177,7 @@ def parse_response(raw_output: str) -> Dict[str, Any]:
         raise GUIContractError("local AI response is not an object")
     if response.get("status") == "error":
         raise GUIContractError(str(response.get("error") or "local AI operation failed"))
-    if response.get("status") not in ("ready", "answered"):
+    if response.get("status") not in ("ready", "answered", "synchronized"):
         raise GUIContractError("local AI returned an unsupported status")
     return response
 
@@ -86,347 +192,6 @@ def local_source_path(source: str) -> Optional[Path]:
     return Path(decoded)
 
 
-class AIPerspectiveApp:
-    def __init__(self, root: Any, *, store: Path, query_text: str = ""):
-        import tkinter as tk
-        from tkinter import ttk
-
-        self.tk = tk
-        self.ttk = ttk
-        self.root = root
-        self.root.title("Recoll Next — AI Perspective")
-        self.root.geometry("1120x760")
-        self.script = Path(__file__).with_name("recoll_ai.py")
-        self.process: Optional[subprocess.Popen[str]] = None
-        self.cancelled = False
-        self.messages: queue.Queue[tuple[str, Any]] = queue.Queue()
-        self.evidence: Dict[str, Dict[str, Any]] = {}
-        self.last_response: Optional[Dict[str, Any]] = None
-
-        self.query_var = tk.StringVar(value=query_text)
-        self.store_var = tk.StringVar(value=str(store))
-        self.view_var = tk.StringVar(value="answer")
-        self.mode_var = tk.StringVar(value="prismatic")
-        self.status_var = tk.StringVar(value="Ready — local only")
-
-        outer = ttk.Frame(root, padding=12)
-        outer.pack(fill="both", expand=True)
-        outer.columnconfigure(1, weight=1)
-        outer.rowconfigure(5, weight=2)
-        outer.rowconfigure(7, weight=1)
-
-        ttk.Label(outer, text="AI Perspective", font=("Segoe UI", 16, "bold")).grid(
-            row=0, column=0, columnspan=3, sticky="w"
-        )
-        ttk.Label(
-            outer,
-            text="Local Ollama perspectives over traceable Recoll evidence.",
-        ).grid(row=1, column=0, columnspan=3, sticky="w", pady=(0, 10))
-
-        ttk.Label(outer, text="Query").grid(row=2, column=0, sticky="w")
-        self.query_entry = ttk.Entry(outer, textvariable=self.query_var)
-        self.query_entry.grid(row=2, column=1, columnspan=2, sticky="ew", padx=(8, 0))
-
-        ttk.Label(outer, text="Knowledge scope").grid(row=3, column=0, sticky="w")
-        self.store_entry = ttk.Entry(outer, textvariable=self.store_var)
-        self.store_entry.grid(row=3, column=1, sticky="ew", padx=8, pady=6)
-        ttk.Button(outer, text="Browse…", command=self.browse_store).grid(
-            row=3, column=2, sticky="e"
-        )
-
-        controls = ttk.Frame(outer)
-        controls.grid(row=4, column=0, columnspan=3, sticky="ew", pady=(2, 10))
-        self.search_button = ttk.Button(
-            controls, text="Search Evidence", command=lambda: self.start("search")
-        )
-        self.search_button.pack(side="left")
-        self.ask_button = ttk.Button(
-            controls, text="Ask AI", command=lambda: self.start("ask")
-        )
-        self.ask_button.pack(side="left", padx=6)
-        ttk.Label(controls, text="Retrieval").pack(side="left", padx=(14, 4))
-        self.mode_combo = ttk.Combobox(
-            controls,
-            textvariable=self.mode_var,
-            values=MODES,
-            state="readonly",
-            width=12,
-        )
-        self.mode_combo.pack(side="left")
-        ttk.Label(controls, text="Perspective").pack(side="left", padx=(14, 4))
-        self.view_combo = ttk.Combobox(
-            controls,
-            textvariable=self.view_var,
-            values=VIEWS,
-            state="readonly",
-            width=16,
-        )
-        self.view_combo.pack(side="left")
-        self.cancel_button = ttk.Button(controls, text="Cancel", command=self.cancel)
-        self.cancel_button.pack(side="right")
-        self.export_button = ttk.Button(
-            controls, text="Export Markdown…", command=self.export_markdown
-        )
-        self.export_button.pack(side="right", padx=6)
-
-        answer_frame = ttk.LabelFrame(outer, text="Generated perspective")
-        answer_frame.grid(row=5, column=0, columnspan=3, sticky="nsew")
-        answer_frame.rowconfigure(0, weight=1)
-        answer_frame.columnconfigure(0, weight=1)
-        self.answer = tk.Text(answer_frame, wrap="word", padx=10, pady=10, height=12)
-        self.answer.grid(row=0, column=0, sticky="nsew")
-        answer_scroll = ttk.Scrollbar(answer_frame, command=self.answer.yview)
-        answer_scroll.grid(row=0, column=1, sticky="ns")
-        self.answer.configure(yscrollcommand=answer_scroll.set, state="disabled")
-
-        self.progress = ttk.Progressbar(outer, mode="indeterminate")
-        self.progress.grid(row=6, column=0, columnspan=3, sticky="ew", pady=8)
-
-        evidence_frame = ttk.LabelFrame(
-            outer, text="Evidence — double-click to open source"
-        )
-        evidence_frame.grid(row=7, column=0, columnspan=3, sticky="nsew")
-        evidence_frame.rowconfigure(0, weight=1)
-        evidence_frame.columnconfigure(0, weight=1)
-        self.evidence_tree = ttk.Treeview(
-            evidence_frame,
-            columns=("title", "score", "source"),
-            show="headings",
-            selectmode="browse",
-        )
-        self.evidence_tree.heading("title", text="Document")
-        self.evidence_tree.heading("score", text="Score")
-        self.evidence_tree.heading("source", text="Source")
-        self.evidence_tree.column("title", width=280)
-        self.evidence_tree.column("score", width=90, anchor="center")
-        self.evidence_tree.column("source", width=570)
-        self.evidence_tree.grid(row=0, column=0, sticky="nsew")
-        evidence_scroll = ttk.Scrollbar(evidence_frame, command=self.evidence_tree.yview)
-        evidence_scroll.grid(row=0, column=1, sticky="ns")
-        self.evidence_tree.configure(yscrollcommand=evidence_scroll.set)
-        self.evidence_tree.bind("<Double-1>", self.open_selected_source)
-
-        ttk.Label(outer, textvariable=self.status_var).grid(
-            row=8, column=0, columnspan=3, sticky="w", pady=(8, 0)
-        )
-        self.set_busy(False)
-        self.query_entry.focus_set()
-        self.root.after(100, self.poll_messages)
-
-    def browse_store(self) -> None:
-        from tkinter import filedialog
-
-        selected = filedialog.askopenfilename(
-            title="Choose semantic knowledge store",
-            initialfile=Path(self.store_var.get()).name,
-            filetypes=(
-                ("SQLite stores", "*.sqlite3 *.sqlite *.db"),
-                ("All files", "*"),
-            ),
-        )
-        if selected:
-            self.store_var.set(selected)
-
-    def start(self, operation: str) -> None:
-        if self.process is not None:
-            return
-        store = Path(self.store_var.get().strip())
-        mode = self.mode_var.get()
-        if not (operation == "search" and mode == "exact") and not store.is_file():
-            self.show_error("Choose an existing semantic knowledge store.")
-            return
-        try:
-            command = build_command(
-                self.script,
-                store,
-                self.query_var.get(),
-                operation,
-                view=self.view_var.get(),
-                mode=mode,
-            )
-        except GUIContractError as ex:
-            self.show_error(str(ex))
-            return
-
-        self.clear_output()
-        self.cancelled = False
-        self.set_busy(True)
-        self.status_var.set(
-            f"Retrieving {mode} evidence…"
-            if operation == "search"
-            else "Retrieving evidence and generating with local Ollama…"
-        )
-        creation_flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
-        self.process = subprocess.Popen(
-            command,
-            cwd=Path(__file__).resolve().parents[2],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            creationflags=creation_flags,
-        )
-        threading.Thread(target=self.wait_for_process, daemon=True).start()
-
-    def wait_for_process(self) -> None:
-        assert self.process is not None
-        stdout, stderr = self.process.communicate()
-        code = self.process.returncode
-        self.messages.put(("finished", (code, stdout, stderr)))
-
-    def cancel(self) -> None:
-        if self.process is None:
-            return
-        self.status_var.set("Cancelling local AI operation…")
-        self.cancelled = True
-        self.process.terminate()
-
-    def poll_messages(self) -> None:
-        try:
-            while True:
-                kind, payload = self.messages.get_nowait()
-                if kind == "finished":
-                    self.finish(*payload)
-        except queue.Empty:
-            pass
-        self.root.after(100, self.poll_messages)
-
-    def finish(self, return_code: int, stdout: str, stderr: str) -> None:
-        self.process = None
-        self.set_busy(False)
-        if self.cancelled:
-            self.status_var.set("Cancelled")
-            self.cancelled = False
-            return
-        try:
-            response = parse_response(stdout.strip())
-            if return_code != 0:
-                raise GUIContractError(
-                    str(response.get("error") or "local AI operation failed")
-                )
-            self.render(response)
-            self.status_var.set("Ready — evidence verified locally")
-        except GUIContractError as ex:
-            detail = str(ex)
-            if stderr.strip():
-                detail = stderr.strip()[-800:]
-            self.show_error(detail)
-
-    def render(self, response: Dict[str, Any]) -> None:
-        self.last_response = response
-        if response["status"] == "answered":
-            answer = str(response.get("answer") or "")
-            if response.get("insufficient_evidence"):
-                answer += "\n\nEvidence status: insufficient."
-            evidence = response.get("citations") or []
-        else:
-            evidence = response.get("results") or []
-            mode = str(response.get("mode") or "conceptual").title()
-            degraded = (
-                " Semantic retrieval unavailable; showing lexical fallback."
-                if response.get("degraded")
-                else ""
-            )
-            answer = f"{mode} evidence: {len(evidence)} segments found.{degraded}"
-        self.set_answer(answer)
-        for position, item in enumerate(evidence, start=1):
-            if isinstance(item, dict):
-                self.add_evidence(position, item)
-
-    def add_evidence(self, position: int, item: Dict[str, Any]) -> None:
-        title = str(item.get("title") or item.get("document_id") or "Untitled")
-        path = str(item.get("path") or "")
-        value = item.get("fusion_score")
-        if not isinstance(value, (int, float)):
-            value = item.get("similarity")
-        if isinstance(value, (int, float)):
-            score = f"{float(value):.3f}"
-        elif item.get("lexical_rank") is not None:
-            score = f"#{item['lexical_rank']}"
-        else:
-            score = ""
-        identifier = self.evidence_tree.insert(
-            "", "end", values=(f"[{position}] {title}", score, path)
-        )
-        self.evidence[identifier] = item
-
-    def open_selected_source(self, _event: Any = None) -> None:
-        selected = self.evidence_tree.selection()
-        if not selected:
-            return
-        source = str(self.evidence.get(selected[0], {}).get("path") or "")
-        if not source:
-            return
-        local = local_source_path(source)
-        if local is not None and os.name == "nt":
-            os.startfile(local)  # type: ignore[attr-defined]
-        else:
-            webbrowser.open(source)
-
-    def export_markdown(self) -> None:
-        from tkinter import filedialog
-
-        if self.last_response is None:
-            self.show_error("Run Concept Search or Ask AI before exporting.")
-            return
-        selected = filedialog.asksaveasfilename(
-            title="Export AI perspective",
-            defaultextension=".md",
-            filetypes=(("Markdown", "*.md"), ("All files", "*")),
-        )
-        if not selected:
-            return
-        evidence = (
-            self.last_response.get("citations")
-            if self.last_response.get("status") == "answered"
-            else self.last_response.get("results")
-        ) or []
-        lines = ["# Recoll Next AI Perspective", "", f"**Query:** {self.query_var.get()}", ""]
-        if self.last_response.get("status") == "answered":
-            lines.extend((str(self.last_response.get("answer") or ""), ""))
-        lines.extend(("## Evidence", ""))
-        for position, item in enumerate(evidence, start=1):
-            lines.append(
-                f"{position}. {item.get('title') or item.get('document_id') or 'Untitled'}"
-            )
-            lines.append(f"   - Source: {item.get('path') or ''}")
-            lines.append(f"   - Segment: `{item.get('segment_id') or ''}`")
-        Path(selected).write_text("\n".join(lines) + "\n", encoding="utf-8")
-        self.status_var.set(f"Exported: {selected}")
-
-    def clear_output(self) -> None:
-        self.last_response = None
-        self.evidence.clear()
-        self.evidence_tree.delete(*self.evidence_tree.get_children())
-        self.set_answer("")
-
-    def set_answer(self, value: str) -> None:
-        self.answer.configure(state="normal")
-        self.answer.delete("1.0", "end")
-        self.answer.insert("1.0", value)
-        self.answer.configure(state="disabled")
-
-    def show_error(self, message: str) -> None:
-        self.set_busy(False)
-        self.status_var.set("Local AI operation failed")
-        self.set_answer(f"Error: {message}")
-
-    def set_busy(self, busy: bool) -> None:
-        state = "disabled" if busy else "normal"
-        self.search_button.configure(state=state)
-        self.ask_button.configure(state=state)
-        self.store_entry.configure(state=state)
-        self.query_entry.configure(state=state)
-        self.view_combo.configure(state="disabled" if busy else "readonly")
-        self.mode_combo.configure(state="disabled" if busy else "readonly")
-        self.cancel_button.configure(state="normal" if busy else "disabled")
-        if busy:
-            self.progress.start(10)
-        else:
-            self.progress.stop()
-
-
 def default_store(repository: Path) -> Path:
     academic = repository / ".local" / "booklibrandom-pdfs.sqlite3"
     return academic if academic.is_file() else repository / ".local" / "semantic.sqlite3"
@@ -439,11 +204,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     import tkinter as tk
+    from recoll_ai_workspace import AIPerspectiveWorkspace
 
     repository = Path(__file__).resolve().parents[2]
     store = Path(args.store) if args.store else default_store(repository)
     root = tk.Tk()
-    AIPerspectiveApp(root, store=store, query_text=args.query)
+    AIPerspectiveWorkspace(root, store=store, query_text=args.query)
     root.mainloop()
     return 0
 

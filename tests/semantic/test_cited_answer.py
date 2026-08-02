@@ -1,15 +1,19 @@
 import json
+import io
 from pathlib import Path
 import sys
 import unittest
+from contextlib import redirect_stdout
+from unittest.mock import patch
 
 
 SEMANTIC_SOURCE = Path(__file__).resolve().parents[2] / "src" / "semantic"
 sys.path.insert(0, str(SEMANTIC_SOURCE))
 
-from recoll_ai import _build_parser  # noqa: E402
+from recoll_ai import _build_parser, main as cli_main  # noqa: E402
 from rclsem_answer import (  # noqa: E402
     ANSWER_SCHEMA,
+    AnswerTimeout,
     AnswerValidationError,
     CitedAnswerComposer,
 )
@@ -181,6 +185,39 @@ class CitedAnswerTest(unittest.TestCase):
         self.assertNotIn(question, str(events.events))
         self.assertEqual("AnswerValidationError", events.events[-1][1]["error_type"])
 
+    def test_citation_resolution_does_not_verify_answer_is_grounded_in_evidence_text(self):
+        """Documents a known gap: a valid, resolvable citation does not guarantee the
+        generated prose is actually derived from that segment's text. The schema only
+        constrains *which segment_id* may be cited, not whether the answer's claims
+        are supported by that segment's content."""
+        item = evidence()  # text: "Ollama remains local and the endpoint is configurable."
+        fabricated_answer = (
+            "Vladimir Putin addressed the Valdai Club on September 19, 2013 "
+            "(source: http://eng.kremlin.ru/news/6007), and Alexander Dugin has "
+            "been suggested as an influence on his Eurasian direction."
+        )
+        provider = FakeChatProvider(
+            json.dumps(
+                {
+                    "answer": fabricated_answer,
+                    "insufficient_evidence": False,
+                    "citations": [item.segment_id],
+                }
+            )
+        )
+        composer = CitedAnswerComposer(
+            FakeRetriever([item]), provider, chat_model="gemma3:4b"
+        )
+
+        result = composer.ask("Why Ollama?")
+
+        # The composer accepts this answer: the cited segment_id resolves, so the
+        # citation contract is technically satisfied, even though nothing in the
+        # cited evidence text mentions Putin, Valdai, Kremlin.ru, or Dugin.
+        self.assertEqual(fabricated_answer, result.answer)
+        self.assertEqual((item,), result.citations)
+        self.assertNotIn("Putin", item.text)
+
     def test_cli_exposes_ask_and_prismatic_views(self):
         args = _build_parser().parse_args(
             [
@@ -196,6 +233,70 @@ class CitedAnswerTest(unittest.TestCase):
         self.assertEqual("timeline", args.view)
         self.assertEqual("gemma3:4b", args.chat_model)
         self.assertEqual(120.0, args.timeout)
+        self.assertEqual(900.0, args.max_runtime)
+
+    def test_answer_progress_reports_stages_without_private_text(self):
+        progress = []
+        item = evidence()
+        composer = CitedAnswerComposer(
+            FakeRetriever([item]),
+            FakeChatProvider(
+                json.dumps(
+                    {
+                        "answer": "The endpoint remains local.",
+                        "insufficient_evidence": False,
+                        "citations": [item.segment_id],
+                    }
+                )
+            ),
+            chat_model="gemma3:4b",
+            progress_callback=progress.append,
+        )
+        composer.ask("Why is the endpoint local?")
+        self.assertEqual(
+            [
+                "retrieving_evidence",
+                "generating_answer",
+                "validating_citations",
+                "completed",
+            ],
+            [entry["stage"] for entry in progress],
+        )
+        self.assertNotIn(item.text, str(progress))
+
+    def test_cli_keyboard_interrupt_is_a_clean_cancelled_exit(self):
+        output = io.StringIO()
+        with patch("recoll_ai._run_sync", side_effect=KeyboardInterrupt), redirect_stdout(output):
+            code = cli_main(["sync", "--store", "practice.sqlite3"])
+        self.assertEqual(130, code)
+        self.assertIn("cancelled", output.getvalue().lower())
+        self.assertNotIn("Traceback", output.getvalue())
+
+    def test_answer_total_runtime_expires_after_bounded_model_request(self):
+        clock = [0.0]
+        item = evidence()
+
+        class SlowChat(FakeChatProvider):
+            def chat(self, *args, **kwargs):
+                clock[0] = 2.0
+                return super().chat(*args, **kwargs)
+
+        composer = CitedAnswerComposer(
+            FakeRetriever([item]),
+            SlowChat(
+                json.dumps(
+                    {
+                        "answer": "Supported.",
+                        "insufficient_evidence": False,
+                        "citations": [item.segment_id],
+                    }
+                )
+            ),
+            chat_model="gemma3:4b",
+            clock=lambda: clock[0],
+        )
+        with self.assertRaises(AnswerTimeout):
+            composer.ask("Question?", max_runtime_seconds=1)
 
 
 if __name__ == "__main__":

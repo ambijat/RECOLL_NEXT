@@ -2,6 +2,7 @@ from pathlib import Path
 import hashlib
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -9,8 +10,12 @@ from unittest.mock import patch
 SEMANTIC_SOURCE = Path(__file__).resolve().parents[2] / "src" / "semantic"
 sys.path.insert(0, str(SEMANTIC_SOURCE))
 
-from recoll_ai import _build_parser, _run_search  # noqa: E402
-from rclsem_hybrid import HybridSearchCoordinator, LexicalSearcher  # noqa: E402
+from recoll_ai import _RankedEvidenceRetriever, _build_parser, _run_search  # noqa: E402
+from rclsem_hybrid import (  # noqa: E402
+    HybridSearchCoordinator,
+    LexicalSearcher,
+    SearchEvidence,
+)
 from rclsem_recoll import RecollQueryService  # noqa: E402
 from rclsem_retrieve import EvidenceResult  # noqa: E402
 from rclsem_segments import DeterministicSegmenter, SourceDocument  # noqa: E402
@@ -158,6 +163,73 @@ class HybridRetrievalTest(unittest.TestCase):
             events.events[0][1]["query_sha256"],
         )
 
+    def test_selected_visible_evidence_is_revalidated_by_rank_and_identity(self):
+        results = [
+            SearchEvidence(
+                segment_id=f"segment-{position}",
+                document_id=f"document-{position}",
+                source_revision="revision",
+                title=f"Document {position}",
+                path=f"{position}.md",
+                text="Evidence",
+                source_start=0,
+                source_end=8,
+                similarity=None,
+                retrieval_mode="exact",
+                provenance=("lexical",),
+                lexical_rank=position,
+            )
+            for position in range(1, 4)
+        ]
+
+        class Coordinator:
+            def search(self, query, *, mode, limit):
+                self.call = (query, mode, limit)
+                return SimpleNamespace(results=tuple(results[:limit]))
+
+        coordinator = Coordinator()
+        retriever = _RankedEvidenceRetriever(
+            coordinator,
+            mode="exact",
+            ranks=(2,),
+            expected_segment_ids=("segment-2",),
+        )
+
+        selected = retriever.search("question", limit=1)
+
+        self.assertEqual(["segment-2"], [item.segment_id for item in selected])
+        self.assertEqual(("question", "exact", 2), coordinator.call)
+
+    def test_selected_visible_evidence_fails_closed_when_result_changed(self):
+        result = SearchEvidence(
+            segment_id="new-segment",
+            document_id="document",
+            source_revision="revision",
+            title="Document",
+            path="document.md",
+            text="Evidence",
+            source_start=0,
+            source_end=8,
+            similarity=None,
+            retrieval_mode="exact",
+            provenance=("lexical",),
+            lexical_rank=1,
+        )
+
+        class Coordinator:
+            def search(self, query, *, mode, limit):
+                return SimpleNamespace(results=(result,))
+
+        retriever = _RankedEvidenceRetriever(
+            Coordinator(),
+            mode="exact",
+            ranks=(1,),
+            expected_segment_ids=("old-segment",),
+        )
+
+        with self.assertRaisesRegex(ValueError, "run Find Evidence again"):
+            retriever.search("question", limit=1)
+
 
 class FakeResult:
     def __init__(self, document):
@@ -259,6 +331,26 @@ class SearchCliContractTest(unittest.TestCase):
             self.assertTrue(report["degraded"])
             self.assertEqual("FileNotFoundError", report["semantic_error_type"])
             self.assertFalse(store.exists())
+
+    def test_ask_parser_accepts_mode_and_visible_evidence_selection(self):
+        args = _build_parser().parse_args(
+            [
+                "ask",
+                "--store",
+                "semantic.sqlite3",
+                "--mode",
+                "prismatic",
+                "--evidence-rank",
+                "2",
+                "--expected-segment-id",
+                "segment-2",
+                "question",
+            ]
+        )
+
+        self.assertEqual("prismatic", args.mode)
+        self.assertEqual([2], args.evidence_rank)
+        self.assertEqual(["segment-2"], args.expected_segment_id)
 
 
 if __name__ == "__main__":

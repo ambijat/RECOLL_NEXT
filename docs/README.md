@@ -3,6 +3,20 @@
 This directory documents the rebuilt Recoll Next product. Inherited product manuals
 were intentionally removed; the source code and legally required provenance remain.
 
+## Start here (non-agent readers)
+
+- [Brochure](BROCHURE.html) — what Recoll Next is and why it's built this way.
+- [Quick Start Guide](QUICKSTART.html) — first search to first cited answer.
+
+These two are presentation documents for humans evaluating or onboarding to the
+product; they are not part of the mandatory agent orientation set below and summarize,
+rather than replace, the normative contracts they link to.
+
+Public repository participants should also read
+[`../CONTRIBUTING.md`](../CONTRIBUTING.md), [`../SECURITY.md`](../SECURITY.md), and
+[`PUBLICATION_CHECKLIST.md`](PUBLICATION_CHECKLIST.md). The unreleased feature summary
+is in [`../CHANGELOG.md`](../CHANGELOG.md).
+
 ## Mandatory orientation
 
 Every human or AI agent must read these documents before changing the repository:
@@ -68,6 +82,8 @@ After orientation, read the documents routed by the task.
 - [`../governance/README.md`](../governance/README.md) — project ledger rules.
 - [`../governance/CHECKPOINTS.md`](../governance/CHECKPOINTS.md) — independently
   readable chain heads.
+- [`PUBLICATION_CHECKLIST.md`](PUBLICATION_CHECKLIST.md) — local source-release gate
+  and operator handoff, without authorizing remote access.
 
 ## Documentation status convention
 

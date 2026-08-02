@@ -36,7 +36,9 @@ Cross-cutting: runtime JSONL ledger and versioned project governance chain
 | `rclsem_perspectives.py` | Secondary interpretation memory and audited retrieval | Validated cited answer, query, and embedding | Deduplicated memory, stale-gated retrieval, and `search.memory.*` events |
 | `rclsem_events.py` | Component-to-ledger adapter | Typed event and minimized payload | Hash-chained runtime append |
 | `rclsem_ledger.py` | Append-only SHA-256 chain | Canonical bounded JSON events | Verified JSONL chain and head hash |
-| `recoll_ai_gui.py` | Immediately runnable Tk workspace | Query, store, selected view | Async search/ask, evidence, source open, export |
+| `recoll_ai_gui.py` | Shared GUI contract (command construction, response parsing, presentation helpers) and thin launcher for the workspace app | Query, store, selected view | `build_command`, `parse_response`, and label/scope helpers used by both Tk apps below |
+| `recoll_ai_workspace.py` | Immediately runnable Tk search/interpret workspace | Query, store, selected mode/view | Async search then ask, rank-selected evidence, source open, export |
+| `recoll_ai_index_builder.py` | Standalone Tk semantic indexing tool, kept separate from everyday search/ask | Store, Recoll scope query, keep-missing choice | Async `sync`, added/updated/unchanged/deleted/embedded report |
 
 ## Native presentation modules
 

@@ -41,7 +41,8 @@ python src\semantic\recoll_ai.py sync `
   --store .local\project-docs.sqlite3 `
   --query "mime:text/markdown" `
   --timeout 120 `
-  --batch-size 32
+  --batch-size 4 `
+  --max-runtime 900
 ```
 
 Academic PDF example:
@@ -51,7 +52,8 @@ python src\semantic\recoll_ai.py sync `
   --store .local\booklibrandom-pdfs.sqlite3 `
   --query "dir:BOOKLIBRANDOM mime:application/pdf" `
   --timeout 120 `
-  --batch-size 32
+  --batch-size 4 `
+  --max-runtime 1800
 ```
 
 The query is executed by Recoll/Xapian. Validate it in ordinary Recoll first.
@@ -68,8 +70,11 @@ queries into one store and plan explicit stale cleanup.
 
 ### Long runs
 
-Embedding thousands of segments can run for a long time. Progress reporting is still
-limited. Use bounded sample stores before full-corpus work. Cancellation may leave
+Embedding thousands of segments can run for a long time. Use bounded sample stores
+before full-corpus work. `--timeout` bounds each Ollama request; `--max-runtime` is
+checked between those bounded requests. The index-builder GUI additionally terminates
+its owned child at the configured total limit. `--progress` emits privacy-safe document
+and batch stages to stderr without changing JSON stdout. Cancellation may leave
 already committed documents intact; atomic replacement protects the document being
 written, and stale deletion is skipped when enumeration/embedding fails.
 
@@ -192,4 +197,3 @@ git log -3 --oneline
 
 Update `SESSION_START.md` when state, milestone, risks, or mandatory operating rules
 changed. Commit locally only. Never fetch, pull, push, or open a remote PR.
-

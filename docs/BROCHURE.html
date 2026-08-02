@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recoll Next — A local-first, evidence-first knowledge system</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --panel: #ffffff;
+    --text: #1c2430;
+    --muted: #5b6675;
+    --border: #e1e5eb;
+    --accent: #1f6feb;
+    --accent-ink: #0b3d91;
+    --code-bg: #0f172a;
+    --code-text: #e2e8f0;
+    --chip-bg: #eef3fc;
+    --good: #1a7f37;
+    --plan: #9a6700;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1420; --panel: #161d2b; --text: #e6eaf2; --muted: #9aa5b6;
+      --border: #263049; --accent: #6ea8fe; --accent-ink: #bcd6ff;
+      --code-bg: #0a0e17; --code-text: #d7e2f4; --chip-bg: #17233d;
+      --good: #56d364; --plan: #e3b341;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1420; --panel: #161d2b; --text: #e6eaf2; --muted: #9aa5b6;
+    --border: #263049; --accent: #6ea8fe; --accent-ink: #bcd6ff;
+    --code-bg: #0a0e17; --code-text: #d7e2f4; --chip-bg: #17233d;
+    --good: #56d364; --plan: #e3b341;
+  }
+  :root[data-theme="light"] {
+    --bg: #f7f8fa; --panel: #ffffff; --text: #1c2430; --muted: #5b6675;
+    --border: #e1e5eb; --accent: #1f6feb; --accent-ink: #0b3d91;
+    --code-bg: #0f172a; --code-text: #e2e8f0; --chip-bg: #eef3fc;
+    --good: #1a7f37; --plan: #9a6700;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.65 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 40px 24px 96px; }
+
+  header.hero {
+    padding: 44px 32px; border: 1px solid var(--border); border-radius: 16px;
+    background: linear-gradient(135deg, var(--chip-bg), var(--panel));
+    margin-bottom: 28px; text-align: center;
+  }
+  header.hero p.kicker {
+    text-transform: uppercase; letter-spacing: .1em; font-size: .8rem;
+    color: var(--accent-ink); font-weight: 700; margin: 0 0 10px;
+  }
+  header.hero h1 { margin: 0 0 12px; font-size: 2.3rem; line-height: 1.2; }
+  header.hero p.lede {
+    margin: 0 auto; max-width: 640px; color: var(--muted); font-size: 1.12rem;
+  }
+  header.hero .cta { margin-top: 22px; }
+  .btn {
+    display: inline-block; padding: 11px 22px; border-radius: 999px;
+    background: var(--accent); color: #fff; text-decoration: none; font-weight: 700;
+    margin: 0 6px;
+  }
+  .btn.ghost {
+    background: transparent; color: var(--accent-ink); border: 1px solid var(--border);
+  }
+
+  nav.toc {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; margin-bottom: 32px;
+  }
+  nav.toc h2 { margin: 0 0 10px; font-size: .9rem; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--muted); }
+  nav.toc ul {
+    margin: 0; padding: 0; list-style: none; columns: 2; gap: 8px 24px;
+  }
+  nav.toc li { margin: 3px 0; break-inside: avoid; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  section {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 26px 28px; margin-bottom: 20px; scroll-margin-top: 20px;
+  }
+  section h2 { margin: 0 0 8px; font-size: 1.35rem; }
+  section h3 { margin: 18px 0 6px; font-size: 1.05rem; }
+  section p { margin: 8px 0; }
+  section .backtotop { display: inline-block; margin-top: 10px; font-size: .85rem; }
+
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+  @media (max-width: 680px) { .feature-grid { grid-template-columns: 1fr; } }
+  .feature {
+    border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px;
+    background: var(--chip-bg);
+  }
+  .feature h4 { margin: 0 0 6px; font-size: 1rem; }
+  .feature p { margin: 0; color: var(--text); font-size: .94rem; }
+
+  .lens-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; padding: 0; list-style: none; }
+  .lens-list li {
+    border: 1px solid var(--border); border-radius: 999px; padding: 5px 14px;
+    font-size: .88rem; background: var(--chip-bg);
+  }
+
+  .flow {
+    font-family: "Cascadia Code", Consolas, "SF Mono", Menlo, monospace;
+    font-size: .82rem; background: var(--code-bg); color: var(--code-text);
+    padding: 16px 18px; border-radius: 10px; overflow-x: auto; white-space: pre;
+  }
+
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: .92rem; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--chip-bg); }
+  .status { font-weight: 700; font-size: .82rem; }
+  .status.done { color: var(--good); }
+  .status.open { color: var(--plan); }
+
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--chip-bg);
+    padding: 14px 18px; border-radius: 8px; margin: 14px 0;
+  }
+  .callout p { margin: 4px 0; }
+  .plain { color: var(--muted); font-size: .94rem; }
+  .journey { margin: 14px 0 0; padding-left: 1.3rem; }
+  .journey li { margin: 8px 0; }
+  details {
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px;
+    margin-top: 12px; background: var(--bg);
+  }
+  summary { cursor: pointer; font-weight: 700; color: var(--accent-ink); }
+
+  a { color: var(--accent); }
+  code { font-family: "Cascadia Code", Consolas, "SF Mono", Menlo, monospace;
+    background: var(--chip-bg); padding: .1em .4em; border-radius: 4px; }
+  footer { color: var(--muted); font-size: .85rem; text-align: center; margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero" id="top">
+    <p class="kicker">Recoll Next</p>
+    <h1>A private librarian for the files on your own computer</h1>
+    <p class="lede">Recoll Next helps you find exact words, discover related ideas, and ask
+      questions about your documents. It shows its sources, keeps ordinary search working,
+      and keeps your work on your machine by default.</p>
+    <div class="cta">
+      <a class="btn" href="QUICKSTART.html">Get started →</a>
+      <a class="btn ghost" href="ARCHITECTURE.md">Read the architecture</a>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Table of contents">
+    <h2>Contents</h2>
+    <ul>
+      <li><a href="#what">What Recoll Next is</a></li>
+      <li><a href="#story">A one-minute story</a></li>
+      <li><a href="#journey">What happens to a question</a></li>
+      <li><a href="#privacy">Why local-first, actually means it</a></li>
+      <li><a href="#model">The Polaroid and Prism model</a></li>
+      <li><a href="#modes">Three ways to search</a></li>
+      <li><a href="#answers">Cited answers, not confident guesses</a></li>
+      <li><a href="#memory">Perspective Memory</a></li>
+      <li><a href="#ledger">A tamper-evident history</a></li>
+      <li><a href="#architecture">Architecture at a glance</a></li>
+      <li><a href="#status">What's real today</a></li>
+      <li><a href="#words">Friendly word guide</a></li>
+      <li><a href="#roadmap">What's next</a></li>
+      <li><a href="#learnmore">Learn more</a></li>
+    </ul>
+  </nav>
+
+  <section id="what">
+    <h2>What Recoll Next is</h2>
+    <p>Imagine one computer holding class notes, reports, PDFs, books, meeting records, and
+      project files. Ordinary folders help you browse, but they do not always help you find
+      an idea whose exact words you have forgotten.</p>
+    <p>Recoll Next combines four local helpers:</p>
+    <div class="feature-grid">
+      <div class="feature"><h4>Recoll: the librarian</h4><p>Reads many file types, makes a searchable index, and finds exact words and document details.</p></div>
+      <div class="feature"><h4>Semantic search: the idea matcher</h4><p>Finds passages that mean something similar even when they use different words.</p></div>
+      <div class="feature"><h4>Ollama: the local explainer</h4><p>Organizes selected passages into an answer, summary, timeline, decision list, or action list.</p></div>
+      <div class="feature"><h4>Citations: the evidence trail</h4><p>Connect each accepted AI answer to the exact passages and original files used.</p></div>
+    </div>
+    <div class="callout"><p><strong>The most important rule:</strong> AI is a helper, not the
+      authority. Your original files and Recoll's index stay in charge.</p></div>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="story">
+    <h2>A one-minute story: the science-fair question</h2>
+    <p>Maya has 200 notes about a school garden. She asks, <em>“Why did the tomato plants
+      grow slowly?”</em></p>
+    <ol class="journey">
+      <li><strong>Exact search</strong> finds notes containing words such as “tomato,” “slow,” and “growth.”</li>
+      <li><strong>Concept search</strong> may also find “not enough sunlight” and “soil stayed too wet,” even without the word “slowly.”</li>
+      <li>Maya reads the evidence cards and selects the useful passages.</li>
+      <li>The local AI makes a short explanation and cites those passages.</li>
+      <li>Maya opens the original notes to check the answer before using it in her report.</li>
+    </ol>
+    <p>This is evidence exploration: the software helps Maya investigate; it does not ask
+      her to believe an answer with no proof.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="journey">
+    <h2>What happens when you ask a question</h2>
+    <ol class="journey">
+      <li><strong>Index:</strong> Recoll has already made a map of words and facts about your files.</li>
+      <li><strong>Retrieve:</strong> Recoll Next finds a small group of likely passages.</li>
+      <li><strong>Inspect:</strong> you can read those passages before asking AI to explain them.</li>
+      <li><strong>Interpret:</strong> Ollama receives only the bounded evidence selected for the task.</li>
+      <li><strong>Validate:</strong> the program rejects missing or made-up citation IDs.</li>
+      <li><strong>Verify:</strong> you can open the original document and judge the result yourself.</li>
+    </ol>
+    <p class="plain">“Bounded” means limited on purpose. The model receives a small evidence
+      set rather than being invited to guess from everything.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="privacy">
+    <h2>Why "local-first" actually means it</h2>
+    <div class="feature-grid">
+      <div class="feature">
+        <h4>Loopback only, by policy</h4>
+        <p>The AI connection points back to this same computer. The program rejects ordinary
+          internet or local-network addresses under its default policy.</p>
+      </div>
+      <div class="feature">
+        <h4>No cloud models, by default</h4>
+        <p>Cloud model identifiers and non-loopback endpoints are rejected by the default
+          configuration. Changing that is a deliberate, governed policy change.</p>
+      </div>
+      <div class="feature">
+        <h4>Content stays out of logs</h4>
+        <p>Full documents, private prompts, and credentials are excluded from diagnostic
+          logs and the event ledger — which record identifiers and measurements, not
+          bodies of text.</p>
+      </div>
+      <div class="feature">
+        <h4>Derived data is disposable</h4>
+        <p>The idea-matching database can be rebuilt. Deleting it does not delete the
+          original documents or Recoll's ordinary search index.</p>
+      </div>
+    </div>
+    <p class="plain">Local-first is a strong default, not a promise that every local process
+      is harmless. The computer owner still needs normal account security, disk encryption,
+      private backups, and trusted document-reading tools.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="model">
+    <h2>The Polaroid and Prism model</h2>
+    <p>Every result starts life as a <strong>Polaroid</strong> — a stable, factual evidence
+      card: title, path, date, matching terms, the actual passage, and exactly why it was
+      retrieved. The Polaroid layer contains no AI-generated facts and works completely on
+      its own.</p>
+    <p>On top of that evidence, Ollama can apply a <strong>Prism</strong> — a selectable lens
+      that organizes the same evidence differently. A lens is an interpretation, never a
+      mutation: selecting one never hides the underlying evidence cards.</p>
+    <ul class="lens-list">
+      <li>Exact</li><li>Concept</li><li>Timeline</li><li>People</li><li>Decision</li>
+      <li>Action</li><li>Agreement</li><li>Contradiction</li><li>Origin</li><li>Novelty</li>
+    </ul>
+    <p>Today's desktop workspace implements the answer, summary, timeline, contradiction,
+      decision, and action views over this same evidence-first foundation.</p>
+    <p class="plain"><strong>In simpler words:</strong> the Polaroid is “what the source
+      shows.” The Prism is “one useful way to look at it.” You can always return to the source.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="modes">
+    <h2>Three ways to search</h2>
+    <table>
+      <tr><th>Mode</th><th>Plain-language job</th><th>Example</th><th>Needs local AI?</th></tr>
+      <tr><td><strong>Exact</strong></td><td>Find these words or filters in Recoll's normal order.</td><td><code>title:volcano</code></td><td>No</td></tr>
+      <tr><td><strong>Prismatic</strong></td><td>Blend word matches and idea matches without pretending their scores mean the same thing.</td><td>Find “water shortage” plus related “drought” passages.</td><td>Uses it, but falls back to Exact evidence if semantics fail.</td></tr>
+      <tr><td><strong>Conceptual</strong></td><td>Lead with similar meaning, then check every result against live Recoll data.</td><td>Connect “plants lacked light” with “insufficient sun exposure.”</td><td>Yes</td></tr>
+    </table>
+    <p>Recoll is always the authority on what documents exist. Semantic retrieval only ever
+      <em>adds</em> conceptually related material on top of that — it never gets to decide
+      the corpus by itself.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="answers">
+    <h2>Cited answers, not confident guesses</h2>
+    <p>When you ask a question, the model receives a bounded set of retrieved passages and
+      must return citations alongside its answer. Before anything reaches the screen:</p>
+    <ul>
+      <li>every cited segment ID must have actually been supplied to the model;</li>
+      <li>every cited segment must still resolve inside the live Recoll index;</li>
+      <li>an answer with an invented, malformed, or unresolved citation is <strong>rejected
+        outright</strong> — never silently repaired to look trustworthy;</li>
+      <li>the exact rank and identity of the evidence you selected is re-verified against a
+        fresh search immediately before generation, so you're never interpreting evidence
+        that quietly changed underneath you.</li>
+    </ul>
+    <p>When evidence is absent, conflicting, or thin, the system is designed to say so
+      rather than paper over the gap with fluent prose.</p>
+    <div class="callout"><p><strong>A citation is a trail, not a truth stamp.</strong> The
+      validator proves that a cited passage was supplied and still exists. A person should
+      still check whether the AI understood that passage fairly.</p></div>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="memory">
+    <h2>Perspective Memory</h2>
+    <p>Answers you choose to keep are stored as <strong>secondary</strong> local memory —
+      never as primary documentary fact. A later memory search only returns a saved
+      perspective if its cited segment, document, and source revision still resolve; once a
+      source changes, the stale memory is suppressed rather than surfaced as current. Use
+      <code>--no-remember</code> for anything ephemeral or sensitive.</p>
+    <p class="plain">Think of this as a notebook of earlier AI explanations with source
+      labels attached. It is not allowed to turn an old explanation into a new primary fact.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="ledger">
+    <h2>A tamper-evident history</h2>
+    <p>Major architectural decisions and milestones are recorded as a hash-chained,
+      append-only event ledger — each entry references the previous entry's hash, and the
+      chain is independently verifiable at any time:</p>
+    <pre class="flow">python src/semantic/rclsem_ledger.py verify governance/events.jsonl</pre>
+    <p>The ledger records what happened and why, in privacy-safe terms — never full
+      documents, prompts, or credentials — and checkpoints of the verified head are kept in
+      <code>governance/CHECKPOINTS.md</code> for independent readability.</p>
+    <p class="plain">A hash chain is like a lab notebook whose numbered pages each include
+      a fingerprint of the page before it. Changing an old page breaks the later links. It
+      detects many changes, but it cannot stop someone from replacing the entire notebook
+      and every separately saved checkpoint.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="architecture">
+    <h2>Architecture at a glance</h2>
+    <pre class="flow">Original files
+  -&gt; Recoll extractors and metadata filters
+  -&gt; Xapian lexical index (authoritative document inventory)
+  -&gt; deterministic, source-preserving segments
+  -&gt; local Ollama embeddings
+  -&gt; SQLite semantic namespace (disposable, rebuildable sidecar)
+  -&gt; Xapian-first Exact / Prismatic (RRF) / Conceptual retrieval
+  -&gt; bounded local Ollama generation
+  -&gt; citation validator (fail-closed)
+  -&gt; optional Perspective Memory
+  -&gt; Tk workspace / native Qt AI dock
+
+Cross-cutting: runtime JSONL ledger + versioned project governance chain</pre>
+    <p>See the full <a href="ARCHITECTURE.md">Architecture</a> and
+      <a href="XAPIAN_FIRST_PROTOCOL.md">Xapian-First Hybrid Search Protocol</a> documents
+      for the normative detail behind this diagram.</p>
+    <details><summary>Why are there two indexes?</summary><p>Recoll/Xapian is the trusted
+      word-and-document index. SQLite stores rebuildable vectors for idea matching. Keeping
+      them separate means ordinary search can survive an AI outage or a damaged semantic store.</p></details>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="status">
+    <h2>What's real today</h2>
+    <p>Recoll Next distinguishes <em>implemented</em> from <em>planned</em> deliberately, and
+      this brochure keeps that honesty:</p>
+    <table>
+      <tr><th>Capability</th><th>Status</th></tr>
+      <tr><td>Local Ollama adapter, loopback-enforced</td><td class="status done">Implemented</td></tr>
+      <tr><td>Deterministic segmentation and incremental semantic sync</td><td class="status done">Implemented</td></tr>
+      <tr><td>Exact / Prismatic / Conceptual hybrid retrieval with live staleness checks</td><td class="status done">Implemented</td></tr>
+      <tr><td>Cited answers with fail-closed citation validation</td><td class="status done">Implemented</td></tr>
+      <tr><td>Evidence-first Tk desktop workspace and separate index-builder tool</td><td class="status done">Implemented</td></tr>
+      <tr><td>Provenance-gated Perspective Memory</td><td class="status done">Implemented</td></tr>
+      <tr><td>Hash-chained governance and runtime event ledgers</td><td class="status done">Implemented, 98 automated tests passing</td></tr>
+      <tr><td>Native Qt AI Perspective dock</td><td class="status open">Implemented in source; not yet compiled (no Qt SDK on the source workstation)</td></tr>
+      <tr><td>Full-corpus retrieval acceleration (current search is an exact scan)</td><td class="status open">Planned — correct now, not yet scaled</td></tr>
+      <tr><td>Verified second-machine / cross-OS portability</td><td class="status open">Documented; a same-machine clean rebuild has passed, a physical second machine has not yet been tried</td></tr>
+    </table>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="words">
+    <h2>Friendly word guide</h2>
+    <table>
+      <tr><th>Project word</th><th>What it means here</th></tr>
+      <tr><td><strong>Corpus</strong></td><td>The collection of documents you choose to search.</td></tr>
+      <tr><td><strong>Index</strong></td><td>A fast lookup map, like the index at the back of a textbook.</td></tr>
+      <tr><td><strong>Lexical search</strong></td><td>Search based mainly on words, phrases, fields, and spelling.</td></tr>
+      <tr><td><strong>Semantic search</strong></td><td>Search for similar meaning or ideas.</td></tr>
+      <tr><td><strong>Embedding / vector</strong></td><td>A list of numbers made by a local model to represent meaning for comparison.</td></tr>
+      <tr><td><strong>Segment</strong></td><td>A bounded passage cut from a larger document, with its original location saved.</td></tr>
+      <tr><td><strong>SQLite sidecar</strong></td><td>A separate local database that travels beside the main search engine and can be rebuilt.</td></tr>
+      <tr><td><strong>Ollama</strong></td><td>The program that runs the configured AI models on this computer.</td></tr>
+      <tr><td><strong>Citation</strong></td><td>A link from an AI explanation back to the exact supplied evidence.</td></tr>
+      <tr><td><strong>Provenance</strong></td><td>Where a result came from and what steps produced it.</td></tr>
+      <tr><td><strong>Fail closed</strong></td><td>Show an error instead of a possibly unsupported answer.</td></tr>
+    </table>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="roadmap">
+    <h2>What's next</h2>
+    <ul>
+      <li>Measure hybrid relevance on a representative corpus and retire transitional
+        duplicated evidence fields.</li>
+      <li>Compile and validate the native Qt dock once a matching Qt/C++ SDK is available.</li>
+      <li>Replace the exact-scan retrieval core with an accelerated structure, keeping the
+        exact scanner as the correctness oracle.</li>
+      <li>Ledger checkpoint signing, retention/redaction tooling, and an offline-capable
+        Windows package.</li>
+    </ul>
+    <p>See the full <a href="ROADMAP.md">Implementation Roadmap</a> for the phase-by-phase
+      plan and exit criteria.</p>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <section id="learnmore">
+    <h2>Learn more</h2>
+    <ul>
+      <li><a href="QUICKSTART.html">Quick Start Guide</a> — get a first cited answer running.</li>
+      <li><a href="PRISMATIC_SEARCH.md">Prismatic Search Charter</a> — the fiduciary duties every feature must honor.</li>
+      <li><a href="GOAL_FIDELITY.md">Goal Fidelity Covenant</a> — the invariants that keep the project honest as it grows.</li>
+      <li><a href="SECURITY_AND_PRIVACY.md">Security and Privacy Model</a> — assets, trust boundaries, and known residual risks.</li>
+      <li><a href="AI_WORKSPACE.md">AI Perspective Workspace</a> — the full desktop-presentation reference.</li>
+      <li><a href="README.md">Documentation map</a> — every contract and reference document, indexed.</li>
+    </ul>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </section>
+
+  <footer>Recoll Next is an independent, local-first product derived from Recoll. Historical
+    Git metadata is lineage only.</footer>
+</div>
+</body>
+</html>

@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import asdict
 import json
+import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Sequence
 import uuid
@@ -23,6 +24,22 @@ DEFAULT_EMBEDDING_MODEL = "embeddinggemma"
 DEFAULT_CHAT_MODEL = "gemma3:4b"
 
 
+def _recoll_profile_label(confdir: str) -> str:
+    if confdir:
+        return str(Path(confdir).resolve())
+    configured = os.environ.get("RECOLL_CONFDIR", "").strip()
+    if configured:
+        return str(Path(configured).resolve())
+    if os.name == "nt":
+        local_app_data = os.environ.get("LOCALAPPDATA", "").strip()
+        if local_app_data:
+            candidate = Path(local_app_data) / "Recoll"
+            if candidate.is_dir():
+                return str(candidate)
+    candidate = Path.home() / ".recoll"
+    return str(candidate) if candidate.is_dir() else "default (resolved by Recoll)"
+
+
 class _UnavailableSemanticSearcher:
     """Defer semantic setup failure so Prismatic can return lexical evidence."""
 
@@ -31,6 +48,52 @@ class _UnavailableSemanticSearcher:
 
     def search(self, query: str, *, limit: int = 10):
         raise self.error
+
+
+class _RankedEvidenceRetriever:
+    """Re-run an authoritative mode and fail if selected visible evidence changed."""
+
+    def __init__(
+        self,
+        coordinator: Any,
+        *,
+        mode: str,
+        ranks: Sequence[int] = (),
+        expected_segment_ids: Sequence[str] = (),
+    ):
+        if any(rank <= 0 for rank in ranks):
+            raise ValueError("evidence ranks must be positive")
+        if len(ranks) != len(expected_segment_ids):
+            raise ValueError(
+                "evidence ranks and expected segment identifiers must have equal length"
+            )
+        if len(set(ranks)) != len(ranks):
+            raise ValueError("evidence ranks must be unique")
+        self.coordinator = coordinator
+        self.mode = mode
+        self.ranks = tuple(ranks)
+        self.expected_segment_ids = tuple(expected_segment_ids)
+        self.last_report = None
+
+    def search(self, query: str, *, limit: int = 10):
+        requested_limit = max((limit, *self.ranks))
+        self.last_report = self.coordinator.search(
+            query, mode=self.mode, limit=requested_limit
+        )
+        results = list(self.last_report.results)
+        if not self.ranks:
+            return results[:limit]
+        selected = []
+        for rank, expected_segment_id in zip(
+            self.ranks, self.expected_segment_ids
+        ):
+            if rank > len(results):
+                raise ValueError("visible evidence changed; run Find Evidence again")
+            item = results[rank - 1]
+            if item.segment_id != expected_segment_id:
+                raise ValueError("visible evidence changed; run Find Evidence again")
+            selected.append(item)
+        return selected
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -54,6 +117,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Python runtime containing recoll.recoll (auto-detected on Windows)",
     )
     sync.add_argument("--batch-size", default=32, type=int)
+    sync.add_argument(
+        "--max-runtime",
+        default=1800.0,
+        type=float,
+        help="total sync budget in seconds, checked between bounded model requests",
+    )
     sync.add_argument("--target-chars", default=900, type=int)
     sync.add_argument("--overlap-chars", default=150, type=int)
     sync.add_argument("--keep-missing", action="store_true")
@@ -87,6 +156,40 @@ def _build_parser() -> argparse.ArgumentParser:
     ask.add_argument("query", help="local question")
     ask.add_argument("--chat-model", default=DEFAULT_CHAT_MODEL)
     ask.add_argument("--evidence-limit", default=6, type=int)
+    ask.add_argument(
+        "--max-runtime",
+        default=900.0,
+        type=float,
+        help="total answer budget in seconds, checked between bounded model requests",
+    )
+    ask.add_argument(
+        "--mode",
+        choices=("exact", "prismatic", "conceptual"),
+        default="conceptual",
+        help="retrieval mode used to obtain answer evidence",
+    )
+    ask.add_argument("--confdir", default="", help="Recoll configuration directory")
+    ask.add_argument(
+        "--recoll-python",
+        help="Python runtime containing recoll.recoll (auto-detected on Windows)",
+    )
+    ask.add_argument("--candidate-limit", default=50, type=int)
+    ask.add_argument("--rrf-k", default=60, type=int)
+    ask.add_argument("--lexical-weight", default=1.0, type=float)
+    ask.add_argument("--semantic-weight", default=1.0, type=float)
+    ask.add_argument(
+        "--evidence-rank",
+        action="append",
+        default=[],
+        type=int,
+        help="one-based visible result rank selected for interpretation",
+    )
+    ask.add_argument(
+        "--expected-segment-id",
+        action="append",
+        default=[],
+        help="segment identity expected at the corresponding selected rank",
+    )
     ask.add_argument(
         "--no-remember",
         action="store_false",
@@ -130,6 +233,11 @@ def _add_semantic_options(
         help="event ledger path (default: <store>.events.jsonl)",
     )
     parser.add_argument("--session", dest="session_id")
+    parser.add_argument(
+        "--progress",
+        action="store_true",
+        help="emit privacy-safe structured progress to stderr",
+    )
     parser.add_argument("--json", action="store_true", dest="as_json")
 
 
@@ -263,6 +371,7 @@ def _run_sync(args: argparse.Namespace) -> Dict[str, Any]:
         segmenter=segmenter,
         batch_size=args.batch_size,
         event_sink=_event_sink(args.store, args.ledger, args.session_id),
+        progress_callback=_progress_sink if args.progress else None,
     )
     inventory = RecollInventory(
         confdir=args.confdir,
@@ -271,17 +380,26 @@ def _run_sync(args: argparse.Namespace) -> Dict[str, Any]:
     )
     report = asdict(
         synchronizer.sync(
-            inventory.documents(), delete_missing=not args.keep_missing
+            inventory.documents(),
+            delete_missing=not args.keep_missing,
+            max_runtime_seconds=args.max_runtime,
         )
     )
-    return {"status": "synchronized", **report}
+    return {
+        "status": "synchronized",
+        **report,
+        "recoll_profile": _recoll_profile_label(args.confdir),
+        "scope_query": args.query,
+        "request_timeout_seconds": args.timeout,
+        "max_runtime_seconds": args.max_runtime,
+        "batch_size": args.batch_size,
+    }
 
 
-def _run_search(args: argparse.Namespace) -> Dict[str, Any]:
+def _search_coordinator(args: argparse.Namespace, sink: Any):
     from rclsem_hybrid import HybridSearchCoordinator, LexicalSearcher
     from rclsem_recoll import RecollQueryService
 
-    sink = _optional_event_sink(args.store, args.ledger, args.session_id)
     documents = RecollQueryService(
         confdir=args.confdir, bridge_python=args.recoll_python
     )
@@ -306,7 +424,7 @@ def _run_search(args: argparse.Namespace) -> Dict[str, Any]:
             if args.mode == "conceptual":
                 raise
             semantic = _UnavailableSemanticSearcher(ex)
-    coordinator = HybridSearchCoordinator(
+    return HybridSearchCoordinator(
         lexical,
         documents,
         semantic,
@@ -316,8 +434,27 @@ def _run_search(args: argparse.Namespace) -> Dict[str, Any]:
         semantic_weight=args.semantic_weight,
         event_sink=sink,
     )
+
+
+def _run_search(args: argparse.Namespace) -> Dict[str, Any]:
+    sink = _optional_event_sink(args.store, args.ledger, args.session_id)
+    coordinator = _search_coordinator(args, sink)
     report = coordinator.search(args.query, mode=args.mode, limit=args.limit)
     results = [asdict(result) for result in report.results]
+    store_name = Path(args.store).name if args.store else ""
+    profile = _recoll_profile_label(args.confdir)
+    if args.mode == "exact":
+        scope_note = f"active Recoll profile: {profile}"
+    elif args.mode == "conceptual":
+        scope_note = (
+            f"semantic store {store_name}; results revalidated through Recoll profile: "
+            f"{profile}"
+        )
+    else:
+        scope_note = (
+            f"active Recoll profile ({profile}) + semantic store {store_name}; "
+            "their configured document scopes may differ"
+        )
     return {
         "status": "ready",
         "mode": report.mode,
@@ -326,34 +463,45 @@ def _run_search(args: argparse.Namespace) -> Dict[str, Any]:
         "semantic_error_type": report.semantic_error_type,
         "stale_rejected": report.stale_rejected,
         "results": results,
+        "recoll_profile": profile,
+        "scope_note": scope_note,
     }
 
 
 def _run_ask(args: argparse.Namespace) -> Dict[str, Any]:
     from rclsem_answer import CitedAnswerComposer
-    from rclsem_retrieve import SemanticSearcher
-    from rclsem_store import SemanticStore
 
     client = OllamaClient(args.endpoint, timeout=args.timeout)
     sink = _event_sink(args.store, args.ledger, args.session_id)
-    searcher = SemanticSearcher(
-        SemanticStore(args.store),
-        client,
-        embedding_model=args.embedding_model,
-        event_sink=sink,
+    searcher = _RankedEvidenceRetriever(
+        _search_coordinator(args, sink),
+        mode=args.mode,
+        ranks=args.evidence_rank,
+        expected_segment_ids=args.expected_segment_id,
     )
     composer = CitedAnswerComposer(
         searcher,
         client,
         chat_model=args.chat_model,
         event_sink=sink,
+        progress_callback=_progress_sink if args.progress else None,
     )
     cited_answer = composer.ask(
         args.query,
         evidence_limit=args.evidence_limit,
         view=args.view,
+        max_runtime_seconds=args.max_runtime,
     )
-    report = {"status": "answered", **asdict(cited_answer), "remembered": False}
+    report = {
+        "status": "answered",
+        **asdict(cited_answer),
+        "retrieval_mode": args.mode,
+        "selected_ranks": list(args.evidence_rank),
+        "recoll_profile": _recoll_profile_label(args.confdir),
+        "remember_requested": args.remember,
+        "max_runtime_seconds": args.max_runtime,
+        "remembered": False,
+    }
     if args.remember and not cited_answer.insufficient_evidence:
         try:
             from rclsem_perspectives import PerspectiveCitation, PerspectiveMemory
@@ -434,6 +582,14 @@ def _print_operation(report: Dict[str, Any]) -> None:
             f"unchanged={report['documents_unchanged']} deleted={report['documents_deleted']}"
         )
         print(f"Segments embedded: {report['segments_embedded']}")
+        print(f"Recoll profile: {report.get('recoll_profile', 'unknown')}")
+        print(f"Scope query: {report.get('scope_query', 'unknown')}")
+        print(
+            "Limits: "
+            f"request={report.get('request_timeout_seconds')}s "
+            f"total={report.get('max_runtime_seconds')}s "
+            f"batch={report.get('batch_size')}"
+        )
         return
     if report["status"] == "answered":
         print(f"Local AI {report['view']}:")
@@ -451,10 +607,19 @@ def _print_operation(report: Dict[str, Any]) -> None:
                 f"source={citation['path']} "
                 f"offsets={citation['source_start']}:{citation['source_end']}"
             )
+            excerpt = " ".join(str(citation.get("text") or "").split())[:320]
+            if excerpt:
+                print(f"      excerpt={excerpt}")
         if report.get("remembered"):
             print(f"Perspective memory: {report['perspective_id']}")
         elif report.get("memory_error_type"):
             print(f"Perspective memory unavailable: {report['memory_error_type']}")
+        elif not report.get("remember_requested"):
+            print("Perspective memory: not saved (--no-remember)")
+        elif report.get("insufficient_evidence"):
+            print("Perspective memory: not saved (insufficient evidence)")
+        else:
+            print("Perspective memory: not saved")
         return
     if report["status"] == "memory_ready":
         print(f"Perspective memory results: {report['result_count']}")
@@ -471,6 +636,8 @@ def _print_operation(report: Dict[str, Any]) -> None:
         " (semantic unavailable; lexical fallback)" if report.get("degraded") else ""
     )
     print(f"{mode.title()} results: {report['result_count']}{suffix}")
+    if report.get("scope_note"):
+        print(f"Scope: {report['scope_note']}")
     for position, result in enumerate(report["results"], start=1):
         label = result["title"] or result["path"] or result["document_id"]
         if result.get("fusion_score") is not None:
@@ -484,7 +651,22 @@ def _print_operation(report: Dict[str, Any]) -> None:
             f"   source={result['path']} offsets="
             f"{result['source_start']}:{result['source_end']}"
         )
+        channels = "+".join(result.get("provenance") or ()) or "unknown"
+        print(
+            f"   found_via={channels} "
+            f"lexical_rank={result.get('lexical_rank')} "
+            f"semantic_rank={result.get('semantic_rank')}"
+        )
         print(f"   {result['text']}")
+
+
+def _progress_sink(payload: Dict[str, object]) -> None:
+    print(
+        "RECOLL_PROGRESS "
+        + json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")),
+        file=sys.stderr,
+        flush=True,
+    )
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -510,6 +692,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             report = _run_ask(args)
         else:
             report = _run_memory_search(args)
+    except KeyboardInterrupt:
+        error = {
+            "status": "cancelled",
+            "error_type": "KeyboardInterrupt",
+            "error": "operation cancelled safely; original files and Recoll were not modified",
+        }
+        if args.as_json:
+            print(json.dumps(error, ensure_ascii=False, sort_keys=True))
+        else:
+            print(f"Recoll AI cancelled: {error['error']}")
+        return 130
     except Exception as ex:
         # The command line is a trust boundary: report the typed failure, never a
         # traceback which might contain extracted document text.

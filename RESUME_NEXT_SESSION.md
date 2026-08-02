@@ -1,19 +1,22 @@
 # Recoll Next — restart capsule
 
-This file is the operational handoff for the session that follows the Xapian-first
-hybrid retrieval milestone. Read it immediately after `SESSION_START.md`. The tracked
-contracts remain authoritative; this document records the exact stopping point and
-the safest order for resuming work.
+This file is the operational handoff for the source-publication-readiness checkpoint.
+Read it immediately after `SESSION_START.md`. The tracked contracts remain
+authoritative; this document records the exact stopping point and the safest order for
+resuming work.
 
 ## Resume anchor
 
-- Product implementation anchor: `41696e1ec88085ac59928c7d26f5927d479c658b`
-  (`Constrain generated citations to supplied evidence`).
-- Project ledger at that milestone: 29 events.
+- Last committed anchor on entry to the publication pass: `13d02595`
+  (`Record citation reliability checkpoint`). Always inspect for a newer local
+  publication checkpoint before relying on this historical entry anchor.
+- Project ledger at the publication-policy decision: 32 events.
 - Verified ledger head:
-  `f8e1035fab6a35f43f674649e3086fc0b1fbbdc3b8b721118104ad38cebd85e0`.
-- Citation-schema allowlist decision: sequence 29 at the verified head above.
-- Semantic test suite: 83 tests passing.
+  `e8076bea575c7b823b638adb79d1ed36eec11345440d76a604c3cbb564f1d23b`.
+- Source-publication and GPL-2.0-or-later contribution decision: sequence 32 at the
+  verified head above.
+- Semantic test suite: 98 tests passing under Python 3.14 with resource warnings
+  treated as errors.
 - No Git remote operation was performed or authorized.
 - The user-supplied `RecollNext-Audit-and-Development-Pathway.md` is intentionally
   untracked and untouched. A cold directory copy will carry it; a Git bundle will
@@ -47,6 +50,13 @@ The active search boundary is Xapian-first:
   installed callers.
 - Cited-answer structured output enumerates only the supplied segment IDs, while the
   independent validator still rejects any unknown or missing required citation.
+- The Tk presentation is split into an everyday evidence/interpretation workspace and
+  a separate semantic index builder. Progress, bounded total runtime, safe
+  cancellation, and selected-evidence revalidation are covered by the shared CLI
+  contract and tests.
+- Public-source onboarding now includes the brochure, quick start, contribution and
+  security policies, changelog, GPL notice, strengthened ignore rules, and a local
+  publication checklist. Private runtime/data/model artifacts remain excluded.
 
 Primary implementation files:
 
@@ -67,7 +77,7 @@ $env:PYTHONPATH='src/semantic'
 python -m unittest discover -s tests/semantic
 ```
 
-Expected summary: `Ran 83 tests` and `OK`.
+Expected summary: `Ran 98 tests` and `OK`.
 
 Store-free Exact search succeeded against the active Recoll profile:
 
@@ -81,16 +91,9 @@ correctly rejected; current lexical evidence was still returned. This demonstrat
 correct safety behavior, but it also means that store should be resynchronized before
 using it as the representative relevance baseline.
 
-The project ledger verified as:
-
-```json
-{"event_count":26,"head_hash":"396fa010deaedd374b03006a75659fa10fc3bd4021a5c848eea0edd14dd4ff5d"}
-```
-
-That is the hybrid-retrieval milestone anchor. The restart capsule is event 27, the
-retired-native-route decision is event 28, and the citation-schema decision is event
-29. The expected current chain has 29 events with head
-`f8e1035fab6a35f43f674649e3086fc0b1fbbdc3b8b721118104ad38cebd85e0`.
+The project ledger's source-publication decision verified with 32 events and head
+`e8076bea575c7b823b638adb79d1ed36eec11345440d76a604c3cbb564f1d23b`.
+Historical heads remain independently readable in `governance/CHECKPOINTS.md`.
 
 ## Known limitations that remain
 
@@ -116,28 +119,12 @@ retired-native-route decision is event 28, and the citation-schema decision is e
 
 Proceed in this order unless the user explicitly changes priorities.
 
-### 1. Freeze the `41696e1e` audit baseline
+### 1. Preserve the local publication checkpoint
 
-Create a new local source bundle and manifest without contacting a remote. Prove:
-
-- the full 29-event chain verifies from genesis;
-- event 21 reproduces old head
-  `4a4386257d1c7ca484ea8aeec608926fba463ef1cbf148df70e6bd35d81adf08`;
-  confirm the same value independently from the old audit manifest rather than
-  trusting this handoff alone;
-- event 26 terminates at `396fa010...ff5d`, event 27 at `3f98757f...31e3`,
-  event 28 at `f2e2ce5f...82f2`, and event 29 at `f8e1035f...85e0`;
-- `d9500690` is an ancestor of `41696e1e` and the range contains nine commits;
-- the new bundle digest matches its manifest;
-- an isolated clone resolves exactly to `41696e1e`, is clean, and passes 83 tests;
-- Exact succeeds in an isolated environment where no sidecar path exists;
-- Prismatic rejects a deliberately stale copied fixture while returning lexical
-  evidence; and
-- every retirement tombstone exits with its explicit message without importing
-  Chroma.
-
-Do not rename or mutate the user's live sidecar for this proof. Use an isolated clone,
-copied fixture, and temporary runtime ledger.
+Verify the final local commit, 98-test suite, public-product documentation links,
+ignore behavior, and project ledger from genesis. Keep the intentional audit report
+untracked and all private `.local` capsules ignored. Do not configure or contact a new
+host until the repository's no-remote contract is explicitly changed by the operator.
 
 ### 2. Establish the relevance baseline
 

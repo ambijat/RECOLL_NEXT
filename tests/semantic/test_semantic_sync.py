@@ -14,7 +14,11 @@ from rclsem_segments import (  # noqa: E402
     SourceDocument,
 )
 from rclsem_store import SemanticStore, StoreCompatibilityError  # noqa: E402
-from rclsem_sync import SemanticSynchronizer, SynchronizationError  # noqa: E402
+from rclsem_sync import (  # noqa: E402
+    SemanticSynchronizer,
+    SynchronizationError,
+    SynchronizationTimeout,
+)
 
 
 class FakeEventSink:
@@ -42,6 +46,17 @@ class FakeEmbeddingProvider:
     @property
     def embedded_count(self):
         return sum(len(batch) for _, batch in self.calls)
+
+
+class FakeClock:
+    def __init__(self):
+        self.value = 0.0
+
+    def __call__(self):
+        return self.value
+
+    def advance(self, seconds):
+        self.value += seconds
 
 
 class SegmenterTest(unittest.TestCase):
@@ -234,6 +249,50 @@ class SemanticSyncTest(unittest.TestCase):
         self.assertEqual(
             {"namespace_id", "error_type"}, set(events.events[-1][1])
         )
+
+    def test_progress_reports_document_and_batch_boundaries_without_content(self):
+        progress = []
+        synchronizer = SemanticSynchronizer(
+            self.store,
+            self.provider,
+            embedding_model="embeddinggemma",
+            segmenter=self.segmenter,
+            batch_size=2,
+            progress_callback=progress.append,
+        )
+        report = synchronizer.sync([self.first])
+        stages = [item["stage"] for item in progress]
+        self.assertIn("document_started", stages)
+        self.assertIn("batch_completed", stages)
+        self.assertIn("document_completed", stages)
+        self.assertEqual("completed", stages[-1])
+        self.assertEqual(report.segments_embedded, progress[-1]["segments_embedded"])
+        self.assertNotIn(self.first.text, str(progress))
+        self.assertNotIn(self.first.path, str(progress))
+
+    def test_total_runtime_expires_at_batch_boundary_without_partial_document(self):
+        clock = FakeClock()
+
+        class SlowProvider(FakeEmbeddingProvider):
+            def embed(inner_self, model, inputs):
+                result = super(SlowProvider, inner_self).embed(model, inputs)
+                clock.advance(2)
+                return result
+
+        synchronizer = SemanticSynchronizer(
+            self.store,
+            SlowProvider(),
+            embedding_model="embeddinggemma",
+            segmenter=self.segmenter,
+            batch_size=1,
+            clock=clock,
+        )
+        with self.assertRaises(SynchronizationTimeout):
+            synchronizer.sync([self.first], max_runtime_seconds=1)
+        namespace = self.store.ensure_namespace(
+            "embeddinggemma", self.segmenter.version
+        )
+        self.assertEqual((0, 0), self.store.counts(namespace.namespace_id))
 
 
 if __name__ == "__main__":

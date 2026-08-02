@@ -28,6 +28,9 @@ later appends do not modify earlier entries.
 | 2026-07-20 | 27 | `3f98757f719a9071292de73e187f586317b0bbfabfcffdfdf4895e3f626231e3` | Portable restart capsule records the `ad45283a` implementation anchor, verified state, transfer cautions, and ordered next course after 81 passing tests. |
 | 2026-07-25 | 28 | `f2e2ce5f685148fa5d431a985cffed7988337449c130bf491eab9421ba1482f2` | Obsolete native semantic worker route retired; the AI Perspective JSON boundary remains supported and compatibility tombstones remain bounded. |
 | 2026-07-25 | 29 | `f8e1035fab6a35f43f674649e3086fc0b1fbbdc3b8b721118104ad38cebd85e0` | Structured answer generation is constrained to supplied citation IDs while independent fail-closed validation remains mandatory. |
+| 2026-07-25 | 30 | `a4f9850be0be1c27f2b14444f9682067011422d7e13e79347c52b2ffb3fc8a56` | GUI hygiene pass: removed the dead pre-workspace Tk class, documented (via test) that citation-ID resolution does not verify answer-text grounding in the cited segment, added a top-level double-click launcher; 89 tests pass. |
+| 2026-07-25 | 31 | `bfc5d23a33b33265a1c1a898c130fde41c14ea15949317ff2607b087866a7234` | Split the Tk GUI into two standalone apps (search/interpret vs. rebuild-index) after review; also records that an incorrectly dir-scoped sync without `--keep-missing` deleted the BOOKLIBRANDOM semantic store's 22 documents — source PDFs and Recoll's lexical index were unaffected, and a corrective resync with the documented scope query was underway; 92 tests pass. |
+| 2026-08-02 | 32 | `e8076bea575c7b823b638adb79d1ed36eec11345440d76a604c3cbb564f1d23b` | Source publication boundary and GPL-2.0-or-later contribution policy recorded; private corpus/runtime/model artifacts remain excluded and remote publication remains a separately authorized operator step. |
 
 Verify the current head before adding another row:
 

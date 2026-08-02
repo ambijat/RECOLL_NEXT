@@ -71,6 +71,18 @@ Non-ready states may include `unavailable`, `models_missing`, `policy_error`, or
 Counts describe one completed operation. Deletion occurs only after complete
 enumeration when `--keep-missing` is absent.
 
+When `--progress` is supplied, sync and ask may emit privacy-safe lines to stderr:
+
+```text
+RECOLL_PROGRESS {"stage":"batch_completed","document_index":1,"batch_index":2,...}
+```
+
+Progress payloads contain stages, ordinals, and counts. They exclude queries, titles,
+paths, document text, prompts, answers, and embeddings. Stdout remains exactly one JSON
+object. Sync and answer total-runtime budgets are checked between bounded requests;
+the current request remains governed by its per-request timeout. The Tk applications
+also enforce a hard deadline by terminating only their owned child process.
+
 ## Evidence search response
 
 `search` accepts `--mode exact|prismatic|conceptual` (default `prismatic`). Exact
@@ -187,6 +199,8 @@ Only current citation triples are returned. A zero-result response is successful
 - Treat non-zero exit as failure even if stdout exists.
 - Do not place raw stdout/stderr into the project ledger.
 - Allow cancellation by terminating only the owned child process.
+- Interactive `Ctrl+C` returns exit code `130` and a bounded `cancelled` envelope/message
+  without a Python traceback.
 - Search and generation have independent timeouts; UI cancellation remains available.
 - Source open operations must use the returned path/URL through platform-safe APIs.
 

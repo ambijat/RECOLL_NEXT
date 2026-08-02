@@ -6,7 +6,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import json
-from typing import List, Mapping, Optional, Protocol, Sequence, Tuple
+import time
+from typing import Callable, List, Mapping, Optional, Protocol, Sequence, Tuple
 
 from rclsem_events import EventSink
 from rclsem_retrieve import EvidenceResult
@@ -21,6 +22,10 @@ class AnswerError(Exception):
 
 class AnswerValidationError(AnswerError):
     """Raised when generated output cannot satisfy the evidence contract."""
+
+
+class AnswerTimeout(AnswerError):
+    """Raised at a safe stage boundary when the total answer budget expires."""
 
 
 class EvidenceRetriever(Protocol):
@@ -73,6 +78,8 @@ class CitedAnswerComposer:
         *,
         chat_model: str,
         event_sink: Optional[EventSink] = None,
+        progress_callback: Optional[Callable[[dict[str, object]], None]] = None,
+        clock: Callable[[], float] = time.monotonic,
     ):
         if not chat_model:
             raise AnswerError("chat model must be non-empty")
@@ -80,6 +87,8 @@ class CitedAnswerComposer:
         self.chat_provider = chat_provider
         self.chat_model = chat_model
         self.event_sink = event_sink
+        self.progress_callback = progress_callback
+        self.clock = clock
 
     def ask(
         self,
@@ -87,6 +96,7 @@ class CitedAnswerComposer:
         *,
         evidence_limit: int = 6,
         view: str = "answer",
+        max_runtime_seconds: Optional[float] = None,
     ) -> CitedAnswer:
         if not isinstance(query, str) or not query.strip():
             raise AnswerError("question must be a non-empty string")
@@ -94,6 +104,13 @@ class CitedAnswerComposer:
             raise AnswerError("evidence_limit must be positive")
         if view not in ANSWER_VIEWS:
             raise AnswerError(f"unsupported answer view: {view}")
+        if max_runtime_seconds is not None and max_runtime_seconds <= 0:
+            raise AnswerError("max_runtime_seconds must be positive")
+        deadline = (
+            self.clock() + max_runtime_seconds
+            if max_runtime_seconds is not None
+            else None
+        )
 
         query_hash = hashlib.sha256(query.encode("utf-8")).hexdigest()
         self._record(
@@ -106,7 +123,10 @@ class CitedAnswerComposer:
             },
         )
         try:
+            self._check_deadline(deadline)
+            self._progress("retrieving_evidence")
             evidence = self.retriever.search(query, limit=evidence_limit)
+            self._check_deadline(deadline)
             if not evidence:
                 result = CitedAnswer(
                     answer=(
@@ -119,11 +139,14 @@ class CitedAnswerComposer:
                     citations=(),
                 )
             else:
+                self._progress("generating_answer", evidence_count=len(evidence))
                 response = self.chat_provider.chat(
                     self.chat_model,
                     _messages(query, view, evidence),
                     response_format=_answer_schema(evidence),
                 )
+                self._check_deadline(deadline)
+                self._progress("validating_citations", evidence_count=len(evidence))
                 result = _validated_answer(response, view, evidence)
         except Exception as ex:
             self._record(
@@ -148,11 +171,29 @@ class CitedAnswerComposer:
                 "view": view,
             },
         )
+        self._progress(
+            "completed",
+            evidence_count=result.retrieved_count,
+            citation_count=len(result.citations),
+        )
         return result
 
     def _record(self, event_type: str, payload: dict[str, object]) -> None:
         if self.event_sink is not None:
             self.event_sink.record(event_type, payload)
+
+    def _progress(self, stage: str, **payload: object) -> None:
+        if self.progress_callback is None:
+            return
+        try:
+            self.progress_callback({"stage": stage, **payload})
+        except Exception:
+            # Progress is presentation state, never evidence or transaction state.
+            pass
+
+    def _check_deadline(self, deadline: Optional[float]) -> None:
+        if deadline is not None and self.clock() >= deadline:
+            raise AnswerTimeout("local answer exceeded the configured total runtime")
 
 
 def _messages(

@@ -241,9 +241,10 @@ void AIPerspectiveDock::startOperation(Operation operation)
         setBusy(true, tr("Retrieving semantic evidence…"));
     } else {
         arguments << "ask" << "--store" << store << "--json"
+                  << "--mode" << mode << "--no-remember"
                   << "--timeout" << "600" << "--evidence-limit" << "2"
                   << "--view" << m_viewCombo->currentData().toString() << query;
-        setBusy(true, tr("Retrieving evidence and generating locally…"));
+        setBusy(true, tr("Retrieving selected-mode evidence and generating locally…"));
     }
 
     m_process->setWorkingDirectory(workingDirectory());

@@ -41,8 +41,10 @@ not parse or edit Glass files directly.
 | Chat model | `gemma3:4b` | Doctor and ask |
 | Inventory query | `mime:*` | Sync |
 | Sync timeout | 30 seconds | Per Ollama request client |
+| Sync total runtime | 1800 seconds CLI; 900 seconds index-builder GUI | Checked between requests; GUI enforces child deadline |
 | Search timeout | 30 seconds | Query embedding request |
 | Ask timeout | 120 seconds CLI default | Embedding and generation client |
+| Ask total runtime | 900 seconds CLI; 660 seconds Tk workspace | Checked between requests; workspace enforces child deadline |
 | Sync batch size | 32 | Segment embeddings |
 | Segment target | 900 characters | Deterministic segmenter |
 | Segment overlap | 150 characters | Deterministic segmenter |
@@ -55,10 +57,10 @@ not parse or edit Glass files directly.
 | Memory-search limit | 5 | Prior perspective results |
 | Ask memory | Enabled for supported cited answers | Disable with `--no-remember` |
 
-The runnable GUI deliberately uses tighter evidence limits and a longer workstation
-generation timeout: five search results, two answer evidence segments, and 600
-seconds for `ask`. These values belong to the presentation contract and must remain
-visible and configurable as packaging matures.
+The runnable GUI deliberately uses safer onboarding limits: the index builder defaults
+to a 120-second request timeout, batch size 4, and 900-second total limit; the evidence
+workspace uses five search results, two answer evidence segments, and 600 seconds for
+`ask`. These values are visible and configurable where an indexing job is launched.
 
 ## CLI reference
 
@@ -80,7 +82,12 @@ document atomically, and removes stale documents only after successful enumerati
 
 Required: `--store`. Configuration: `--endpoint`, `--embedding-model`, `--timeout`,
 `--ledger`, `--session`, `--confdir`, `--query`, `--recoll-python`, `--batch-size`,
-`--target-chars`, `--overlap-chars`, `--keep-missing`, and `--json`.
+`--target-chars`, `--overlap-chars`, `--max-runtime`, `--progress`, `--keep-missing`,
+and `--json`.
+
+`--progress` writes privacy-safe `RECOLL_PROGRESS` JSON Lines to stderr. It never changes
+the single-object JSON response on stdout. `--max-runtime` is checked at safe batch
+boundaries; an in-flight request remains bounded by `--timeout`.
 
 `--keep-missing` prevents deletion of sidecar documents absent from the current
 query. Use it when synchronizing several partial scopes into one store; otherwise a
@@ -99,7 +106,7 @@ Conceptual but deliberately optional for Exact. Options include `--mode`, `--con
 Retrieves primary evidence and asks the local chat model for schema-constrained
 output. Required: `--store` and positional query. It supports `answer`, `summary`,
 `timeline`, `contradictions`, `decisions`, and `actions` views. Additional options:
-`--chat-model`, `--evidence-limit`, and `--no-remember`.
+`--chat-model`, `--evidence-limit`, `--max-runtime`, `--progress`, and `--no-remember`.
 
 ### `memory-search`
 

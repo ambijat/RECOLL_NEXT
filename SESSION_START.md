@@ -45,6 +45,12 @@ must not be contacted.
   `recoll_ai_gui.py` provides an immediately runnable dependency-free desktop
   companion. Both consume the same asynchronous `search --json` and `ask --json`
   contracts and expose evidence, cancellation, and source opening.
+- The standalone semantic index builder now exposes request timeout, embedding batch
+  size, Recoll profile, and total-runtime controls; streams privacy-safe document/batch
+  progress; and terminates its owned child at the configured limit. CLI cancellation
+  exits cleanly with code 130, while answer progress distinguishes retrieval,
+  generation, and citation validation under a separate total-runtime budget. The
+  semantic suite has 98 passing tests.
 - The obsolete native `ENABLE_SEMANTIC`/`DocSequenceSem` route has been removed from
   the build and Qt simple-search surface. The supported AI Perspective dock remains
   independent, while Python retirement tombstones continue to guide older installed
@@ -65,6 +71,11 @@ must not be contacted.
   reconstruction, configuration, build/test requirements, migration, operations,
   recovery, and mandatory cross-agent handoff. `AGENTS.md` requires every agent to
   read the complete `Required reading` set before mutation.
+- Public-source preparation now includes a current root README, GPL-2.0-or-later
+  contribution notice, contribution and security policies, changelog, brochure,
+  quick start, and a contract-safe publication checklist. Private corpus/runtime/model
+  artifacts remain excluded, and creating or contacting a hosting remote remains a
+  separately authorized operator action.
 - A clean rebuild in an isolated local destination validated source, lexical, AI, and
   event fidelity at source commit `abc79e90`. It recreated Python without downloads,
   rebuilt a three-document Recoll/Xapian and semantic corpus, produced and rejected
@@ -88,6 +99,8 @@ Foundation and hardening:
    desktop companion is available for immediate validation.
 6. Repeat the validated isolated clean-rebuild portability procedure on a second
    physical desktop and establish the native Qt build toolchain.
+7. Preserve a locally verified, public-source-ready checkpoint while keeping remote
+   hosting outside automated repository work.
 
 ## Required reading
 
@@ -118,6 +131,7 @@ Foundation and hardening:
 - [Event ledger specification](docs/EVENT_LEDGER.md)
 - [Project governance ledger](governance/README.md)
 - [Implementation roadmap](docs/ROADMAP.md)
+- [Source publication checklist](docs/PUBLICATION_CHECKLIST.md)
 
 Inherited product documentation is intentionally unavailable. Add new documentation
 only when it describes the rebuilt product or records legally required provenance.

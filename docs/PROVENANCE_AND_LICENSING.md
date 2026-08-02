@@ -43,11 +43,11 @@ substitute for reading the applicable license files before distribution.
 
 ## New contributions
 
-New files should carry a license/header consistent with the repository's governed
-distribution decision once that decision is finalized. Until packaging is defined,
-preserve commit authorship and do not import third-party code or assets without
-recording origin, version, license, and modification status.
+The governed source-distribution license is GPL-2.0-or-later, documented at the
+repository root in `LICENSE.md`. New Recoll Next contributions use that license unless
+a file carries a more specific compatible notice. Preserve commit authorship and do
+not import third-party code or assets without recording origin, version, license, and
+modification status.
 
 Any future dependency manifest/SBOM must distinguish inherited source, new Recoll
 Next code, runtime dependencies, model artifacts, and user corpus data.
-
