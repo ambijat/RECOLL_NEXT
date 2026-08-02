@@ -33,6 +33,7 @@ later appends do not modify earlier entries.
 | 2026-08-02 | 32 | `e8076bea575c7b823b638adb79d1ed36eec11345440d76a604c3cbb564f1d23b` | Source publication boundary and GPL-2.0-or-later contribution policy recorded; private corpus/runtime/model artifacts remain excluded and remote publication remains a separately authorized operator step. |
 | 2026-08-02 | 33 | `8633a8279073e00c72b89c032d665a313100b783e2e8e84cf191f05b3d6a263c` | Local source publication checkpoint `af461ea4` passed compile, 98-test, ledger, link, whitespace, and ignore-policy checks; native Qt build remains unclaimed and no remote was contacted. |
 | 2026-08-02 | 34 | `1bfa4ac9df7a6deed930f469e09a96db5bc5b1c12df18d41bf1c2b1bd3816c27` | Default-deny remote policy narrowed by explicit user direction: initial publication of the selected product branch is authorized only to `https://github.com/ambijat/RECOLL_NEXT.git`; fetch, pull, force-push, deletion, unrelated refs, private artifacts, and other remotes remain prohibited. |
+| 2026-08-02 | 35 | `8ff9560f8d78030c420776c756332671f0241ae21aa93e475e9f5a32b09c03cc` | Public GitHub repository `ambijat/RECOLL_NEXT` was confirmed empty, then only `master` at `f406abfd` was published; the target is public and no private artifacts or unrelated refs were pushed. |
 
 Verify the current head before adding another row:
 

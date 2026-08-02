@@ -85,6 +85,10 @@ and operation explicitly authorized by the user after the local publication gate
 - Governance event 34 records the user-directed default-deny publication exception for
   `https://github.com/ambijat/RECOLL_NEXT.git` at head
   `1bfa4ac9df7a6deed930f469e09a96db5bc5b1c12df18d41bf1c2b1bd3816c27`.
+- Initial source publication succeeded to the public GitHub repository
+  `https://github.com/ambijat/RECOLL_NEXT` with only `master` at `f406abfd` pushed.
+  Governance event 35 records the outcome at head
+  `8ff9560f8d78030c420776c756332671f0241ae21aa93e475e9f5a32b09c03cc`.
 - A clean rebuild in an isolated local destination validated source, lexical, AI, and
   event fidelity at source commit `abc79e90`. It recreated Python without downloads,
   rebuilt a three-document Recoll/Xapian and semantic corpus, produced and rejected
