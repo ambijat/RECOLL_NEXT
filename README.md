@@ -11,8 +11,9 @@ build, and packaging validation before a binary release can be claimed.
 
 Start every work session with [SESSION_START.md](SESSION_START.md).
 
-New here? Read the [brochure](docs/BROCHURE.html) for what this is, or jump straight to
-the [quick start guide](docs/QUICKSTART.html).
+New here? Open the combined [brochure and operator manual](index.html), read the
+shorter [brochure](docs/BROCHURE.html), or jump straight to the
+[quick start guide](docs/QUICKSTART.html).
 
 ## Privacy and operating boundary
 

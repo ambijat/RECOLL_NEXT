@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Recoll Next brochure and operator manual for private search, semantic retrieval, and cited local AI answers.">
+  <title>Recoll Next — Brochure &amp; Operator Manual</title>
+  <style>
+    :root {
+      color-scheme: light; --paper:#f5f1e8; --surface:#fffdf8; --ink:#182421;
+      --muted:#5d6b65; --line:#d6d0c2; --green:#174f44; --deep:#0f3932;
+      --mint:#dcece5; --amber:#d98b2b; --amber-soft:#fff0d4;
+      --rose:#9b403b; --rose-soft:#f8e5e2; --blue:#245a78; --blue-soft:#e2edf3;
+      --shadow:0 18px 50px rgba(24,36,33,.10); --radius:22px;
+    }
+    :root[data-theme="dark"] {
+      color-scheme:dark; --paper:#101916; --surface:#17231f; --ink:#eef4ef;
+      --muted:#afbeb6; --line:#34443d; --green:#7fc7af; --deep:#b1e5d3;
+      --mint:#203a32; --amber:#f2b45f; --amber-soft:#3d2d18;
+      --rose:#f09a93; --rose-soft:#412522; --blue:#8bc2df; --blue-soft:#203541;
+      --shadow:0 18px 50px rgba(0,0,0,.28);
+    }
+    @media (prefers-color-scheme:dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme:dark; --paper:#101916; --surface:#17231f; --ink:#eef4ef;
+        --muted:#afbeb6; --line:#34443d; --green:#7fc7af; --deep:#b1e5d3;
+        --mint:#203a32; --amber:#f2b45f; --amber-soft:#3d2d18;
+        --rose:#f09a93; --rose-soft:#412522; --blue:#8bc2df; --blue-soft:#203541;
+        --shadow:0 18px 50px rgba(0,0,0,.28);
+      }
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth;max-width:100%;overflow-x:hidden}
+    body{margin:0;max-width:100%;overflow-x:hidden;background:radial-gradient(circle at 90% 4%,color-mix(in srgb,var(--amber) 16%,transparent),transparent 25rem),radial-gradient(circle at 8% 18%,color-mix(in srgb,var(--green) 13%,transparent),transparent 29rem),var(--paper);color:var(--ink);font:17px/1.65 Georgia,"Times New Roman",serif}
+    a{color:var(--green);text-underline-offset:.18em} a:hover{color:var(--amber)}
+    code,pre,.eyebrow,.badge,.nav,.button,th,.step-no,.status{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}
+    .shell{width:min(1180px,calc(100% - 36px));margin:0 auto}
+    .topbar{position:sticky;top:0;z-index:20;border-bottom:1px solid color-mix(in srgb,var(--line) 78%,transparent);background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(14px)}
+    .topbar .shell{display:flex;align-items:center;gap:18px;min-height:62px}
+    .brand{font-weight:800;letter-spacing:-.02em;color:var(--ink);text-decoration:none;white-space:nowrap}.brand span{color:var(--amber)}
+    .nav{display:flex;gap:16px;overflow-x:auto;font-size:13px;margin-left:auto}.nav a{color:var(--muted);text-decoration:none;white-space:nowrap}
+    .theme{border:1px solid var(--line);color:var(--ink);background:var(--surface);border-radius:999px;padding:7px 10px;cursor:pointer}
+    .hero{padding:92px 0 54px;display:grid;grid-template-columns:1.4fr .8fr;gap:52px;align-items:center}.hero>*{min-width:0}
+    .eyebrow{color:var(--green);font-weight:800;letter-spacing:.13em;text-transform:uppercase;font-size:13px}
+    h1,h2,h3{font-family:Inter,ui-sans-serif,system-ui,sans-serif;line-height:1.08;letter-spacing:-.035em}h1{font-size:clamp(48px,7vw,88px);margin:16px 0 24px}h2{font-size:clamp(32px,4vw,52px);margin:0 0 18px}h3{font-size:22px;margin:0 0 10px}
+    .lead{font-size:clamp(20px,2.4vw,27px);color:var(--muted);max-width:760px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+    .button{display:inline-block;padding:12px 17px;border-radius:11px;text-decoration:none;font-weight:800;font-size:14px}.button.primary{background:var(--green);color:var(--surface)}.button.secondary{border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+    .hero-card,.card,.callout,.step,.toc,table,pre{border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 94%,transparent)}
+    .hero-card{padding:26px;border-radius:var(--radius);box-shadow:var(--shadow);transform:rotate(1deg)}.hero-card ul{padding-left:1.2em}
+    .status{display:inline-flex;align-items:center;gap:8px;color:var(--green);font-size:13px;font-weight:800}.status:before{content:"";width:9px;height:9px;border-radius:50%;background:#39a96b;box-shadow:0 0 0 5px color-mix(in srgb,#39a96b 17%,transparent)}
+    .toc{border-radius:16px;padding:17px 22px;margin:12px 0 74px}.toc strong{font-family:ui-sans-serif,system-ui,sans-serif}.toc-links{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px}.toc a{text-decoration:none;font-size:15px}
+    section{padding:68px 0;border-top:1px solid var(--line);scroll-margin-top:76px}.section-head{max-width:800px;margin-bottom:30px}.section-head p{color:var(--muted);font-size:19px}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.grid.two{grid-template-columns:repeat(2,1fr)}.card{border-radius:16px;padding:24px}.card .badge{display:inline-block;margin-bottom:14px;padding:4px 8px;border-radius:6px;background:var(--mint);color:var(--green);font-size:12px;font-weight:800}
+    .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.flow div{padding:18px 12px;border-radius:12px;background:var(--mint);text-align:center;font-family:ui-sans-serif,system-ui,sans-serif;font-weight:700}.flow div:not(:last-child):after{content:"→";float:right;transform:translateX(19px);color:var(--amber)}
+    .manual{display:grid;gap:22px}.step{position:relative;border-radius:var(--radius);padding:28px 30px 30px 82px}.step-no{position:absolute;left:24px;top:27px;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--green);color:var(--surface);font-weight:900}
+    pre{max-width:100%;overflow-x:auto;border-radius:12px;padding:17px 19px;background:var(--deep);color:#f4fff9;font-size:14px;line-height:1.55}:not(pre)>code{padding:2px 5px;border-radius:5px;background:var(--mint);color:var(--deep)}
+    .callout{border-left:6px solid var(--amber);border-radius:12px;padding:18px 22px;background:var(--amber-soft)}.callout.danger{border-left-color:var(--rose);background:var(--rose-soft)}.callout.info{border-left-color:var(--blue);background:var(--blue-soft)}
+    table{width:100%;border-collapse:collapse;border-radius:14px;overflow:hidden}th,td{padding:14px 16px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:var(--mint);color:var(--deep);font-size:13px}tr:last-child td{border-bottom:0}
+    .checklist{list-style:none;padding:0}.checklist li{margin:9px 0;padding-left:27px;position:relative}.checklist li:before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:900}.limits li::marker{color:var(--amber)}
+    footer{padding:48px 0 70px;color:var(--muted);border-top:1px solid var(--line)}footer .shell{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    @media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:58px}.grid,.grid.two{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.flow div:not(:last-child):after{content:"↓";float:none;display:block;transform:translateY(15px)}.nav{display:none}}
+    @media(max-width:560px){body{font-size:16px}.shell{width:min(100% - 24px,1180px)}.hero{padding-top:42px}.hero-card{transform:none}h1{overflow-wrap:break-word}.eyebrow{overflow-wrap:anywhere}.actions .button{max-width:100%;white-space:normal}.step{padding:76px 20px 22px}.step-no{left:20px;top:20px}th,td{padding:10px}}
+    @media print{.topbar,.actions,.theme{display:none!important}body{background:white;color:black;font-size:11pt}.hero,section{padding:24px 0}.hero{display:block}.card,.step,.callout,table,pre{break-inside:avoid}a{color:black}}
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="shell"><a class="brand" href="#top">Recoll <span>Next</span></a><nav class="nav" aria-label="Primary"><a href="#promise">Why</a><a href="#how">How</a><a href="#operate">Operator manual</a><a href="#safety">Safety</a><a href="#troubleshooting">Troubleshooting</a><a href="#status">Status</a></nav><button class="theme" id="theme-toggle" type="button">◐ Theme</button></div></header>
+  <main id="top" class="shell">
+    <header class="hero">
+      <div><div class="eyebrow">Private search · traceable answers · your machine</div><h1>Your files, seen from more than one angle.</h1><p class="lead">Recoll Next combines Recoll's proven full-text index with local semantic search and cited Ollama interpretation—without turning an AI model into the authority over your documents.</p><div class="actions"><a class="button primary" href="#operate">Start operating</a><a class="button secondary" href="#promise">Understand the product</a><a class="button secondary" href="https://github.com/ambijat/RECOLL_NEXT">View source</a></div></div>
+      <aside class="hero-card"><div class="status">Source checkpoint published</div><h3>What works today</h3><ul class="checklist"><li>Exact, Prismatic, and Conceptual search</li><li>Local cited answers and perspectives</li><li>Tk desktop workspace and index builder</li><li>Hash-chained event ledgers</li><li>98 automated semantic contract tests</li></ul><p><strong>Honest limit:</strong> the native Qt dock exists in source but still awaits a validated toolchain build and package.</p></aside>
+    </header>
+    <nav class="toc" aria-label="Contents"><strong>Brochure + manual</strong><div class="toc-links"><a href="#promise">Product promise</a><a href="#how">Architecture</a><a href="#modes">Search modes</a><a href="#operate">Setup and operation</a><a href="#daily">Daily checklist</a><a href="#safety">Privacy and recovery</a><a href="#troubleshooting">Troubleshooting</a><a href="#status">Status</a><a href="#reference">Deep reference</a></div></nav>
+
+    <section id="promise"><div class="section-head"><div class="eyebrow">The brochure</div><h2>A private librarian, not an oracle</h2><p>Recoll Next is an evidence-exploration system for documents already on your computer. It keeps fast deterministic search and adds optional conceptual retrieval and synthesis you can inspect.</p></div><div class="grid">
+      <article class="card"><span class="badge">LOCAL-FIRST</span><h3>Your material stays local</h3><p>Documents, extracted text, embeddings, prompts, and generated perspectives remain on the workstation by default. Ollama uses loopback.</p></article>
+      <article class="card"><span class="badge">EVIDENCE-FIRST</span><h3>Every answer shows its work</h3><p>Generated output must cite supplied segment identifiers. Invalid, missing, or invented citations make the synthesis fail closed.</p></article>
+      <article class="card"><span class="badge">RESILIENT</span><h3>Search survives AI failure</h3><p>Recoll and Xapian remain authoritative. Exact search works even when Ollama or the semantic sidecar is unavailable.</p></article>
+    </div></section>
+
+    <section id="how"><div class="section-head"><div class="eyebrow">The operating model</div><h2>Originals first. Interpretation last.</h2><p>Each layer has one job and a clear source of truth. Derived AI data can be rebuilt without changing original documents or Recoll's lexical index.</p></div><div class="flow"><div>Original files</div><div>Recoll + Xapian</div><div>Semantic sidecar</div><div>Local Ollama</div><div>Cited perspective</div></div><div class="grid two" style="margin-top:22px"><article class="card"><h3>Polaroid: factual evidence</h3><p>A stable result card holds source identity, title, path, offsets, retrieval provenance, and indexed passage.</p></article><article class="card"><h3>Prism: optional perspective</h3><p>Summary, timeline, contradiction, decision, action, and answer views organize selected evidence without replacing it.</p></article></div></section>
+
+    <section id="modes"><div class="section-head"><div class="eyebrow">Three retrieval modes</div><h2>Choose how literal or conceptual search should be</h2></div><div class="grid">
+      <article class="card"><span class="badge">EXACT</span><h3>Recoll order, unchanged</h3><p>Uses the authoritative profile and Xapian rank. It needs neither a semantic store nor Ollama.</p></article>
+      <article class="card"><span class="badge">PRISMATIC · DEFAULT</span><h3>Lexical + semantic</h3><p>Runs bounded channels concurrently and combines ranks with reciprocal-rank fusion. Semantic failure visibly falls back to lexical evidence.</p></article>
+      <article class="card"><span class="badge">CONCEPTUAL</span><h3>Ideas beyond exact words</h3><p>Uses local embeddings, then accepts a hit only when identity and revision still resolve through live Recoll.</p></article>
+    </div></section>
+
+    <section id="operate"><div class="section-head"><div class="eyebrow">Operator manual</div><h2>From checkout to first cited answer</h2><p>This is the validated Windows/PowerShell path. Run it from the repository root. Installing Recoll, Ollama, or models is a separately authorized workstation step.</p></div><div class="manual">
+      <article class="step"><span class="step-no">1</span><h3>Know the four moving parts</h3><p>You need the Recoll Next source, Python, an installed Recoll runtime/profile, and local Ollama. Default models are <code>embeddinggemma</code> and <code>gemma3:4b</code>.</p><div class="callout info"><strong>Source is not data.</strong> Corpus files, profiles, Xapian indexes, semantic databases, and model files are separate local capsules.</div></article>
+      <article class="step"><span class="step-no">2</span><h3>Create the Python environment</h3><p>The semantic slice uses the standard library and downloads no packages during bootstrap.</p><pre><code>python src\semantic\initsemenv.py .venv --verify
+.\.venv\Scripts\Activate.ps1
+python --version</code></pre><p>On POSIX, use <code>source .venv/bin/activate</code>. Recreate the environment on each machine.</p></article>
+      <article class="step"><span class="step-no">3</span><h3>Select and validate a Recoll profile</h3><p><code>topdirs</code> defines the corpus and <code>dbdir</code> defines Xapian. Confirm ordinary Recoll search before semantic synchronization.</p><pre><code>python src\semantic\recoll_ai.py search `
+  --mode exact --limit 5 "your literal query"</code></pre><div class="callout"><strong>Never assume copied paths are valid.</strong> Remap every corpus root and database path deliberately.</div></article>
+      <article class="step"><span class="step-no">4</span><h3>Check local AI readiness</h3><pre><code>python src\semantic\recoll_ai.py doctor
+python src\semantic\recoll_ai.py doctor --json</code></pre><p>This confirms loopback policy and model inventory. It does not start Ollama or download models.</p></article>
+      <article class="step"><span class="step-no">5</span><h3>Build a scoped semantic sidecar</h3><pre><code>python src\semantic\recoll_ai.py sync `
+  --store .local\practice.sqlite3 `
+  --query "mime:text/markdown" `
+  --timeout 120 --batch-size 4 `
+  --max-runtime 900 --progress `
+  --keep-missing</code></pre><div class="callout danger"><strong>Deletion boundary:</strong> without <code>--keep-missing</code>, a successful sync removes sidecar documents absent from the current query. Use one store per scope, or keep the flag for partial scopes. Source files and Xapian are never deleted.</div></article>
+      <article class="step"><span class="step-no">6</span><h3>Search and inspect evidence</h3><pre><code>python src\semantic\recoll_ai.py search `
+  --store .local\practice.sqlite3 `
+  --limit 5 "the idea you are looking for"
+
+python src\semantic\recoll_ai.py search `
+  --mode conceptual `
+  --store .local\practice.sqlite3 `
+  --limit 5 "the idea you are looking for"</code></pre><p>Inspect title, source, offsets, provenance, and rank before asking for interpretation.</p></article>
+      <article class="step"><span class="step-no">7</span><h3>Generate a cited perspective</h3><pre><code>python src\semantic\recoll_ai.py ask `
+  --store .local\practice.sqlite3 `
+  --view summary --evidence-limit 2 `
+  --timeout 600 `
+  "Summarize the evidence and cite it."</code></pre><p>Views: <code>answer</code>, <code>summary</code>, <code>timeline</code>, <code>contradictions</code>, <code>decisions</code>, and <code>actions</code>. Add <code>--no-remember</code> for an ephemeral answer.</p></article>
+      <article class="step"><span class="step-no">8</span><h3>Use the desktop tools</h3><div class="grid two"><div><h3>Everyday workspace</h3><pre><code>AI-Perspective.bat</code></pre><p>Find, inspect, select, then interpret evidence.</p></div><div><h3>Index maintenance</h3><pre><code>Rebuild-Index.bat</code></pre><p>Configure scope and deletion safety away from daily search.</p></div></div></article>
+      <article class="step"><span class="step-no">9</span><h3>Verify and close</h3><pre><code>python -m compileall -q src\semantic
+python -W error::ResourceWarning -m unittest discover -s tests\semantic
+python src\semantic\rclsem_ledger.py verify governance\events.jsonl
+git diff --check
+git status --short</code></pre><p>The suite has 98 tests. Tests do not prove that local Recoll, Ollama, or Qt are installed.</p></article>
+    </div></section>
+
+    <section id="daily"><div class="section-head"><div class="eyebrow">Routine operation</div><h2>A small daily checklist</h2></div><div class="grid two"><article class="card"><h3>Start</h3><ul class="checklist"><li>Activate the recreated environment.</li><li>Run <code>doctor</code>.</li><li>Verify the governance ledger.</li><li>Identify working-tree changes.</li><li>Confirm the selected Recoll profile.</li></ul></article><article class="card"><h3>Before a long sync</h3><ul class="checklist"><li>Let Recoll indexing finish.</li><li>Validate the scope query in Recoll.</li><li>Use a separate or backed-up store.</li><li>Choose <code>--keep-missing</code> deliberately.</li><li>Set bounded timeouts.</li></ul></article></div><h3 style="margin-top:30px">Back up capsules independently</h3><table><thead><tr><th>Capsule</th><th>Protects</th><th>Safe default</th></tr></thead><tbody><tr><td>Source + governance</td><td>Code, history, decisions</td><td>Git history or verified local bundle</td></tr><tr><td>Original corpus</td><td>Documentary truth</td><td>Private backup policy</td></tr><tr><td>Recoll profile + Xapian</td><td>Configuration and lexical retrieval</td><td>Back up profile; prefer rebuilding Xapian</td></tr><tr><td>Semantic store + runtime ledger</td><td>Vectors and Perspective Memory</td><td>Stop writers; copy together or rebuild</td></tr><tr><td>Ollama inventory</td><td>Model/runtime identity</td><td>Record tags; provision separately</td></tr></tbody></table></section>
+
+    <section id="safety"><div class="section-head"><div class="eyebrow">Privacy, integrity, recovery</div><h2>Boundaries operators never blur</h2></div><div class="grid"><article class="card"><h3>Private by default</h3><p>Do not commit corpus content, databases, runtime ledgers, prompts, answers, exports, credentials, profiles, or model blobs.</p></article><article class="card"><h3>Derived means rebuildable</h3><p>Preserve incompatible stores and rebuild into a new path. Never repair Xapian or a hash chain by editing internal files.</p></article><article class="card"><h3>Remote means explicit</h3><p>Git and model remote access are default-deny. Exact publication authority never expands to private data or unrelated refs.</p></article></div><div class="callout danger" style="margin-top:24px"><strong>Possible disclosure?</strong> Stop the process without deleting evidence, disconnect the path, preserve bounded logs and ledger heads, rotate credentials outside the repository, and follow the <a href="docs/SECURITY_AND_PRIVACY.md">incident procedure</a>.</div></section>
+
+    <section id="troubleshooting"><div class="section-head"><div class="eyebrow">Troubleshooting</div><h2>Fail safely, then repair the derived layer</h2></div><table><thead><tr><th>Symptom</th><th>Safe response</th></tr></thead><tbody><tr><td>Ollama unavailable</td><td>Keep using Exact; repair Ollama and rerun <code>doctor</code>.</td></tr><tr><td>Model missing</td><td>Provision the exact tag only with download/install authorization.</td></tr><tr><td>Recoll binding fails</td><td>Use bundled-Python discovery or <code>--recoll-python</code>.</td></tr><tr><td>Empty semantic results</td><td>Confirm store, namespace, model, scope, and synchronization.</td></tr><tr><td>Dimension mismatch</td><td>Select the correct namespace or rebuild; never coerce vectors.</td></tr><tr><td>Stale evidence rejected</td><td>Resynchronize from the authoritative Recoll profile.</td></tr><tr><td>Generation is slow</td><td>Keep evidence visible, wait, or cancel the owned child.</td></tr><tr><td>Ledger verification fails</td><td>Preserve it and diagnose the first invalid event; never edit history.</td></tr></tbody></table></section>
+
+    <section id="status"><div class="section-head"><div class="eyebrow">What is real today</div><h2>Source-ready is not binary-release-ready</h2><p>The project reports validation honestly so presentation never outruns evidence.</p></div><div class="grid two"><article class="card"><h3>Implemented and tested</h3><ul class="checklist"><li>Local Ollama policy and adapter</li><li>Deterministic semantic synchronization</li><li>Xapian-first hybrid retrieval</li><li>Citation validation and Perspective Memory</li><li>Tk workspace and index builder</li><li>Governance/runtime ledgers</li></ul></article><article class="card"><h3>Open work</h3><ul class="limits"><li>Native Qt compilation and package</li><li>Physical second-machine proof</li><li>Representative relevance measurement</li><li>Full-corpus vector acceleration</li><li>Memory management UI</li><li>Signed ledger checkpoints</li></ul></article></div></section>
+
+    <section id="reference"><div class="section-head"><div class="eyebrow">Deep reference</div><h2>Use the right document for the job</h2></div><div class="grid"><article class="card"><h3>Learn and operate</h3><p><a href="docs/QUICKSTART.html">Quick Start</a><br><a href="docs/OPERATIONS_RUNBOOK.md">Operations Runbook</a><br><a href="docs/CONFIGURATION_REFERENCE.md">Configuration</a><br><a href="docs/API_CONTRACT.md">CLI/JSON Contract</a></p></article><article class="card"><h3>Understand guarantees</h3><p><a href="docs/PRISMATIC_SEARCH.md">Prismatic Charter</a><br><a href="docs/XAPIAN_FIRST_PROTOCOL.md">Xapian-first Protocol</a><br><a href="docs/GOAL_FIDELITY.md">Goal Fidelity</a><br><a href="docs/SECURITY_AND_PRIVACY.md">Security &amp; Privacy</a></p></article><article class="card"><h3>Build and move</h3><p><a href="docs/DEVELOPMENT_AND_BUILD.md">Development &amp; Build</a><br><a href="docs/PORTABILITY_CONTRACT.md">Portability</a><br><a href="docs/DATA_MIGRATION.md">Migration</a><br><a href="docs/PUBLICATION_CHECKLIST.md">Publication</a></p></article></div><div class="actions"><a class="button primary" href="docs/README.md">Complete documentation map</a><a class="button secondary" href="governance/CHECKPOINTS.md">Governance checkpoints</a><a class="button secondary" href="LICENSE.md">License</a></div></section>
+  </main>
+  <footer><div class="shell"><div><strong>Recoll Next</strong> — local evidence, multiple perspectives.</div><div>GPL-2.0-or-later · Private data not included</div></div></footer>
+  <script>
+    (function(){var r=document.documentElement,b=document.getElementById('theme-toggle'),s=localStorage.getItem('recoll-next-theme');if(s==='light'||s==='dark')r.dataset.theme=s;b.addEventListener('click',function(){var c=r.dataset.theme;if(!c)c=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';var n=c==='dark'?'light':'dark';r.dataset.theme=n;localStorage.setItem('recoll-next-theme',n)})}());
+  </script>
+</body>
+</html>

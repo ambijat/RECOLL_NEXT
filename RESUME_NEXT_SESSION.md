@@ -9,9 +9,9 @@ resuming work.
 
 - Verified source publication anchor: `af461ea4`
   (`Prepare local source publication checkpoint`).
-- Project ledger after GitHub publication: 35 events.
+- Project ledger after the root operator-manual milestone: 36 events.
 - Verified ledger head:
-  `8ff9560f8d78030c420776c756332671f0241ae21aa93e475e9f5a32b09c03cc`.
+  `4410c6c82aa05eb24e3672327ed1fe068892da1b555c8f2e0e75eec29a2f4786`.
 - Source-publication policy is sequence 32, local readiness is sequence 33, the narrow
   remote exception is sequence 34, and verified GitHub publication is sequence 35.
 - Semantic test suite: 98 tests passing under Python 3.14 with resource warnings
@@ -20,6 +20,8 @@ resuming work.
   `https://github.com/ambijat/RECOLL_NEXT.git`. The empty public target received only
   `master`; governance events 34 and 35 record authorization and outcome. All broader
   remote operations remain denied.
+- Root `index.html` is the dependency-free public brochure and operator manual;
+  governance event 36 records its tested commands, safety coverage, and validated links.
 - The user-supplied `RecollNext-Audit-and-Development-Pathway.md` is intentionally
   untracked and untouched. A cold directory copy will carry it; a Git bundle will
   not.
@@ -93,8 +95,8 @@ correctly rejected; current lexical evidence was still returned. This demonstrat
 correct safety behavior, but it also means that store should be resynchronized before
 using it as the representative relevance baseline.
 
-The project ledger verified after GitHub publication with 35 events and head
-`8ff9560f8d78030c420776c756332671f0241ae21aa93e475e9f5a32b09c03cc`.
+The project ledger verified after the root manual milestone with 36 events and head
+`4410c6c82aa05eb24e3672327ed1fe068892da1b555c8f2e0e75eec29a2f4786`.
 Historical heads remain independently readable in `governance/CHECKPOINTS.md`.
 
 ## Known limitations that remain

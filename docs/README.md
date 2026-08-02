@@ -5,10 +5,12 @@ were intentionally removed; the source code and legally required provenance rema
 
 ## Start here (non-agent readers)
 
+- [Brochure and Operator Manual](../index.html) — complete public landing page,
+  product explanation, operating sequence, safety rules, and troubleshooting.
 - [Brochure](BROCHURE.html) — what Recoll Next is and why it's built this way.
 - [Quick Start Guide](QUICKSTART.html) — first search to first cited answer.
 
-These two are presentation documents for humans evaluating or onboarding to the
+These three are presentation documents for humans evaluating or onboarding to the
 product; they are not part of the mandatory agent orientation set below and summarize,
 rather than replace, the normative contracts they link to.
 

@@ -15,6 +15,8 @@ source-development checkpoint, not a packaged binary release.
 - Native Qt AI Perspective dock source using the same JSON process boundary.
 - Hash-chained project and runtime event ledgers.
 - Offline-safe Python environment bootstrap and documented migration workflow.
+- Self-contained root brochure and operator manual suitable for the repository landing
+  page or static GitHub Pages publication.
 
 ### Still required for a binary release
 
