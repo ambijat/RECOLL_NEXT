@@ -3,9 +3,10 @@
 ## Project lineage
 
 Recoll Next is an independent local product derived from the cloned Recoll source
-history. The configured Git remote is historical metadata only and is not contacted.
-Upstream history is preserved as lineage; new decisions, documentation, AI
-integration, and local commits are made in this repository.
+history. The inherited Recoll remote is historical metadata only. Upstream history is
+preserved as lineage; new decisions, documentation, AI integration, and local commits
+are made here. Publication to a separate remote is permitted only for the exact
+destination and operation explicitly authorized by the user.
 
 Inherited product manuals, generated documentation, citation metadata, and legacy
 distribution packaging were intentionally removed to create a rebuild skeleton.

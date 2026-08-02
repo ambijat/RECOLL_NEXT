@@ -86,8 +86,9 @@ Recoll query.
 - [Project governance ledger](governance/README.md)
 - [Roadmap](docs/ROADMAP.md)
 
-Historical Git metadata is lineage only. Development must not contact its configured
-remote.
+Historical upstream Git metadata is lineage only. Remote access is denied by default;
+publication is limited to an exact destination and operation explicitly authorized by
+the user after the local acceptance gate.
 
 ## Project status and participation
 

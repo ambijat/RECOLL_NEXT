@@ -3,9 +3,9 @@
 ## Purpose
 
 This checklist prepares a source checkpoint for a public Git host without weakening
-Recoll Next's local-first or provenance rules. It does not authorize a network or Git
-remote action. Publication remains a separate operator step after the local checkpoint
-passes.
+Recoll Next's local-first or provenance rules. It does not itself authorize a network
+or Git remote action. Publication requires the user to name the exact destination and
+operation after the local checkpoint passes.
 
 ## Publication scope
 
@@ -18,9 +18,10 @@ project governance chain. Exclude:
 - Ollama executables/model blobs, Python environments, build outputs, and IDE state;
 - private transfer manifests, audit capsules, credentials, keys, and tokens.
 
-The historical Recoll remote is lineage metadata. Creating or contacting a public
-hosting remote requires an explicit repository-policy change and operator action; it
-is never part of an automated readiness check.
+The historical Recoll remote is lineage metadata. An authorized publication uses a
+separate, exact destination and may push only the selected product branch/ref. It does
+not authorize fetch, pull, force-push, remote deletion, unrelated refs, private
+artifacts, or access to another remote.
 
 ## Local acceptance gate
 

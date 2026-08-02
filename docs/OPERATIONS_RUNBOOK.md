@@ -196,4 +196,6 @@ git log -3 --oneline
 ```
 
 Update `SESSION_START.md` when state, milestone, risks, or mandatory operating rules
-changed. Commit locally only. Never fetch, pull, push, or open a remote PR.
+changed. Commit locally by default. Remote operations require an exact user-authorized
+destination and action plus the publication acceptance gate; never infer broader
+fetch, pull, force-push, deletion, or PR authority.

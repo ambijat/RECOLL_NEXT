@@ -9,8 +9,9 @@ provides extraction, indexing, metadata, and lexical retrieval. Ollama provides 
 embeddings and generation. The product adds semantic retrieval, cited answers, and a
 tamper-evident history of system activity.
 
-This clone is independent. The configured Git remote is historical metadata only and
-must not be contacted.
+This clone is independent. The inherited Recoll remote is historical metadata only.
+Remote access is denied by default, with a narrow exception for an exact destination
+and operation explicitly authorized by the user after the local publication gate.
 
 ## Current state
 
@@ -74,12 +75,16 @@ must not be contacted.
 - Public-source preparation now includes a current root README, GPL-2.0-or-later
   contribution notice, contribution and security policies, changelog, brochure,
   quick start, and a contract-safe publication checklist. Private corpus/runtime/model
-  artifacts remain excluded, and creating or contacting a hosting remote remains a
-  separately authorized operator action.
+  artifacts remain excluded. The user has authorized initial publication of the
+  selected product branch to `https://github.com/ambijat/RECOLL_NEXT.git`; this does
+  not authorize fetch, pull, force-push, ref deletion, or any other remote.
 - Local source checkpoint `af461ea4` passed Python compilation, all 98 semantic tests,
   governance verification, product-document link validation, whitespace checks, and
   representative ignore-policy checks. Governance event 33 records the milestone at
   head `8633a8279073e00c72b89c032d665a313100b783e2e8e84cf191f05b3d6a263c`.
+- Governance event 34 records the user-directed default-deny publication exception for
+  `https://github.com/ambijat/RECOLL_NEXT.git` at head
+  `1bfa4ac9df7a6deed930f469e09a96db5bc5b1c12df18d41bf1c2b1bd3816c27`.
 - A clean rebuild in an isolated local destination validated source, lexical, AI, and
   event fidelity at source commit `abc79e90`. It recreated Python without downloads,
   rebuilt a three-document Recoll/Xapian and semantic corpus, produced and rejected
@@ -103,8 +108,8 @@ Foundation and hardening:
    desktop companion is available for immediate validation.
 6. Repeat the validated isolated clean-rebuild portability procedure on a second
    physical desktop and establish the native Qt build toolchain.
-7. Preserve a locally verified, public-source-ready checkpoint while keeping remote
-   hosting outside automated repository work.
+7. Preserve a locally verified, public-source-ready checkpoint and publish only the
+   explicitly authorized product branch to the exact governed destination.
 
 ## Required reading
 
@@ -142,7 +147,8 @@ only when it describes the rebuilt product or records legally required provenanc
 
 ## Working rules
 
-- No remote Git or cloud-model operations.
+- No Git remote operation without an exact user-authorized destination and action;
+  no cloud-model operations.
 - Do not log full document content, prompts containing private content, credentials,
   tokens, or environment dumps.
 - Treat the ledger as evidence, not as a queue or source database.

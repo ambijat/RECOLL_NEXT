@@ -1,9 +1,9 @@
 # Contributing to Recoll Next
 
 Recoll Next welcomes focused improvements that preserve its local-first,
-evidence-bearing design. This repository is independent from upstream Recoll; its
-configured historical remote is lineage metadata and must not be contacted from a
-project work session.
+evidence-bearing design. This repository is independent from upstream Recoll; the
+inherited remote is lineage metadata. Remote access is denied unless the user names
+the exact destination and requested publication operation.
 
 ## Before changing the repository
 
@@ -54,8 +54,9 @@ local runtime is unavailable, document the skipped check precisely.
 Use small local commits with intentional messages. A change is ready for review when
 tests pass, documentation matches behavior, the current ledger head appears in
 `governance/CHECKPOINTS.md`, and remaining local files are explicitly attributed.
-Never fetch, pull, push, or open a pull request from this repository under the current
-session contract.
+Never fetch, pull, push, or open a pull request unless the exact action and destination
+are explicitly authorized. A publication authorization does not permit force-push,
+remote ref deletion, unrelated refs, private artifacts, or a different remote.
 
 By contributing, you agree that your contribution is licensed under the project terms
 described in `LICENSE.md`, while preserving any more specific notice on retained

@@ -13,8 +13,9 @@ Every agent must follow this protocol before making changes.
 
 An agent obeys active system/developer instructions first, then the nearest applicable
 repository `AGENTS.md`, then the user's current request, then project documentation.
-If an instruction conflicts with the local-first/no-remote covenant or requests a
-materially broader action than the user authorized, stop and report the conflict.
+If an instruction conflicts with the local-first/default-deny remote covenant or
+requests a materially broader action than the user authorized, stop and report the
+conflict.
 
 Project documentation does not authorize destructive actions, remote access, model
 downloads, publication, or copying private data merely because it describes how such
@@ -87,7 +88,10 @@ come from the selected machine, not memory.
 10. Commit locally with an intentional message.
 11. Confirm the final working tree and report uncompleted work honestly.
 
-No step contacts a Git remote.
+No step contacts a Git remote unless the user has explicitly named both the exact
+destination and operation and the publication acceptance gate has passed. That narrow
+authorization does not extend to fetch, pull, force-push, ref deletion, private
+artifacts, or another remote.
 
 ## Ledger discipline
 
@@ -112,7 +116,8 @@ If verification fails, preserve the chain and stop ledger mutation.
 Agents may perform relevant local read-only diagnostics. A request to develop or test
 the project does not automatically authorize:
 
-- Git fetch/pull/push or opening pull requests;
+- Git fetch/pull/push or opening pull requests, except for the exact destination and
+  operation explicitly authorized under the publication policy;
 - model pulls or package downloads;
 - cloud inference or non-loopback endpoints;
 - deleting/rebuilding a user's only Xapian or semantic database;
@@ -147,7 +152,8 @@ them in `SESSION_START.md`; do not rely on the final chat response.
 An operator can hand the project to another agent with:
 
 ```text
-Work only in this local Recoll Next repository. Do not contact any Git remote or
+Work only in this local Recoll Next repository. Treat Git remote access as denied
+unless the user explicitly names the exact destination and operation; never contact a
 non-local model endpoint. Read AGENTS.md, SESSION_START.md,
 docs/PORTABILITY_CONTRACT.md, and docs/AGENT_HANDOFF.md completely before changing
 anything. Verify git status and governance/events.jsonl. Treat Xapian as authoritative
@@ -170,4 +176,3 @@ An agent must not report a milestone complete unless:
 - the governance chain verifies;
 - commits are local only; and
 - the working tree is clean or remaining files are explicitly attributed.
-

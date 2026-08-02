@@ -20,7 +20,7 @@
 | CLI to GUI child process | Local argument-vector/JSON boundary |
 | Semantic components to SQLite | Private derived-data boundary |
 | Components to runtime ledger | Minimized audit boundary |
-| Repository to Git remote | Prohibited |
+| Repository to Git remote | Default denied; exact user-authorized publication only |
 | Local model to non-loopback endpoint | Prohibited without governed policy change |
 
 Loopback reduces network exposure but is not an authentication mechanism. Other local
@@ -109,4 +109,3 @@ rules in `EVENT_LEDGER.md`; never “fix” historical lines.
 - packaged ACL defaults;
 - threat testing of hybrid retrieval and document prompt injection;
 - dependency inventory/SBOM for a reproducible native package.
-

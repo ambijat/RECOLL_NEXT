@@ -16,7 +16,10 @@ resuming work.
   sequence 33 at the head above.
 - Semantic test suite: 98 tests passing under Python 3.14 with resource warnings
   treated as errors.
-- No Git remote operation was performed or authorized.
+- No Git remote had been contacted at the source-readiness checkpoint. The user later
+  authorized initial publication of the selected product branch only to
+  `https://github.com/ambijat/RECOLL_NEXT.git`; governance event 34 records the narrow
+  exception and all broader remote operations remain denied.
 - The user-supplied `RecollNext-Audit-and-Development-Pathway.md` is intentionally
   untracked and untouched. A cold directory copy will carry it; a Git bundle will
   not.
@@ -122,8 +125,8 @@ Proceed in this order unless the user explicitly changes priorities.
 
 Verify the final local commit, 98-test suite, public-product documentation links,
 ignore behavior, and project ledger from genesis. Keep the intentional audit report
-untracked and all private `.local` capsules ignored. Do not configure or contact a new
-host until the repository's no-remote contract is explicitly changed by the operator.
+untracked and all private `.local` capsules ignored. Publication may use only the exact
+destination and operation recorded by governance event 34.
 
 ### 2. Establish the relevance baseline
 
@@ -188,7 +191,8 @@ python src/semantic/recoll_ai.py search --mode exact --json --limit 3 "recoll"
 
 Do not fetch, pull, push, contact a Git remote, install dependencies, synchronize a
 store, or run a migration until the tracked contracts have been read and the user has
-placed that action in scope.
+placed that exact action and destination in scope. Publication authorization never
+implies permission for other remote operations.
 
 ## Flash-drive transfer checklist
 
