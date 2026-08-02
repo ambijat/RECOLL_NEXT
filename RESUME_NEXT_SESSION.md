@@ -7,14 +7,13 @@ resuming work.
 
 ## Resume anchor
 
-- Last committed anchor on entry to the publication pass: `13d02595`
-  (`Record citation reliability checkpoint`). Always inspect for a newer local
-  publication checkpoint before relying on this historical entry anchor.
-- Project ledger at the publication-policy decision: 32 events.
+- Verified source publication anchor: `af461ea4`
+  (`Prepare local source publication checkpoint`).
+- Project ledger at the publication milestone: 33 events.
 - Verified ledger head:
-  `e8076bea575c7b823b638adb79d1ed36eec11345440d76a604c3cbb564f1d23b`.
-- Source-publication and GPL-2.0-or-later contribution decision: sequence 32 at the
-  verified head above.
+  `8633a8279073e00c72b89c032d665a313100b783e2e8e84cf191f05b3d6a263c`.
+- Source-publication policy is sequence 32; the verified local-readiness milestone is
+  sequence 33 at the head above.
 - Semantic test suite: 98 tests passing under Python 3.14 with resource warnings
   treated as errors.
 - No Git remote operation was performed or authorized.
@@ -91,8 +90,8 @@ correctly rejected; current lexical evidence was still returned. This demonstrat
 correct safety behavior, but it also means that store should be resynchronized before
 using it as the representative relevance baseline.
 
-The project ledger's source-publication decision verified with 32 events and head
-`e8076bea575c7b823b638adb79d1ed36eec11345440d76a604c3cbb564f1d23b`.
+The project ledger's source-publication milestone verified with 33 events and head
+`8633a8279073e00c72b89c032d665a313100b783e2e8e84cf191f05b3d6a263c`.
 Historical heads remain independently readable in `governance/CHECKPOINTS.md`.
 
 ## Known limitations that remain

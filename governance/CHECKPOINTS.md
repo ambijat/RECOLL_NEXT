@@ -31,6 +31,7 @@ later appends do not modify earlier entries.
 | 2026-07-25 | 30 | `a4f9850be0be1c27f2b14444f9682067011422d7e13e79347c52b2ffb3fc8a56` | GUI hygiene pass: removed the dead pre-workspace Tk class, documented (via test) that citation-ID resolution does not verify answer-text grounding in the cited segment, added a top-level double-click launcher; 89 tests pass. |
 | 2026-07-25 | 31 | `bfc5d23a33b33265a1c1a898c130fde41c14ea15949317ff2607b087866a7234` | Split the Tk GUI into two standalone apps (search/interpret vs. rebuild-index) after review; also records that an incorrectly dir-scoped sync without `--keep-missing` deleted the BOOKLIBRANDOM semantic store's 22 documents — source PDFs and Recoll's lexical index were unaffected, and a corrective resync with the documented scope query was underway; 92 tests pass. |
 | 2026-08-02 | 32 | `e8076bea575c7b823b638adb79d1ed36eec11345440d76a604c3cbb564f1d23b` | Source publication boundary and GPL-2.0-or-later contribution policy recorded; private corpus/runtime/model artifacts remain excluded and remote publication remains a separately authorized operator step. |
+| 2026-08-02 | 33 | `8633a8279073e00c72b89c032d665a313100b783e2e8e84cf191f05b3d6a263c` | Local source publication checkpoint `af461ea4` passed compile, 98-test, ledger, link, whitespace, and ignore-policy checks; native Qt build remains unclaimed and no remote was contacted. |
 
 Verify the current head before adding another row:
 

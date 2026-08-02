@@ -76,6 +76,10 @@ must not be contacted.
   quick start, and a contract-safe publication checklist. Private corpus/runtime/model
   artifacts remain excluded, and creating or contacting a hosting remote remains a
   separately authorized operator action.
+- Local source checkpoint `af461ea4` passed Python compilation, all 98 semantic tests,
+  governance verification, product-document link validation, whitespace checks, and
+  representative ignore-policy checks. Governance event 33 records the milestone at
+  head `8633a8279073e00c72b89c032d665a313100b783e2e8e84cf191f05b3d6a263c`.
 - A clean rebuild in an isolated local destination validated source, lexical, AI, and
   event fidelity at source commit `abc79e90`. It recreated Python without downloads,
   rebuilt a three-document Recoll/Xapian and semantic corpus, produced and rejected
